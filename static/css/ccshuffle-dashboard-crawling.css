@@ -1,0 +1,16 @@
+/*
+ * The stylesheet for the crawling admin page.
+ *
+ * @author Kevin Haller
+ */
+
+#dashboard {
+    max-height: 1000px;
+    min-height: 350px;
+}
+
+#dashboard .header{
+    padding: 2px 0px 2px 15px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eeeeee;
+}

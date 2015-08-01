@@ -1,0 +1,180 @@
+/**
+ * The stylesheet for cc shuffle.
+ *
+ * @author Kevin Haller
+ */
+
+html, body{
+    min-width: 350px;
+}
+
+#content {
+    margin-top: 50px;
+}
+
+/* Style for the shuffle icon */
+#svg-shuffle {
+    fill: #9E5471;
+}
+
+#svg-creative-commons {
+    fill: #555555;
+}
+
+/* Style for the navigation*/
+nav {
+    opacity: 1;
+}
+
+.nav-register-button {
+    min-width: 12em;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.nav-login-button {
+    min-width: 8em;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.nav-menu {
+    float: left;
+    list-style: outside none none;
+}
+
+@media (max-width: 799px) {
+    .desktop-login-container {
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        visibility: hidden;
+    }
+}
+
+@media (min-width: 800px) {
+    .mobil-login-container {
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        visibility: hidden;
+    }
+}
+
+/* Style for the registration */
+.register-container {
+    min-width: 200px;
+    max-width: 600px;
+    margin: 60px auto 0 auto;
+}
+
+.register-container form {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.register-container form .form-group > .error-container {
+    margin-top: 10px;
+}
+
+.register-container form > button {
+    margin-top: 15px;
+}
+
+/* Style for the login  */
+.login-container {
+    min-width: 200px;
+    max-width: 600px;
+    margin: 60px auto 0 auto;
+}
+
+.login-container form {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.login-container .error-container {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* Style for 404 error */
+.error-404 {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.error-404-brand {
+    margin-bottom: 30px;
+    margin-top: 30px;
+}
+
+.error-404-brand a {
+   text-decoration: none;
+}
+
+.error-404-brand-svg {
+    box-shadow: 6px 6px 3px #888;
+    border-radius: 20px 20px 20px 20px;
+    background: #f5f5f5;
+    padding: 30px;
+    width: 350px;
+    height: 175px;
+}
+
+.error-404-help {
+    margin-top: 20px;
+}
+
+.error-404-help a {
+    color: #59acb4;
+    border-bottom: 2px solid #59acb4;
+    text-decoration: none;
+}
+
+/* Fade in animation */
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.9;
+    }
+}
+
+@-moz-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.9;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.9;
+    }
+}
+
+.fade-in {
+    opacity: 0;
+    -webkit-animation: fadeIn ease-in 1;
+    -moz-animation: fadeIn ease-in 1;
+    animation: fadeIn ease-in 1;
+
+    -webkit-animation-fill-mode: forwards;
+    -moz-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+
+    -webkit-animation-duration: 1s;
+    -moz-animation-duration: 1s;
+    animation-duration: 1s;
+
+    -webkit-animation-delay: 0.7s;
+    -moz-animation-delay: 0.7s;
+    animation-delay: 0.7s;
+}

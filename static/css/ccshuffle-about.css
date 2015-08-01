@@ -1,0 +1,196 @@
+/*
+ * The stylesheet for the about page.
+ *
+ * @author Kevin Haller
+ */
+
+#content {
+    position: relative;
+    background-color: white;
+    z-index: 5;
+    margin-top: 0px;
+    margin-bottom: 240px;
+    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.8);
+}
+
+/* Style for the shuffle icon */
+#svg-shuffle {
+    fill: #9E5471;
+}
+
+#svg-creative-commons {
+    fill: #666666;
+}
+
+/* Style for the headline */
+.headline-container {
+    background: url("../img/headline-img.jpg") no-repeat center center fixed;
+    height: 100vh;
+    padding-left: 0em;
+    padding-right: 0em;
+    text-align: center;
+}
+
+.headline-svg {
+    padding: 30px;
+    width: 100%;
+}
+
+.headline-nav {
+    position: relative;
+    top: 16vh;
+    width: 34em;
+    max-height: 80vh;
+    text-align: center;
+    margin: 0 auto 0 auto ;
+    padding: 30px 20px 30px 20px;
+    border-radius: 20px;
+    background: -webkit-radial-gradient(white, #eeeeee, white);
+    background: -o-radial-gradient(white, #eeeeee, white);
+    background: -moz-radial-gradient(white, #eeeeee, white);
+    background: radial-gradient(white, #eeeeee, white);
+}
+
+@media (max-width: 500px) {
+    .headline-nav {
+        width: 90%;
+    }
+}
+
+@media (max-height: 500px) {
+
+    .headline-nav {
+        top: calc(50vh - 10em);
+        max-height: 20em;
+    }
+
+    .headline-nav * a {
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        visibility: hidden;
+    }
+}
+
+@media (max-height: 500px) {
+
+    #svg-shuffle {
+        fill: #eeeeee;
+    }
+
+    #svg-creative-commons {
+        fill: #dddddd;
+    }
+
+    .headline-nav {
+        background: none;
+    }
+}
+
+.headline-nav * a {
+    width: 80%;
+    max-width: 24em;
+    min-width: 12em;
+    padding: 0.5em;
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+}
+
+.headline-nav * a:hover {
+    background-color: #b7de71;
+}
+
+.headline-nav * a:active {
+    background-color: #b7de71;
+}
+
+.headline-container .scroll-down {
+    position: absolute;
+    text-align: center;
+    top: calc(100vh - 50px);
+    left:0;
+    right:0;
+}
+
+.headline-container .scroll-down > a {
+    color: white;
+    font-size: 42px;
+    text-decoration: none;
+    transition: all .2s ease-in-out;
+}
+
+.headline-container .scroll-down > a:hover {
+    font-size: 46px;
+}
+
+/* Style for info sector */
+.info-cc-container {
+    width: 80%;
+}
+
+.info-cc-container .thumbnail{
+    border: none;
+}
+
+.info-cc-container * h1 {
+    margin-top: 1.2em;
+    margin-bottom: 1.0em;
+    text-align: center;
+}
+
+.info-cc-container * h2 {
+    font-size: 24px;
+    margin-bottom: 0.8em;
+}
+
+.circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 200px;
+    line-height: 200px;
+    text-align: center;
+    border: 4px solid #5CBDE0;
+    font-size: 100px;
+    color: #5CBDE0;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.circle-icon {
+    -ms-transform: translate(0px,8px); /* IE 9 */
+    -webkit-transform: translate(0px,8px); /* Safari */
+    transform: translate(0px,8px);
+}
+
+/* Style for the footer */
+#footer {
+    background: #E6E6E6 none repeat scroll 0% 0%;
+    z-index: 1;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: 240px;
+    overflow: hidden;
+}
+
+#footer p {
+    color: #666;
+}
+
+#footer .subfooter {
+    border-top: 1px solid #AAA;
+    padding: 15px 20px 0px 15px;
+    width: 80%;
+}
+
+#footer .menu {
+    height: 190px;
+}
+
+#footer .license {
+    max-width: 75%;
+}
+
+#footer .author {
+    max-width: 25%;
+}

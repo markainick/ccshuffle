@@ -1,0 +1,12 @@
+{% extends 'error-base.html' %}
+
+{% block title %} 404 | {{ block.super }} {% endblock title %}
+
+{% block error-title %}
+    <h1><strong>Page not found.</strong></h1>
+{% endblock error-title %}
+
+{% block error-msg %}
+     <p>For some reason the page can't be found. Try finding it from our
+     <a href="{% url 'home' %}"> homepage </a>.</p>
+{% endblock error-msg %}

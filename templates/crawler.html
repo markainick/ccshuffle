@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %} Crawling dashboard | {{ block.super }}{% endblock title %}
+
+{% block headcss %}
+    <!-- Stylesheet for the crawling dashboard -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ccshuffle-dashboard-crawling.css' %}"/>
+{% endblock headcss %}
+
+{% block headjs %}
+    <script type="text/javascript" src="{% static 'js/dashboard_crawling.js'%}"></script>
+{% endblock headjs %}
+
+{% block content %}
+    <div id="content">
+        <div id="dashboard" class="container">
+            <div class="row header">
+                <h1>Dashboard for Crawling</h1>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-8">
+                                    <h2 class="panel-title"><i class="fa fa-music"></i> Jamendo </h2>
+                                </div>
+                                <div class="col-xs-4">
+                                    <div class="actions pull-right">
+                                        <a href="" target="_blank"><i class="fa fa-external-link"></i> </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <!-- TODO Table of past crawling procedures and statistics -->
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-4 pull-right">
+                                    <button id="start-jamendo-crawling" type="button"
+                                            class="btn btn-default pull-right"> Start crawling
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

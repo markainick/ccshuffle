@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %} Login | {{ block.super }} {% endblock title %}
+
+{% block navigation %}
+    {% if not user.is_authenticated %}
+        <a class="btn btn-primary navbar-btn nav-register-button" href="{% url 'register' %}">Register</a>
+    {% else %} <!-- Should not happen -->
+        <a class="btn btn-danger navbar-btn nav-login-button pull-right" href="{% url 'signout' %}">Sign out</a>
+    {% endif %}
+{% endblock navigation %}
+
+{% block content %}
+    <div class="container login-container">
+        <h1>Login</h1>
+
+        <form id="login-form" method="post">
+            {% csrf_token %}
+            <div class="notification-container">
+                {% if login_notification %}
+                    <!--  TODO Issue #3 <https://github.com/outofbits/ccshuffle/issues/3>-->
+                    <!-- <p id="login-notification" class="alert alert-info" role="alert"> {{ login_notification }} </p> -->
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+            </div>
+            <div class="error-container">
+                {% if form.non_field_errors %}
+                    <p id="login-error-notification" class="alert alert-danger"
+                       role="alert"> {{ form.non_field_errors.as_text }} </p>
+                {% endif %}
+            </div>
+            {% if 'next' in request.GET %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+            {% else %}
+                <input type="hidden" name="next" value="{{ form.cleaned_data.next }}"/>
+            {% endif %}
+            <button id="btn_login" type="submit" class="btn btn-default navbar-btn nav-login-button" value="Login">Sign
+                in
+            </button>
+        </form>
+    </div>
+{% endblock content %}
