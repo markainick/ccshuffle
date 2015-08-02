@@ -1,0 +1,44 @@
+.min-width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  min-width: ~"@{pxValue}px";
+  min-width: ~"@{sizeValue}rem";
+}
+
+.max-width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  max-width: ~"@{pxValue}px";
+  max-width: ~"@{sizeValue}rem";
+}
+
+.margin-hr(@right, @left) {
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  margin-right: ~"@{pxRight}px";
+  margin-right: ~"@{right}rem";
+  margin-left: ~"@{pxLeft}px";
+  margin-left: ~"@{left}rem";
+}
+
+.margin-vr(@upper, @lower) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  margin-top: ~"@{pxUpper}px";
+  margin-top: ~"@{upper}rem";
+  margin-bottom: ~"@{pxLower}px";
+  margin-bottom: ~"@{lower}rem";
+}
+
+.margin-top(@upper) {
+  @pxUpper: (@upper * 10);
+  margin-top: ~"@{pxUpper}px";
+  margin-top: ~"@{upper}rem";
+}
+
+.margin(@upper, @right, @lower, @left) {
+  @pxUpper: (@upper * 10);
+  @pxRight: (@right *10);
+  @pxLower: (@lower *10);
+  @pxLeft: (@left *10);
+  margin: ~"@{pxUpper}px @{pxRight}px @{pxLower}px @{pxLeft}px";
+  margin: ~"@{upper}rem @{right}rem @{lower}rem @{left}rem";
+}

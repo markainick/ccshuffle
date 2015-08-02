@@ -8,93 +8,96 @@
             <form action="{% url 'signin' %}" class="form-inline" method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="sr-only" for="{{globalLoginForm.username.id_for_label}}">Username</label>
+                    <label class="sr-only" for="{{ globalLoginForm.username.id_for_label }}">Username</label>
                     {{ globalLoginForm.username }}
                 </div>
                 <div class="form-group">
-                    <label class="sr-only" for="{{globalLoginForm.password.id_for_label}}">Password</label>
+                    <label class="sr-only" for="{{ globalLoginForm.password.id_for_label }}">Password</label>
                     {{ globalLoginForm.password }}
                 </div>
-                <button type="submit" class="btn btn-default navbar-btn nav-login-button" value="Login">Sign in</button>
+                <button type="submit" class="btn btn-default navbar-btn login-button" value="Login">Sign in</button>
             </form>
         </div>
         <div class="mobil-login-container pull-right">
-            <a class="btn btn-default navbar-btn nav-login-button" href="{% url 'signin' %}">Sign in</a>
+            <a class="btn btn-default navbar-btn login-button" href="{% url 'signin' %}">Sign in</a>
         </div>
     {% else %} <!-- Should not happen -->
-        <a class="btn btn-danger navbar-btn nav-login-button pull-right" href="{% url 'signout' %}">Sign out</a>
+        <a class="btn btn-danger navbar-btn logout-button pull-right" href="{% url 'signout' %}">Sign out</a>
     {% endif %}
 {% endblock navigation %}
 
 {% block content %}
-	<!-- Register -->
-	<div class="container register-container">
-	    <h1>Register</h1>
-	    <form id="register-form" action="" method="post">
-            {% csrf_token %}
-	        <div class="form-group">
-	            <label for="{{ form.username.id_for_label }}">Username *</label>
+    <!-- Register -->
+    <div id="content" class="container register-container">
+        <section id="register-form-section">
+            <h1>Register</h1>
 
-	            <div class="input-group">
-                    {{ form.username }}
+            <form id="register-form" action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username *</label>
+
+                    <div class="input-group">
+                        {{ form.username }}
 	                <span class="input-group-addon" id="basic-username"><span
-	                        class="glyphicon glyphicon-user"/></span>
-	            </div>
-                {% if form.username.errors %}
-                    <div class="error-container">
-                            <p class="alert alert-danger" role="alert"> {{form.username.errors.as_text}} </p>
+                            class="glyphicon glyphicon-user"/></span>
                     </div>
-                {% endif %}
-	        </div>
-	        <div class="form-group">
-	            <label for="{{ form.password1.id_for_label }}">Password *</label>
+                    {% if form.username.errors %}
+                        <div class="error-container">
+                            <p class="alert alert-danger" role="alert"> {{ form.username.errors.as_text }} </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Password *</label>
 
-	            <div class="input-group">
-                     {{ form.password1 }}
+                    <div class="input-group">
+                        {{ form.password1 }}
 	                <span class="input-group-addon" id="basic-password"><span
-	                        class="glyphicon glyphicon-lock"/></span>
-	            </div>
-                {% if form.password1.errors %}
-                    <div class="error-container">
-                            <p class="alert alert-danger" role="alert"> {{form.password1.errors.as_text}} </p>
+                            class="glyphicon glyphicon-lock"/></span>
                     </div>
-                {% endif %}
-	        </div>
-	        <div class="form-group">
-	            <label for="{{ form.password2.id_for_label }}">Confirm password *</label>
+                    {% if form.password1.errors %}
+                        <div class="error-container">
+                            <p class="alert alert-danger" role="alert"> {{ form.password1.errors.as_text }} </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirm password *</label>
 
-	            <div class="input-group">
-                     {{ form.password2 }}
+                    <div class="input-group">
+                        {{ form.password2 }}
 	                <span class="input-group-addon" id="basic-password-confirm"><span
-	                        class="glyphicon glyphicon-lock"/></span>
-	            </div>
-                {% if form.password2.errors %}
-                    <div class="error-container">
-                            <p class="alert alert-danger" role="alert"> {{form.password2.errors.as_text}} </p>
+                            class="glyphicon glyphicon-lock"/></span>
                     </div>
-                {% endif %}
-	        </div>
-	        <div class="form-group">
-	            <label for="{{ form.email.id_for_label }}">Email (optional)</label>
+                    {% if form.password2.errors %}
+                        <div class="error-container">
+                            <p class="alert alert-danger" role="alert"> {{ form.password2.errors.as_text }} </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email (optional)</label>
 
-	            <div class="input-group">
-                    {{ form.email }}
+                    <div class="input-group">
+                        {{ form.email }}
 	                        <span class="input-group-addon" id="basic-email"><span
-	                                class="glyphicon glyphicon-envelope"/></span>
-	            </div>
-                {% if form.email.errors %}
-                    <div class="error-container">
-                            <p class="alert alert-danger" role="alert"> {{form.email.errors.as_text}} </p>
+                                    class="glyphicon glyphicon-envelope"/></span>
                     </div>
-                {% endif %}
-	        </div>
-             <div class="error-container">
-                {% if form.non_field_errors %}
-                    <p class="alert alert-danger" role="alert"> {{form.non_field_errors.as_text}} </p>
-                {% endif %}
-            </div>
-	        <button id="btn_create_account" type="submit" class="btn btn-primary">Create account</button>
-	    </form>
-	</div>
+                    {% if form.email.errors %}
+                        <div class="error-container">
+                            <p class="alert alert-danger" role="alert"> {{ form.email.errors.as_text }} </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="error-container">
+                    {% if form.non_field_errors %}
+                        <p class="alert alert-danger" role="alert"> {{ form.non_field_errors.as_text }} </p>
+                    {% endif %}
+                </div>
+                <button id="btn_create_account" type="submit" class="btn btn-primary">Create account</button>
+            </form>
+        </section>
+    </div>
 {% endblock content %}
 
