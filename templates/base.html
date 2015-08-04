@@ -11,17 +11,17 @@
     <meta name="description" content="Search for creative commons music available on the internet and listen to it."/>
     <!-- Bootstrap stylesheet-->
     <link rel="stylesheet" href="{% static 'plugins/bootstrap/dist/css/bootstrap.min.css' %}" type="text/css"/>
-    <!-- CC shuffle stylesheet -->
-    <link rel="stylesheet" href="{% static 'css/ccshuffle.css' %}"/>
     <!-- Font awesome stylesheet -->
     <link rel="stylesheet" href="{% static 'plugins/font-awesome/css/font-awesome.min.css' %}" type="text/css"/>
-    <!-- Container for further stylesheets -->
+    <!-- Creative commons shuffle stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/ccshuffle.min.css' %}" type="text/css"/>
+    {% comment %} Container for further stylesheets {% endcomment %}
     {% block headcss %} {% endblock headcss %}
     <!-- JQuery -->
     <script type="text/javascript" src="{% static 'plugins/jquery/jquery-2.1.4.min.js' %}"></script>
     <!-- Bootstrap javascript-->
     <script type="text/javascript" src="{% static 'plugins/bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    <!-- Container for further javascripts -->
+    {% comment %} Container for further javascripts {% endcomment %}
     {% block headjs %} {% endblock headjs %}
 </head>
 <body xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">

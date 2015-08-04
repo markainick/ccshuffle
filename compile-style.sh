@@ -11,3 +11,7 @@ lessc 'static/less/ccshuffle.less' > 'static/css/ccshuffle.css'
 lessc 'static/less/ccshuffle-about.less' > 'static/css/ccshuffle-about.css'
 lessc 'static/less/ccshuffle-dashboard-crawling.less' > 'static/css/ccshuffle-dashboard-crawling.css'
 
+# Compress the stylesheets
+python -m csscompressor 'static/css/ccshuffle.css' -o 'static/css/ccshuffle.min.css' --line-break 200
+python -m csscompressor 'static/css/ccshuffle-about.css' -o 'static/css/ccshuffle-about.min.css' --line-break 200
+python -m csscompressor 'static/css/ccshuffle-dashboard-crawling.css' -o 'static/css/ccshuffle-dashboard-crawling.min.css' --line-break 200

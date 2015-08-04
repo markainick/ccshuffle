@@ -5,11 +5,12 @@
 
 {% block headcss %}
     <!-- Stylesheet for the crawling dashboard -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/ccshuffle-dashboard-crawling.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ccshuffle-dashboard-crawling.min.css' %}"/>
 {% endblock headcss %}
 
 {% block headjs %}
-    <script type="text/javascript" src="{% static 'js/dashboard_crawling.js' %}"></script>
+    <!-- Javascript for the crawling dashbaord -->
+    <script type="text/javascript" src="{% static 'js/dashboard-crawling.js' %}"></script>
 {% endblock headjs %}
 
 {% block content %}

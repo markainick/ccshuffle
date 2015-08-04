@@ -12,17 +12,4 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- */
-@import "variables.less";
-@import "mixins.less";
-
-#dashboard {
-  .max-width(100);
-  .min-height(35);
-
-  .header {
-    .padding(0.2, 0, 0.2, 1.5);
-    .margin-bottom(2.5);
-    border-bottom: 1px solid #eeeeee;
-  }
-}
+ */#dashboard{max-width:1000px;max-width:100rem;min-height:350px;min-height:35rem}#dashboard .header{padding:2px 0 2px 15px;padding:.2rem 0rem .2rem 1.5rem;margin-bottom:25px;margin-bottom:2.5rem;border-bottom:1px solid #eee}

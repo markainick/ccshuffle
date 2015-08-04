@@ -1,4 +1,4 @@
-/**
+/*!
  *  The stylesheet for creative commons shuffle - About page.
  *
  *  COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
@@ -13,12 +13,6 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  */
-.hide-content {
-  position: absolute !important;
-  top: -9999px !important;
-  left: -9999px !important;
-  visibility: hidden;
-}
 #dashboard {
   max-width: 1000px;
   max-width: 100rem;
