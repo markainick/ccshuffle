@@ -5,3 +5,4 @@
 
 lessc 'ccshuffle.less' > '../css/ccshuffle.css'
 lessc 'ccshuffle-about.less' > '../css/ccshuffle-about.css'
+lessc 'ccshuffle-dashboard-crawling.less' > '../css/ccshuffle-dashboard-crawling.css'

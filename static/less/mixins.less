@@ -15,6 +15,13 @@
   font-size: ~"@{sizeValue}rem";
 }
 
+// Width with the unit rem and px as fallback.
+.width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  width: ~"@{pxValue}px";
+  width: ~"@{sizeValue}rem";
+}
+
 // Max width with the unit rem and px as fallback.
 .max-width(@sizeValue) {
   @pxValue: (@sizeValue * 10);
@@ -33,7 +40,21 @@
 .height(@sizeValue) {
   @pxValue: (@sizeValue * 10);
   height: ~"@{pxValue}px";
-  hright: ~"@{sizeValue}rem";
+  height: ~"@{sizeValue}rem";
+}
+
+// Max height with the unit rem and px as fallback.
+.max-height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  max-height: ~"@{pxValue}px";
+  max-height: ~"@{sizeValue}rem";
+}
+
+// Min height with the unit rem and px as fallback.
+.min-height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  min-height: ~"@{pxValue}px";
+  min-height: ~"@{sizeValue}rem";
 }
 
 // Margin for right and left with the unit rem and px as fallback.
@@ -100,6 +121,17 @@
   padding-left: ~"@{left}rem";
 }
 
+// Padding for all sides with the unit rem and px as fallback.
+.padding(@upper, @right, @lower, @left) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  padding: ~"@{pxUpper}px @{pxRight}px @{pxLower}px @{pxLeft}px";
+  padding: ~"@{upper}rem @{right}rem @{lower}rem @{left}rem";
+}
+
+// Cover for backgrounds.
 .background-cover() {
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -107,6 +139,7 @@
   -o-background-size: cover;
 }
 
+// GreyScale effect with the default value 1.
 .greyscale(@value:1) {
   filter: grayscale(@value);
   -webkit-filter: grayscale(@value);
@@ -115,7 +148,8 @@
   -ms-filter: grayscale(@value);
 }
 
-.sepia(@value) {
+// Sepia (old photography) effect with the default value 1.
+.sepia(@value:1) {
   filter: sepia(@value);
   -webkit-filter: sepia(@value);
   -moz-filter: sepia(@value);
@@ -123,14 +157,10 @@
   -ms-filter: sepia(@value);
 }
 
+// Hides content.
 .hide-content {
   position: absolute !important;
   top: -9999px !important;
   left: -9999px !important;
   visibility: hidden;
 }
-
-//.scale-to-viewport() {
-//  width: 100%;
-//  height: 100vh;
-//}
