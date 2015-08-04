@@ -13,6 +13,12 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  */
+.hide-content {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  visibility: hidden;
+}
 html,
 body {
   width: 100%;
@@ -85,8 +91,6 @@ svg #svg-shuffle-text {
   min-width: 20rem;
   max-width: 600px;
   max-width: 60rem;
-  margin-top: 10px;
-  margin-top: 1rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -116,8 +120,6 @@ svg #svg-shuffle-text {
   min-width: 20rem;
   max-width: 600px;
   max-width: 60rem;
-  margin-top: 10px;
-  margin-top: 1rem;
   margin-left: auto;
   margin-right: auto;
 }

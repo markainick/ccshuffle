@@ -1,15 +1,42 @@
-.min-width(@sizeValue) {
-  @pxValue: (@sizeValue * 10);
-  min-width: ~"@{pxValue}px";
-  min-width: ~"@{sizeValue}rem";
+// Sans serif font with fallback.
+.sans-serif-font() {
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
+// Simple serif font with fallback.
+.serif-font() {
+  font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+}
+
+// Font size with the unit rem and px as fallback.
+.font-size(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  font-size: ~"@{pxValue}px";
+  font-size: ~"@{sizeValue}rem";
+}
+
+// Max width with the unit rem and px as fallback.
 .max-width(@sizeValue) {
   @pxValue: (@sizeValue * 10);
   max-width: ~"@{pxValue}px";
   max-width: ~"@{sizeValue}rem";
 }
 
+// Min width with the unit rem and px as fallback.
+.min-width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  min-width: ~"@{pxValue}px";
+  min-width: ~"@{sizeValue}rem";
+}
+
+// Height with the unit rem and px as fallback.
+.height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  height: ~"@{pxValue}px";
+  hright: ~"@{sizeValue}rem";
+}
+
+// Margin for right and left with the unit rem and px as fallback.
 .margin-hr(@right, @left) {
   @pxRight: (@right *10);
   @pxLeft: (@left *10);
@@ -19,6 +46,7 @@
   margin-left: ~"@{left}rem";
 }
 
+// Margin for top and bottom with the unit rem as fallback.
 .margin-vr(@upper, @lower) {
   @pxUpper: (@upper * 10);
   @pxLower: (@lower *10);
@@ -28,12 +56,21 @@
   margin-bottom: ~"@{lower}rem";
 }
 
+// Margin only for top with the unit rem and px as fallback.
 .margin-top(@upper) {
   @pxUpper: (@upper * 10);
   margin-top: ~"@{pxUpper}px";
   margin-top: ~"@{upper}rem";
 }
 
+// Margin only for bottom with the unit rem and px as fallback.
+.margin-bottom(@lower) {
+  @pxLower: (@lower *10);
+  margin-bottom: ~"@{pxLower}px";
+  margin-bottom: ~"@{lower}rem";
+}
+
+// Margin for all sides with the unit rem and px as fallback.
 .margin(@upper, @right, @lower, @left) {
   @pxUpper: (@upper * 10);
   @pxRight: (@right *10);
@@ -42,3 +79,58 @@
   margin: ~"@{pxUpper}px @{pxRight}px @{pxLower}px @{pxLeft}px";
   margin: ~"@{upper}rem @{right}rem @{lower}rem @{left}rem";
 }
+
+// Padding for top and bottom with the unit rem and px as fallback.
+.padding-vr(@upper, @lower) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  padding-top: ~"@{pxUpper}px";
+  padding-top: ~"@{upper}rem";
+  padding-bottom: ~"@{pxLower}px";
+  padding-bottom: ~"@{lower}rem";
+}
+
+// Padding for right and left with the unit rem and px as fallback.
+.padding-hr(@right, @left) {
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  padding-right: ~"@{pxRight}px";
+  padding-right: ~"@{right}rem";
+  padding-left: ~"@{pxLeft}px";
+  padding-left: ~"@{left}rem";
+}
+
+.background-cover() {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+.greyscale(@value:1) {
+  filter: grayscale(@value);
+  -webkit-filter: grayscale(@value);
+  -moz-filter: grayscale(@value);
+  -o-filter: grayscale(@value);
+  -ms-filter: grayscale(@value);
+}
+
+.sepia(@value) {
+  filter: sepia(@value);
+  -webkit-filter: sepia(@value);
+  -moz-filter: sepia(@value);
+  -o-filter: sepia(@value);
+  -ms-filter: sepia(@value);
+}
+
+.hide-content {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  visibility: hidden;
+}
+
+//.scale-to-viewport() {
+//  width: 100%;
+//  height: 100vh;
+//}
