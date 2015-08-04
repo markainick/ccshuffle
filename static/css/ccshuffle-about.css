@@ -2,6 +2,7 @@
  *  The stylesheet for creative commons shuffle - About page.
  *
  *  COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
+ *  COPYRIGHT (c) Start Bootstrap - Creative Bootstrap Theme (http://startbootstrap.com)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -330,7 +331,7 @@ footer .credits a:focus {
 footer .credits .fa-heart {
   color: #fb866a;
 }
-/* Grayscale classes for container */
+/* Greyscale classes for container */
 .full-greyscale-this {
   filter: grayscale(1);
   -webkit-filter: grayscale(1);
