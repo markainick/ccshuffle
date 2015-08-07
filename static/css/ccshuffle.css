@@ -79,6 +79,37 @@ svg #svg-shuffle-text {
     visibility: hidden;
   }
 }
+/* Style for the brand container */
+.brand-container {
+  margin-top: 50px;
+  text-align: center;
+}
+.brand-container .brand {
+  margin-top: 30px;
+  margin-top: 3rem;
+  margin-bottom: 30px;
+  margin-bottom: 3rem;
+}
+.brand-container .brand a {
+  text-decoration: none;
+}
+.brand-container .brand svg {
+  box-shadow: 6px 6px 3px #888;
+  border-radius: 20px 20px 20px 20px;
+  background: #f5f5f5;
+  padding: 30px;
+  width: 350px;
+  height: 175px;
+}
+.brand-container .help {
+  margin-top: 20px;
+  margin-top: 2rem;
+}
+.brand-container .help a {
+  color: #59acb4;
+  border-bottom: 2px solid #59acb4;
+  text-decoration: none;
+}
 /* Style for the login area */
 .login-container {
   min-width: 200px;
@@ -136,35 +167,4 @@ svg #svg-shuffle-text {
   margin-top: 1rem;
   margin-bottom: 10px;
   margin-bottom: 1rem;
-}
-/* Style for the error notifications */
-.error-container {
-  margin-top: 50px;
-  text-align: center;
-}
-.error-container .brand {
-  margin-top: 30px;
-  margin-top: 3rem;
-  margin-bottom: 30px;
-  margin-bottom: 3rem;
-}
-.error-container .brand a {
-  text-decoration: none;
-}
-.error-container .brand svg {
-  box-shadow: 6px 6px 3px #888;
-  border-radius: 20px 20px 20px 20px;
-  background: #f5f5f5;
-  padding: 30px;
-  width: 350px;
-  height: 175px;
-}
-.error-container .help {
-  margin-top: 20px;
-  margin-top: 2rem;
-}
-.error-container .help a {
-  color: #59acb4;
-  border-bottom: 2px solid #59acb4;
-  text-decoration: none;
 }

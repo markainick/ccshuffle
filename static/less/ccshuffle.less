@@ -79,6 +79,37 @@ svg {
   }
 }
 
+/* Style for the brand container */
+.brand-container {
+  margin-top: 50px;
+  text-align: center;
+
+  .brand {
+    .margin-vr(3, 3);
+    a {
+      text-decoration: none;
+    }
+
+    svg {
+      box-shadow: 6px 6px 3px #888;
+      border-radius: 20px 20px 20px 20px;
+      background: #f5f5f5;
+      padding: 30px;
+      width: 350px;
+      height: 175px;
+    }
+  }
+
+  .help {
+    .margin-top(2);
+    a {
+      color: #59acb4;
+      border-bottom: 2px solid #59acb4;
+      text-decoration: none;
+    }
+  }
+}
+
+
 @import "ccshuffle-login-area.less";
 @import "ccshuffle-register-area.less";
-@import "ccshuffle-error-notification.less";
