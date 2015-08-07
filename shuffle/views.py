@@ -19,7 +19,7 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.views import generic
 from .forms import LoginForm, RegistrationForm
-from .searchengine import JamendoEngine
+from .searchengine import JamendoSearchEngine
 
 import logging
 
@@ -149,7 +149,7 @@ class CrawlerPageView(generic.TemplateView):
         if 'command' in ajax_data:
             if ajax_data['command'] == 'start-jamendo-crawl':
                 try:
-                    jamendo_engine = JamendoEngine()
+                    jamendo_engine = JamendoSearchEngine()
                     jamendo_engine.crawl()
                     return HttpResponse('The crawling of the jamendo service was successful.', status=200)
                 except BaseException as e:

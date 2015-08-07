@@ -1,4 +1,3 @@
-
 #   COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -13,6 +12,7 @@
 #
 
 from django.db import models
+from datetime import datetime
 
 
 class Artist(models.Model):
@@ -25,7 +25,7 @@ class Artist(models.Model):
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
-    def has_jamendo_profile(self):
+    def is_on_jamendo(self):
         return self.jamendo_id is not None
 
     def __str__(self):
@@ -35,18 +35,16 @@ class Artist(models.Model):
 class Album(models.Model):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
-    artist = models.ForeignKey(Artist, blank=False)
-    release_date = models.DateTimeField(blank=True, default=None)
+    artist = models.ForeignKey(Artist, blank=True, null=True)
+    release_date = models.DateField(blank=True, default=None)
+
+    jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    def is_on_jamendo(self):
+        return self.jamendo_id is not None
 
     def __str__(self):
         return self.name
-
-class JamendoAlbum(Album):
-    pass
-
-
-class SoundcloudAlbum(Album):
-    pass
 
 
 class Tag(models.Model):
@@ -57,13 +55,38 @@ class Tag(models.Model):
 class Song(models.Model):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
     name = models.CharField(max_length=250, blank=False)
-    album = models.ForeignKey(Album, default=None, related_name='songs')
+    artist = models.ForeignKey(Artist, blank=True, null=True)
+    album = models.ForeignKey(Album, blank=True, null=True, related_name='songs')
     duration = models.IntegerField(blank=True, default=None)
-    album = models.ForeignKey(Album, blank=True, default=None, null=True)
     tags = models.ManyToManyField(Tag)
-    release_date = models.DateTimeField(blank=True, default=None)
+    release_date = models.DateField(blank=True, default=None)
 
-    jamendo_id = models.IntegerField(blank=True, unique=False, null=True)
+    jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    def is_on_jamendo(self):
+        return self.album is not None
 
     def __str__(self):
         return self.name + (" (Album" + self.album + ")" if self.album is not None else "")
+
+
+class CrawlingProcess(models.Model):
+    """ This class represents planned, executed or failed crawling processes. """
+
+    Service_Jamendo = 'Jamendo'
+    Service_Soundcloud = 'Soundcloud'
+    Service_CCMixter = 'CCMixter'
+    Service_General = 'GENERAL'
+
+    Status_Planned = 'Planned'
+    Status_Running = 'Running'
+    Status_Finished = 'Finished'
+    Status_Failed = 'Failed'
+
+    service = models.CharField(max_length=100, blank=False)
+    execution_date = models.DateTimeField(blank=False, default=datetime.now)
+    status = models.CharField(max_length=100, blank=False)
+    exception = models.CharField(max_length=500, blank=True, null=True)
+
+    def __str__(self):
+        return '%s (%s - %s)' % (self.execution_date, self.service, self.status)
