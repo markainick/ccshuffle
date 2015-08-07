@@ -5,11 +5,12 @@
 
 {% block headcss %}
     <!-- Stylesheet for the crawling dashboard -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/ccshuffle-dashboard-crawling.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ccshuffle-dashboard-crawling.min.css' %}"/>
 {% endblock headcss %}
 
 {% block headjs %}
-    <script type="text/javascript" src="{% static 'js/dashboard_crawling.js'%}"></script>
+    <!-- Javascript for the crawling dashbaord -->
+    <script type="text/javascript" src="{% static 'js/dashboard-crawling.js' %}"></script>
 {% endblock headjs %}
 
 {% block content %}
@@ -28,7 +29,8 @@
                                 </div>
                                 <div class="col-xs-4">
                                     <div class="actions pull-right">
-                                        <a href="" target="_blank"><i class="fa fa-external-link"></i> </a>
+                                        <a href="https://www.jamendo.com" target="_blank"><i
+                                                class="fa fa-external-link"></i> </a>
                                     </div>
                                 </div>
                             </div>

@@ -1,196 +1,349 @@
-/*
- * The stylesheet for the about page.
+/*!
+ *  The stylesheet for creative commons shuffle - About page.
  *
- * @author Kevin Haller
+ *  COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
+ *  COPYRIGHT (c) Start Bootstrap - Creative Bootstrap Theme (http://startbootstrap.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  */
-
-#content {
-    position: relative;
-    background-color: white;
-    z-index: 5;
-    margin-top: 0px;
-    margin-bottom: 240px;
-    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.8);
+body {
+  font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
 }
-
-/* Style for the shuffle icon */
-#svg-shuffle {
-    fill: #9E5471;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
-
-#svg-creative-commons {
-    fill: #666666;
+hr {
+  border: solid 2px #f05f40;
+  max-width: 50px;
+  max-width: 5rem;
 }
-
-/* Style for the headline */
-.headline-container {
-    background: url("../img/headline-img.jpg") no-repeat center center fixed;
-    height: 100vh;
-    padding-left: 0em;
-    padding-right: 0em;
-    text-align: center;
+p {
+  font-size: 16px;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  margin-bottom: 2rem;
 }
-
-.headline-svg {
-    padding: 30px;
-    width: 100%;
+.light {
+  border-color: white;
 }
-
-.headline-nav {
-    position: relative;
-    top: 16vh;
-    width: 34em;
-    max-height: 80vh;
-    text-align: center;
-    margin: 0 auto 0 auto ;
-    padding: 30px 20px 30px 20px;
-    border-radius: 20px;
-    background: -webkit-radial-gradient(white, #eeeeee, white);
-    background: -o-radial-gradient(white, #eeeeee, white);
-    background: -moz-radial-gradient(white, #eeeeee, white);
-    background: radial-gradient(white, #eeeeee, white);
+.text-primary {
+  color: #f05f40;
 }
-
-@media (max-width: 500px) {
-    .headline-nav {
-        width: 90%;
-    }
+/* Style for buttons */
+.btn {
+  border: none;
+  border-radius: 300px;
+  font-weight: 300;
+  text-transform: uppercase;
 }
-
-@media (max-height: 500px) {
-
-    .headline-nav {
-        top: calc(50vh - 10em);
-        max-height: 20em;
-    }
-
-    .headline-nav * a {
-        position: absolute !important;
-        top: -9999px !important;
-        left: -9999px !important;
-        visibility: hidden;
-    }
+.btn-xl {
+  padding-right: 30px;
+  padding-right: 3rem;
+  padding-left: 30px;
+  padding-left: 3rem;
+  padding-top: 15px;
+  padding-top: 1.5rem;
+  padding-bottom: 15px;
+  padding-bottom: 1.5rem;
 }
-
-@media (max-height: 500px) {
-
-    #svg-shuffle {
-        fill: #eeeeee;
-    }
-
-    #svg-creative-commons {
-        fill: #dddddd;
-    }
-
-    .headline-nav {
-        background: none;
-    }
+.navbar-default {
+  background-color: white;
+  border-color: rgba(119, 132, 146, 0.05);
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
-
-.headline-nav * a {
-    width: 80%;
-    max-width: 24em;
-    min-width: 12em;
-    padding: 0.5em;
-    margin-top: 0.6em;
-    margin-bottom: 0.6em;
+.navbar-default .navbar-header .navbar-brand {
+  color: #778492;
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
 }
-
-.headline-nav * a:hover {
-    background-color: #b7de71;
+.navbar-default .navbar-header .navbar-brand:hover,
+.navbar-default .navbar-header .navbar-brand:focus {
+  color: #5f6b77;
 }
-
-.headline-nav * a:active {
-    background-color: #b7de71;
+.navbar-default .nav > li > a,
+.navbar-default .nav > li > a:focus {
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 13px;
+  color: #778492;
 }
-
-.headline-container .scroll-down {
-    position: absolute;
-    text-align: center;
-    top: calc(100vh - 50px);
-    left:0;
-    right:0;
+.navbar-default .nav > li > a:hover,
+.navbar-default .nav > li > a:focus:hover {
+  color: #f05f40;
 }
-
-.headline-container .scroll-down > a {
+.navbar-default .nav > li.active > a,
+.navbar-default .nav > li.active > a:focus {
+  color: #f05f40 !important;
+  background-color: transparent;
+}
+.navbar-default .nav > li.active > a:hover,
+.navbar-default .nav > li.active > a:focus:hover {
+  background-color: transparent;
+}
+@media (min-width: 768px) {
+  .navbar-transparent {
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .navbar-transparent .navbar-header .navbar-brand {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .navbar-transparent .navbar-header .navbar-brand:hover,
+  .navbar-transparent .navbar-header .navbar-brand:focus {
     color: white;
-    font-size: 42px;
-    text-decoration: none;
-    transition: all .2s ease-in-out;
+  }
+  .navbar-transparent .nav > li > a,
+  .navbar-transparent .nav > li > a:focus {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .navbar-transparent .nav > li > a:hover,
+  .navbar-transparent .nav > li > a:focus:hover {
+    color: white;
+  }
+  .navbar-transparent.affix {
+    background-color: white;
+    border-color: rgba(119, 132, 146, 0.05);
+  }
+  .navbar-transparent.affix .navbar-header .navbar-brand {
+    color: #f05f40;
+    font-size: 14px;
+  }
+  .navbar-transparent.affix .navbar-header .navbar-brand:hover,
+  .navbar-transparent.affix .navbar-header .navbar-brand:focus {
+    color: #5f6b77;
+  }
+  .navbar-transparent.affix .nav > li > a,
+  .navbar-transparent.affix .nav > li > a:focus {
+    color: #778492;
+  }
+  .navbar-transparent.affix .nav > li > a:hover,
+  .navbar-transparent.affix .nav > li > a:focus:hover {
+    color: #f05f40;
+  }
 }
-
-.headline-container .scroll-down > a:hover {
-    font-size: 46px;
+/* Style for the header container */
+.header-background {
+  position: relative;
+  width: 100%;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+  background: url("../img/headline-img.jpg") no-repeat center center fixed;
+  min-height: 100%;
 }
-
-/* Style for info sector */
-.info-cc-container {
-    width: 80%;
+header {
+  text-align: center;
+  color: white;
 }
-
-.info-cc-container .thumbnail{
-    border: none;
+header #headline {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  text-align: center;
+  padding-top: 100px;
+  padding-top: 10rem;
+  padding-bottom: 100px;
+  padding-bottom: 10rem;
+  padding-right: 15px;
+  padding-right: 1.5rem;
+  padding-left: 15px;
+  padding-left: 1.5rem;
+  width: 100%;
 }
-
-.info-cc-container * h1 {
-    margin-top: 1.2em;
-    margin-bottom: 1.0em;
-    text-align: center;
+header #headline .headline-content {
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-right: 50px;
+  padding-right: 5rem;
+  padding-left: 50px;
+  padding-left: 5rem;
+  padding-top: 0px;
+  padding-top: 0rem;
+  padding-bottom: 0px;
+  padding-bottom: 0rem;
 }
-
-.info-cc-container * h2 {
-    font-size: 24px;
-    margin-bottom: 0.8em;
+header #headline .headline-content h1 {
+  font-size: 42px;
+  font-size: 4.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
 }
-
-.circle {
-    width: 200px;
-    height: 200px;
-    border-radius: 200px;
-    line-height: 200px;
-    text-align: center;
-    border: 4px solid #5CBDE0;
-    font-size: 100px;
-    color: #5CBDE0;
-    margin-left: auto;
-    margin-right: auto;
+header #headline .headline-content hr {
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 30px;
+  margin-top: 3rem;
+  margin-bottom: 30px;
+  margin-bottom: 3rem;
 }
-
-.circle-icon {
-    -ms-transform: translate(0px,8px); /* IE 9 */
-    -webkit-transform: translate(0px,8px); /* Safari */
-    transform: translate(0px,8px);
+header #headline .headline-content p {
+  font-size: 18px;
+  font-size: 1.8rem;
+  font-weight: 300;
+  max-width: 66%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 50px;
+  margin-bottom: 5rem;
 }
-
-/* Style for the footer */
-#footer {
-    background: #E6E6E6 none repeat scroll 0% 0%;
-    z-index: 1;
-    position: fixed;
-    bottom: 0px;
-    width: 100%;
-    height: 240px;
-    overflow: hidden;
+@media (max-width: 767px) and (max-height: 600px) {
+  header .headline-content-description {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    visibility: hidden;
+  }
+  header h1 {
+    margin-bottom: 50px;
+    margin-bottom: 5rem;
+  }
 }
-
-#footer p {
-    color: #666;
+section {
+  min-height: 50%;
+  padding-top: 50px;
 }
-
-#footer .subfooter {
-    border-top: 1px solid #AAA;
-    padding: 15px 20px 0px 15px;
-    width: 80%;
+/* Style for the about section */
+#about {
+  background-color: #f05f40;
+  box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.8);
+  color: white;
 }
-
-#footer .menu {
-    height: 190px;
+#about .container {
+  max-width: 1000px;
+  max-width: 100rem;
+  padding-top: 5px;
+  padding-top: 0.5rem;
+  padding-bottom: 10px;
+  padding-bottom: 1rem;
 }
-
-#footer .license {
-    max-width: 75%;
+/* Style for the services section */
+#services .container {
+  margin-top: 5px;
+  margin-top: 0.5rem;
 }
-
-#footer .author {
-    max-width: 25%;
+.service-box {
+  margin-top: 20px;
+  margin-top: 2rem;
+}
+/* Style for the  'get in touch' section */
+#intouch a:hover {
+  text-decoration: none;
+}
+#intouch .thumbnail {
+  cursor: hand;
+  padding-right: 20px;
+  padding-right: 2rem;
+  padding-left: 20px;
+  padding-left: 2rem;
+  padding-top: 20px;
+  padding-top: 2rem;
+  padding-bottom: 0px;
+  padding-bottom: 0rem;
+  margin-top: 20px;
+  margin-top: 2rem;
+  margin-right: 20px;
+  margin-right: 2rem;
+  margin-left: 20px;
+  margin-left: 2rem;
+}
+#intouch .thumbnail i {
+  color: #778492;
+  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
+}
+#intouch .thumbnail:hover,
+#intouch .thumbnail:focus {
+  background-color: #778492;
+  color: white;
+}
+#intouch .thumbnail:hover p,
+#intouch .thumbnail:focus p {
+  color: white;
+  text-decoration: none;
+}
+#intouch .thumbnail:hover i,
+#intouch .thumbnail:focus i {
+  color: white;
+}
+#intouch .container .row {
+  max-width: 1000px;
+  max-width: 100rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+#intouch .container .row .col-sm-6 {
+  height: 100%;
+}
+/* Design for the footer */
+footer .credits {
+  background: #32383e;
+  color: #FFFFFF;
+  padding-right: 0px;
+  padding-right: 0rem;
+  padding-left: 0px;
+  padding-left: 0rem;
+  padding-top: 10px;
+  padding-top: 1rem;
+  padding-bottom: 10px;
+  padding-bottom: 1rem;
+}
+footer .credits .copyright {
+  line-height: 1.6;
+  color: #a1aab4;
+  font-size: 14px;
+  font-size: 1.4rem;
+}
+footer .credits a {
+  color: #FFFFFF;
+}
+footer .credits a:hover {
+  text-decoration: underline;
+  color: #FFFFFF;
+}
+footer .credits a:focus {
+  text-decoration: none;
+}
+footer .credits .fa-heart {
+  color: #fb866a;
+}
+/* Greyscale classes for container */
+.full-greyscale-this {
+  filter: grayscale(1);
+  -webkit-filter: grayscale(1);
+  -moz-filter: grayscale(1);
+  -o-filter: grayscale(1);
+  -ms-filter: grayscale(1);
+}
+.three-quarter-greyscale-this {
+  filter: grayscale(0.75);
+  -webkit-filter: grayscale(0.75);
+  -moz-filter: grayscale(0.75);
+  -o-filter: grayscale(0.75);
+  -ms-filter: grayscale(0.75);
+}
+.half-greyscale-this {
+  filter: grayscale(0.5);
+  -webkit-filter: grayscale(0.5);
+  -moz-filter: grayscale(0.5);
+  -o-filter: grayscale(0.5);
+  -ms-filter: grayscale(0.5);
 }

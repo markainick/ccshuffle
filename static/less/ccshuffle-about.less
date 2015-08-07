@@ -1,0 +1,329 @@
+/*!
+ *  The stylesheet for creative commons shuffle - About page.
+ *
+ *  COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
+ *  COPYRIGHT (c) Start Bootstrap - Creative Bootstrap Theme (http://startbootstrap.com)
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ */
+@import "variables.less";
+@import "mixins.less";
+
+body {
+  .serif-font;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  .sans-serif-font;
+}
+
+hr {
+  border: solid 2px @about-separator-theme-color;
+  .max-width(5);
+}
+
+p {
+  .font-size(1.6);
+  line-height: 1.5;
+  .margin-bottom(2.0);
+}
+
+.light {
+  border-color: white;
+}
+
+.text-primary {
+  color: @about-container-color;
+}
+
+/* Style for buttons */
+.btn {
+  border: none;
+  border-radius: 300px;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+
+.btn-xl {
+  .padding-hr(3, 3);
+  .padding-vr(1.5, 1.5);
+}
+
+.navbar-default {
+  background-color: white;
+  border-color: fade(@cool-grey, 5%);
+  .sans-serif-font;
+  // .transition-all;
+  .navbar-header .navbar-brand {
+    color: @cool-grey;
+    .sans-serif-font;
+    font-weight: 700;
+    text-transform: uppercase;
+    &:hover,
+    &:focus {
+      color: darken(@cool-grey, 10%);
+    }
+  }
+  .nav {
+    > li {
+      > a,
+      > a:focus {
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 13px;
+        color: @cool-grey;
+        &:hover {
+          color: @warm-orange;
+        }
+      }
+      &.active {
+        > a,
+        > a:focus {
+          color: @warm-orange !important;
+          background-color: transparent;
+          &:hover {
+            background-color: transparent;
+          }
+        }
+      }
+    }
+  }
+}
+
+.navbar-transparent {
+  @media (min-width: @screen-sm-min) {
+    background-color: transparent;
+    border-color: fade(white, 30%);
+    .navbar-header .navbar-brand {
+      color: fade(white, 70%);
+      &:hover,
+      &:focus {
+        color: white;
+      }
+    }
+
+    .nav > li > a,
+    .nav > li > a:focus {
+      color: fade(white, 70%);
+      &:hover {
+        color: white;
+      }
+    }
+
+    &.affix {
+      background-color: white;
+      border-color: fade(@cool-grey, 5%);
+      .navbar-header .navbar-brand {
+        color: @warm-orange;
+        font-size: 14px;
+        &:hover,
+        &:focus {
+          color: darken(@cool-grey, 10%);
+        }
+      }
+      .nav > li > a,
+      .nav > li > a:focus {
+        color: @cool-grey;
+        &:hover {
+          color: @warm-orange;
+        }
+      }
+    }
+  }
+}
+
+/* Style for the header container */
+.header-background {
+  position: relative;
+  width: 100%;
+  .background-cover;
+  background: url("../img/headline-img.jpg") no-repeat center center fixed;
+  min-height: 100%;
+}
+
+header {
+  text-align: center;
+  color: white;
+
+  #headline {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    text-align: center;
+    .padding-vr(10, 10);
+    .padding-hr(1.5, 1.5);
+    width: 100%;
+    .headline-content {
+      display: inline-block;
+      //  .max-width(100);
+      margin-left: auto;
+      margin-right: auto;
+      .padding-hr(5, 5);
+      .padding-vr(0, 0);
+      h1 {
+        .font-size(4.2);
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      hr {
+        margin-right: auto;
+        margin-left: auto;
+        .margin-vr(3, 3);
+      }
+      p {
+        .font-size(1.8);
+        font-weight: 300;
+        max-width: 66%;
+        margin-left: auto;
+        margin-right: auto;
+        .margin-bottom(5);
+      }
+    }
+  }
+
+  @media (max-width: @screen-xs-max) {
+    @media (max-height: 600px) {
+      .headline-content-description {
+        .hide-content;
+      }
+
+      h1 {
+        .margin-bottom(5);
+      }
+    }
+  }
+
+}
+
+section {
+  min-height: 50%;
+  padding-top: @navbar-height;
+}
+
+/* Style for the about section */
+#about {
+  background-color: @about-container-color;
+  box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.8);
+  color: white;
+
+  .container {
+    .max-width(100);
+    .padding-vr(0.5, 1);
+  }
+}
+
+/* Style for the services section */
+#services {
+  .container {
+    .margin-top(0.5);
+  }
+}
+
+.service-box {
+  .margin-top(2);
+}
+
+/* Style for the  'get in touch' section */
+
+#intouch {
+
+  a {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .thumbnail {
+    cursor: hand;
+    .padding-hr(2, 2);
+    .padding-vr(2, 0);
+    .margin-top(2);
+    .margin-hr(2, 2);
+    i {
+      color: @touch-icon-color;
+      .margin-bottom(0.5);
+    }
+
+    &:hover, &:focus {
+      background-color: @touch-icon-color;
+      color: white;
+
+      p {
+        color: white;
+        text-decoration: none;
+      }
+
+      i {
+        color: white;
+      }
+    }
+  }
+
+  .container {
+    .row {
+      .max-width(100);
+      margin-right: auto;
+      margin-left: auto;
+      .col-sm-6 {
+        height: 100%;
+      }
+    }
+  }
+}
+
+/* Design for the footer */
+footer {
+  .credits {
+    background: darken(@footer-text-color, 30%);
+    color: #FFFFFF;
+    .padding-hr(0, 0);
+    .padding-vr(1, 1);
+
+    .copyright {
+      line-height: 1.6;
+      color: lighten(@footer-text-color, 15%);
+      .font-size(1.4);
+    }
+
+    a {
+      color: #FFFFFF;
+
+      &:hover {
+        text-decoration: underline;
+        color: #FFFFFF;
+      }
+      &:focus {
+        text-decoration: none;
+      }
+    }
+    .fa-heart {
+      color: @footer-heart-color;
+    }
+  }
+}
+
+/* Greyscale classes for container */
+.full-greyscale-this {
+  .greyscale(1);
+}
+
+.three-quarter-greyscale-this {
+  .greyscale(0.75);
+}
+
+.half-greyscale-this {
+  .greyscale(0.5);
+}
+
+
+

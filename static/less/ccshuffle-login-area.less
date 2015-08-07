@@ -1,0 +1,23 @@
+@import "variables.less";
+@import "mixins.less";
+
+/* Style for the login area */
+.login-container {
+  .min-width(20);
+  .max-width(60);
+  margin-left: auto;
+  margin-right: auto;
+
+  form {
+    .margin-vr(2, 2)
+  }
+
+  .error-container {
+    .margin-vr(0.5, 0.5)
+  }
+
+  .login-button {
+    .min-width(12);
+    .margin-vr(1, 1)
+  }
+}

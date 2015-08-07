@@ -1,0 +1,166 @@
+// Sans serif font with fallback.
+.sans-serif-font() {
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+// Simple serif font with fallback.
+.serif-font() {
+  font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+}
+
+// Font size with the unit rem and px as fallback.
+.font-size(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  font-size: ~"@{pxValue}px";
+  font-size: ~"@{sizeValue}rem";
+}
+
+// Width with the unit rem and px as fallback.
+.width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  width: ~"@{pxValue}px";
+  width: ~"@{sizeValue}rem";
+}
+
+// Max width with the unit rem and px as fallback.
+.max-width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  max-width: ~"@{pxValue}px";
+  max-width: ~"@{sizeValue}rem";
+}
+
+// Min width with the unit rem and px as fallback.
+.min-width(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  min-width: ~"@{pxValue}px";
+  min-width: ~"@{sizeValue}rem";
+}
+
+// Height with the unit rem and px as fallback.
+.height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  height: ~"@{pxValue}px";
+  height: ~"@{sizeValue}rem";
+}
+
+// Max height with the unit rem and px as fallback.
+.max-height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  max-height: ~"@{pxValue}px";
+  max-height: ~"@{sizeValue}rem";
+}
+
+// Min height with the unit rem and px as fallback.
+.min-height(@sizeValue) {
+  @pxValue: (@sizeValue * 10);
+  min-height: ~"@{pxValue}px";
+  min-height: ~"@{sizeValue}rem";
+}
+
+// Margin for right and left with the unit rem and px as fallback.
+.margin-hr(@right, @left) {
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  margin-right: ~"@{pxRight}px";
+  margin-right: ~"@{right}rem";
+  margin-left: ~"@{pxLeft}px";
+  margin-left: ~"@{left}rem";
+}
+
+// Margin for top and bottom with the unit rem as fallback.
+.margin-vr(@upper, @lower) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  margin-top: ~"@{pxUpper}px";
+  margin-top: ~"@{upper}rem";
+  margin-bottom: ~"@{pxLower}px";
+  margin-bottom: ~"@{lower}rem";
+}
+
+// Margin only for top with the unit rem and px as fallback.
+.margin-top(@upper) {
+  @pxUpper: (@upper * 10);
+  margin-top: ~"@{pxUpper}px";
+  margin-top: ~"@{upper}rem";
+}
+
+// Margin only for bottom with the unit rem and px as fallback.
+.margin-bottom(@lower) {
+  @pxLower: (@lower *10);
+  margin-bottom: ~"@{pxLower}px";
+  margin-bottom: ~"@{lower}rem";
+}
+
+// Margin for all sides with the unit rem and px as fallback.
+.margin(@upper, @right, @lower, @left) {
+  @pxUpper: (@upper * 10);
+  @pxRight: (@right *10);
+  @pxLower: (@lower *10);
+  @pxLeft: (@left *10);
+  margin: ~"@{pxUpper}px @{pxRight}px @{pxLower}px @{pxLeft}px";
+  margin: ~"@{upper}rem @{right}rem @{lower}rem @{left}rem";
+}
+
+// Padding for top and bottom with the unit rem and px as fallback.
+.padding-vr(@upper, @lower) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  padding-top: ~"@{pxUpper}px";
+  padding-top: ~"@{upper}rem";
+  padding-bottom: ~"@{pxLower}px";
+  padding-bottom: ~"@{lower}rem";
+}
+
+// Padding for right and left with the unit rem and px as fallback.
+.padding-hr(@right, @left) {
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  padding-right: ~"@{pxRight}px";
+  padding-right: ~"@{right}rem";
+  padding-left: ~"@{pxLeft}px";
+  padding-left: ~"@{left}rem";
+}
+
+// Padding for all sides with the unit rem and px as fallback.
+.padding(@upper, @right, @lower, @left) {
+  @pxUpper: (@upper * 10);
+  @pxLower: (@lower *10);
+  @pxRight: (@right *10);
+  @pxLeft: (@left *10);
+  padding: ~"@{pxUpper}px @{pxRight}px @{pxLower}px @{pxLeft}px";
+  padding: ~"@{upper}rem @{right}rem @{lower}rem @{left}rem";
+}
+
+// Cover for backgrounds.
+.background-cover() {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+// GreyScale effect with the default value 1.
+.greyscale(@value:1) {
+  filter: grayscale(@value);
+  -webkit-filter: grayscale(@value);
+  -moz-filter: grayscale(@value);
+  -o-filter: grayscale(@value);
+  -ms-filter: grayscale(@value);
+}
+
+// Sepia (old photography) effect with the default value 1.
+.sepia(@value:1) {
+  filter: sepia(@value);
+  -webkit-filter: sepia(@value);
+  -moz-filter: sepia(@value);
+  -o-filter: sepia(@value);
+  -ms-filter: sepia(@value);
+}
+
+// Hides content.
+.hide-content() {
+  position: absolute !important;
+  top: -9999px !important;
+  left: -9999px !important;
+  visibility: hidden;
+}
