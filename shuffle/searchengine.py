@@ -277,7 +277,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         """
         logger.info('SE (Jamendo): Crawling for all songs !')
         songs_list = cls.all_query(lambda properties: cls.json_call('tracks', properties),
-                                   lambda x: x)
+                                   lambda x: JamendoSongEntity(x).song())
         Song.objects.bulk_create(songs_list)
         return songs_list
 

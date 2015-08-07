@@ -67,7 +67,7 @@ class Song(models.Model):
         return self.album is not None
 
     def __str__(self):
-        return self.name + (" (Album" + self.album + ")" if self.album is not None else "")
+        return self.name + (" (Album" + self.album.__str__() + ")" if self.album is not None else "")
 
 
 class CrawlingProcess(models.Model):
