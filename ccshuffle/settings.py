@@ -102,7 +102,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = ("/home/haller/Outofbits-Django/ccshuffle-opshift/wsgi/ccshuffle/static",)
+STATICFILES_DIRS = (os.getcwd() + "/static",)
 
 # Logging settings
 # https://docs.djangoproject.com/en/1.8/topics/logging/
