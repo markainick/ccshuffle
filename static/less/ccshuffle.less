@@ -17,8 +17,6 @@
 @import "mixins.less";
 
 html, body {
-  width: 100%;
-  height: 100%;
   min-width: @min-supported-size;
 }
 
@@ -81,7 +79,6 @@ svg {
 
 /* Style for the brand container */
 .brand-container {
-  margin-top: 50px;
   text-align: center;
 
   .brand {
@@ -110,6 +107,49 @@ svg {
   }
 }
 
+/* Style for the search container */
+#search-section {
+  .padding-top(5);
+
+  .search-container {
+    .max-width(75);
+
+    .row {
+      .padding(0.5, 5, 0.5, 5);
+    }
+
+    .brand {
+      margin-right: auto;
+      margin-left: auto;
+      .margin-vr(0.5, 0.5);
+      .max-width(50);
+    }
+
+    @media (max-width: @screen-xs-max) {
+      .row {
+        .padding(0.5, 0.2, 0.5, 0.2);
+      }
+    }
+
+    @media (max-height: 750px) {
+      .brand {
+        .max-width(25);
+      }
+    }
+  }
+
+  @media (min-height: 760px) {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    right: 0%;
+    -webkit-transform: translateY(-100%);
+    -ms-transform: translateY(-100%);
+    transform: translateY(-100%);
+    .padding-top(0);
+  }
+
+}
 
 @import "ccshuffle-login-area.less";
 @import "ccshuffle-register-area.less";

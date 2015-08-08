@@ -1,15 +1,39 @@
-<!-- TODO Build the home page for searching and listening creative commons music -->
 <div id="content">
-    <header class="brand-container">
-        <div class="container">
+    <section id="search-section">
+        <div class="container search-container">
             <div class="row brand">
                 <a href="{% url 'home' %}">
                     {% include 'ccshuffle-logo.svg' %}
                 </a>
             </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <ul class="nav nav-tabs">
+                        <li role="tab" class="active"><a href="#tags" data-toggle="tab">Tags</a></li>
+                        <li role="tab"><a href="#artists" data-toggle="tab">Artists</a></li>
+                        <li role="tab"><a href="#albums" data-toggle="tab">Albums</a></li>
+                        <li role="tab"><a href="#songs" data-toggle="tab">Songs</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <form id="search-form" class="{% url 'home' %}">
+                        <div class="input-group">
+                            <input name="search-phrase" type="text" class="form-control"
+                                   placeholder="Alternative Rock"/>
+                            <input type="hidden" name="search-for" value="tags"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"
+                                                                                    aria-hidden="true"></span></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </header>
-    <section id="search-section">
+    </section>
+    <section id="search-results-section">
 
     </section>
 </div>

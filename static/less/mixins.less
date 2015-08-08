@@ -121,6 +121,13 @@
   padding-left: ~"@{left}rem";
 }
 
+// Padding for the top with the unit rem and px as fallback.
+.padding-top(@upper) {
+  @pxUpper: (@upper * 10);
+  padding-top: ~"@{pxUpper}px";
+  padding-top: ~"@{upper}rem";
+}
+
 // Padding for all sides with the unit rem and px as fallback.
 .padding(@upper, @right, @lower, @left) {
   @pxUpper: (@upper * 10);

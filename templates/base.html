@@ -76,6 +76,9 @@
 {% block content %}
     {% include 'search.html' %}
 {% endblock content %}
-{% block bodyjs %} {% endblock bodyjs %}
+{% block bodyjs %}
+    <!-- Search container javascript -->
+    <script type="text/javascript" src="{% static 'js/ccshuffle-searchboard.js' %}"></script>
+{% endblock bodyjs %}
 </body>
 </html>

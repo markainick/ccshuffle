@@ -15,8 +15,6 @@
  */
 html,
 body {
-  width: 100%;
-  height: 100%;
   min-width: 350px;
 }
 #content {
@@ -81,7 +79,6 @@ svg #svg-shuffle-text {
 }
 /* Style for the brand container */
 .brand-container {
-  margin-top: 50px;
   text-align: center;
 }
 .brand-container .brand {
@@ -109,6 +106,54 @@ svg #svg-shuffle-text {
   color: #59acb4;
   border-bottom: 2px solid #59acb4;
   text-decoration: none;
+}
+/* Style for the search container */
+#search-section {
+  padding-top: 50px;
+  padding-top: 5rem;
+}
+#search-section .search-container {
+  max-width: 750px;
+  max-width: 75rem;
+}
+#search-section .search-container .row {
+  padding: 5px 50px 5px 50px;
+  padding: 0.5rem 5rem 0.5rem 5rem;
+}
+#search-section .search-container .brand {
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 5px;
+  margin-top: 0.5rem;
+  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
+  max-width: 500px;
+  max-width: 50rem;
+}
+@media (max-width: 767px) {
+  #search-section .search-container .row {
+    padding: 5px 2px 5px 2px;
+    padding: 0.5rem 0.2rem 0.5rem 0.2rem;
+  }
+}
+@media (max-height: 750px) {
+  #search-section .search-container .brand {
+    max-width: 250px;
+    max-width: 25rem;
+  }
+}
+@media (min-height: 760px) {
+  #search-section {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    right: 0%;
+    -webkit-transform: translateY(-100%);
+    -ms-transform: translateY(-100%);
+    transform: translateY(-100%);
+    padding-top: 0px;
+    padding-top: 0rem;
+  }
 }
 /* Style for the login area */
 .login-container {
