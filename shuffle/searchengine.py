@@ -101,6 +101,7 @@ class JamendoServiceMixin(object):
         properties['client_id'] = cls.client_id
         properties['format'] = 'json'
         request_url = cls.api_url + '%s/?%s' % (qualifier, urllib.parse.urlencode(properties))
+        print('Request[%s]: %s' % (qualifier, request_url))
         logger.debug('Request[%s]: %s' % (qualifier, request_url))
         response = requests.get(request_url, hooks=hooks).json()
         if response is None or not ('headers' in response and 'results' in response):
@@ -110,26 +111,31 @@ class JamendoServiceMixin(object):
         return response
 
     @classmethod
-    def all_query(cls, call, map_function=None, filter_function=None):
+    def all_query(cls, qualifier, properties={}, process=None):
         """
         This method is a template for getting all data sets for a special entity. The function 'call' must be given.
         This function is called unless the response of the function is empty.
 
-        :param call: a function that takes the properties of the api call as argument and return a response as json
-                     dictionary.
-        :param map_function: a function that takes a dictionary of a jamendo entity as argument as json dictionary.
-        :param filter_function: a function that takes an argument and returns a boolean.
-        :return:
+        :param qualifier: the required qualifier, which shall be used for the json call (f.e. songs, tracks, albums).
+        :param properties: optional properties, which shall be used for the json call. The properties 'limit' as well as
+                           offset will be overwritten.
+        :param process: an optional function that takes a list of json dictionaries (jamendo entities) as argument
+                        and returns a list. This list will be used for the further processing.
         """
         offset = 0
         result_list = []
+        properties['limit'] = 'all'
         while True:
-            response = call(properties={'limit': 'all', 'offset': offset})
+            properties['offset'] = offset
+            response = cls.json_call(qualifier, properties=properties)
             if response['headers']['results_count'] == 0 or not response['results']:
                 break
             else:
                 offset += int(response['headers']['results_count'])
-                result_list.extend(filter(filter_function, map(map_function, response['results'])))
+                new_entities_list = response['results']
+                if process is not None:
+                    new_entities_list = process(new_entities_list)
+                result_list.extend(new_entities_list)
         return result_list
 
 
@@ -174,11 +180,14 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         :param artists_list: the list of already loaded or known artists.
         :return: the loaded artists with no duplicates regarding the jamendo_id.
         """
+
+        def process_result(artists_json):
+            artists = [JamendoArtistEntity(artist).artist() for artist in artists_json]
+            Artist.objects.bulk_create(artists)
+            return artists
+
         logger.info('SE (Jamendo): Crawling for all artists !')
-        artist_list = cls.all_query(lambda properties: cls.json_call('artists', properties),
-                                    lambda x: JamendoArtistEntity(x).artist())
-        Artist.objects.bulk_create(artist_list)
-        return artist_list
+        return cls.all_query('artists', process=process_result)
 
     @classmethod
     def __parse_json(cls, jamendo_artist: {str: str}) -> Artist:
@@ -238,11 +247,14 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
 
         :return: the loaded albums with no duplicates regarding the jamendo_id.
         """
+
+        def process_result(albums_json):
+            albums = [JamendoAlbumEntity(album).album() for album in albums_json]
+            Album.objects.bulk_create(albums)
+            return albums
+
         logger.info('SE (Jamendo): Crawling for all albums !')
-        album_list = cls.all_query(lambda properties: cls.json_call('albums', properties),
-                                   lambda x: JamendoAlbumEntity(x).album())
-        Album.objects.bulk_create(album_list)
-        return album_list
+        return cls.all_query('albums', process=process_result)
 
     @classmethod
     def __parse_json(cls, jamendo_album: {str: str}) -> Album:
@@ -275,11 +287,14 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
 
         :return: the loaded songs with no duplicates regarding the jamendo_id.
         """
+
+        def process_result(songs_json):
+            songs = [JamendoSongEntity(song).song() for song in songs_json]
+            Song.objects.bulk_create(songs)
+            return songs
+
         logger.info('SE (Jamendo): Crawling for all songs !')
-        songs_list = cls.all_query(lambda properties: cls.json_call('tracks', properties),
-                                   lambda x: JamendoSongEntity(x).song())
-        Song.objects.bulk_create(songs_list)
-        return songs_list
+        return cls.all_query('tracks', process=process_result)
 
     @classmethod
     def __parse_json(cls, jamendo_song: {str: str}) -> Song:

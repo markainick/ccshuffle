@@ -79,6 +79,7 @@ class JamendoEngineTest(TestCase):
         self.assertRaises(JamendoCallException, JamendoArtistEntity.all_artists)
         JamendoServiceMixin.client_id = client_id
 
+    @unittest.skip('Long runtime')
     def test_crawl(self):
         """ Tests the crawling process """
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
@@ -106,4 +107,4 @@ class JamendoEngineTest(TestCase):
         self.assertEqual('Jamendo', p.service, 'The last crawling process must be a jamendo job.')
         self.assertEqual('Failed', p.status, 'The last crawling must have been failed.')
         self.assertIn('Your credential is not authorized.', p.exception,
-                         'The exception message must contain \' Your credential is not authorized. \'')
+                      'The exception message must contain \' Your credential is not authorized. \'')
