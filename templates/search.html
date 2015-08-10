@@ -9,10 +9,19 @@
             <div class="row">
                 <div class="col-xs-12">
                     <ul class="nav nav-tabs">
-                        <li role="tab" class="active"><a href="#tags" data-toggle="tab">Tags</a></li>
-                        <li role="tab"><a href="#artists" data-toggle="tab">Artists</a></li>
-                        <li role="tab"><a href="#albums" data-toggle="tab">Albums</a></li>
-                        <li role="tab"><a href="#songs" data-toggle="tab">Songs</a></li>
+                        <li role="tab" {% if request.GET.search_for == None or request.GET.search_for == 'tags' %}
+                            class="active" {% endif %} >
+                            <a href="#tags" data-toggle="tab">Tags</a>
+                        </li>
+                        <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
+                            <a href="#artists" data-toggle="tab">Artists</a>
+                        </li>
+                        <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
+                            <a href="#albums" data-toggle="tab">Albums</a>
+                        </li>
+                        <li role="tab" {% if request.GET.search_for == 'songs' %} class="active" {% endif %}>
+                            <a href="#songs" data-toggle="tab">Songs</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -20,12 +29,13 @@
                 <div class="col-xs-12">
                     <form id="search-form" class="{% url 'home' %}">
                         <div class="input-group">
-                            <input name="search-phrase" type="text" class="form-control"
-                                   placeholder="Alternative Rock"/>
-                            <input type="hidden" name="search-for" value="tags"/>
+                            <input name="search_phrase" type="text" class="form-control"
+                                   placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
+                            <input type="hidden" name="search_for" value="{{ request.GET.search_for|default:'tags' }}"/>
                             <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"
-                                                                                    aria-hidden="true"></span></button>
+                                <button class="btn btn-default" type="submit">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                                </button>
                             </span>
                         </div>
                     </form>
