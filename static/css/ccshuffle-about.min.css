@@ -13,7 +13,7 @@
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- */body{font-family:'Merriweather','Helvetica Neue',Arial,sans-serif}h1,h2,h3,h4,h5,h6{font-family:'Open Sans','Helvetica Neue',Arial,sans-serif}
+ */body,html{height:100%;width:100%}body{font-family:'Merriweather','Helvetica Neue',Arial,sans-serif}h1,h2,h3,h4,h5,h6{font-family:'Open Sans','Helvetica Neue',Arial,sans-serif}
 hr{border:solid 2px #f05f40;max-width:50px;max-width:5rem}p{font-size:16px;font-size:1.6rem;line-height:1.5;margin-bottom:20px;margin-bottom:2rem}.light{border-color:white}.text-primary{color:#f05f40}.btn{border:0;border-radius:300px;font-weight:300;text-transform:uppercase}
 .btn-xl{padding-right:30px;padding-right:3rem;padding-left:30px;padding-left:3rem;padding-top:15px;padding-top:1.5rem;padding-bottom:15px;padding-bottom:1.5rem}.navbar-default{background-color:white;border-color:rgba(119,132,146,0.05);font-family:'Open Sans','Helvetica Neue',Arial,sans-serif}
 .navbar-default .navbar-header .navbar-brand{color:#778492;font-family:'Open Sans','Helvetica Neue',Arial,sans-serif;font-weight:700;text-transform:uppercase}
