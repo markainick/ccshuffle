@@ -26,3 +26,43 @@
   margin-bottom: 2.5rem;
   border-bottom: 1px solid #eeeeee;
 }
+#dashboard .panel .panel-title i {
+  margin-right: 5px;
+  margin-right: 0.5rem;
+}
+#dashboard .panel table td,
+#dashboard .panel table th {
+  text-align: center;
+}
+#dashboard .panel .table-collapse-link {
+  cursor: pointer;
+  text-decoration: none;
+  margin-right: 10px;
+  margin-right: 1rem;
+}
+#dashboard .panel .table-collapse-link:before {
+  content: 'Hide entries' !important;
+}
+#dashboard .panel .table-collapse-link:after {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  content: '\e253' !important;
+}
+#dashboard .panel .table-collapse-link[aria-expanded="false"]:before {
+  content: 'Show all entries' !important;
+}
+#dashboard .panel .table-collapse-link[aria-expanded="false"]:after {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  content: '\e252' !important;
+}

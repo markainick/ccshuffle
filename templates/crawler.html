@@ -16,40 +16,86 @@
 {% block content %}
     <div id="content">
         <div id="dashboard" class="container">
-            <div class="row header">
+            <header class="row header">
                 <h1>Dashboard for Crawling</h1>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-8">
-                                    <h2 class="panel-title"><i class="fa fa-music"></i> Jamendo </h2>
-                                </div>
-                                <div class="col-xs-4">
-                                    <div class="actions pull-right">
-                                        <a href="https://www.jamendo.com" target="_blank"><i
-                                                class="fa fa-external-link"></i> </a>
+            </header>
+            <section id="jamendo-crawling-section">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-8">
+                                        <h2 class="panel-title"><i class="fa fa-music"></i> Jamendo </h2>
+                                    </div>
+                                    <div class="col-xs-4">
+                                        <div class="actions pull-right">
+                                            <a href="https://www.jamendo.com" target="_blank"><i
+                                                    class="fa fa-external-link"></i> </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="panel-body">
-                            <div class="row">
-                                <!-- TODO Table of past crawling procedures and statistics -->
-                            </div>
-                            <div class="row">
-                                <div class="col-xs-4 pull-right">
-                                    <button id="start-jamendo-crawling" type="button"
-                                            class="btn btn-default pull-right"> Start crawling
-                                    </button>
+                            <div class="panel-body">
+                                <div class="row">
+
+                                </div>
+                                <div class="row">
+                                    <table id="jamendo-cp-table" class="table">
+                                        <thead>
+                                        <tr class="text-center">
+                                            <th>#</th>
+                                            <th>Service name</th>
+                                            <th>Execution date</th>
+                                            <th>Status</th>
+                                            <th>Exception message</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% if jamendo_cp_list %}
+                                            {% for entry in jamendo_cp_list %}
+                                                {% if forloop.counter == 5 %}
+                                                    </tbody>
+                                                    <tbody id="jamendo-cp-table-collapse" class="collapse">
+                                                {% endif %}
+                                                <tr {% if entry.status == 'Failed' %} class="failed-row" {% endif %}>
+                                                    <td>{{ forloop.counter }}</td>
+                                                    <td>{{ entry.service }}</td>
+                                                    <td>{{ entry.execution_date|date:"D d M Y -  H:i" }}</td>
+                                                    <td>{{ entry.status }}</td>
+                                                    <td>{{ entry.exception }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="5" class="text-center">No crawling processes.</td>
+                                            </tr>
+                                        {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if  jamendo_cp_list.count >= 5 %}
+                                    <div class="row">
+                                        <a class="table-collapse-link pull-right" data-toggle="collapse"
+                                           data-target="#jamendo-cp-table-collapse" aria-expanded="false">
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div class="row">
+                                    <div class="col-xs-4 pull-left">
+                                        <button id="start-jamendo-crawling" type="button"
+                                                class="btn btn-default pull-left"> Start crawling
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
+            <section id="soundcloud-crawling-section">
+
+            </section>
         </div>
     </div>
 {% endblock content %}

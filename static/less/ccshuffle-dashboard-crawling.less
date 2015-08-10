@@ -25,4 +25,58 @@
     .margin-bottom(2.5);
     border-bottom: 1px solid #eeeeee;
   }
+
+  .panel {
+
+    .panel-title {
+      i {
+        .margin-right(0.5);
+      }
+    }
+
+    table {
+      td, th {
+        text-align: center;
+      }
+    }
+
+    .table-collapse-link {
+      cursor: pointer;
+      text-decoration: none;
+      .margin-right(1);
+
+      &:before {
+        content: 'Hide entries' !important;
+      }
+
+      &:after {
+        position: relative;
+        top: 1px;
+        display: inline-block;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: normal;
+        line-height: 1;
+        content: '\e253' !important;
+      }
+    }
+
+    .table-collapse-link[aria-expanded="false"] {
+      &:before {
+        content: 'Show all entries' !important;
+      }
+
+      &:after {
+        position: relative;
+        top: 1px;
+        display: inline-block;
+        font-family: 'Glyphicons Halflings';
+        font-style: normal;
+        font-weight: normal;
+        line-height: 1;
+        content: '\e252' !important;
+      }
+    }
+
+  }
 }

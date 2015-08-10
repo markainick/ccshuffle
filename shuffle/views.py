@@ -20,6 +20,7 @@ from django.template import RequestContext
 from django.views import generic
 from .forms import LoginForm, RegistrationForm
 from .searchengine import JamendoSearchEngine
+from .models import CrawlingProcess
 
 import logging
 
@@ -125,6 +126,14 @@ class CrawlerPageView(generic.TemplateView):
     """ This class represents the page view for starting the crawling process as well as showing the process. """
     template_name = 'crawler.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(type(self), self).get_context_data(**kwargs)
+        context['jamendo_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_Jamendo)
+        context['soundcloud_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_Soundcloud)
+        context['ccmixter_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_CCMixter)
+        context['general_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_General)
+        return context
+
     def get(self, request, *args, **kwargs):
         if request.user is None or not request.user.is_authenticated():
             return redirect('%s?next=%s' % (reverse_lazy('signin'), request.path))
@@ -139,9 +148,10 @@ class CrawlerPageView(generic.TemplateView):
 
     def handle_ajax_request(self, request):
         """
+        Handle ajax requests.
 
-        :param request:
-        :return:
+        :param request: the request object.
+        :return: the http response to the ajax requests.
         """
         logger.debug('%s: Ajax request' % self.__class__.__name__)
         logger.debug('%s' % request.GET)
@@ -149,8 +159,7 @@ class CrawlerPageView(generic.TemplateView):
         if 'command' in ajax_data:
             if ajax_data['command'] == 'start-jamendo-crawl':
                 try:
-                    jamendo_engine = JamendoSearchEngine()
-                    return HttpResponse(jamendo_engine.crawl(), status=200)
+                    return HttpResponse(JamendoSearchEngine().crawl(), status=200)
                 except BaseException as e:
                     return HttpResponse('During the crawling an error occurred (%s)' % e, status=500)
             else:

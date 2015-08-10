@@ -91,6 +91,13 @@
   margin-bottom: ~"@{lower}rem";
 }
 
+// Margin only for right with the unit rem and px as fallback.
+.margin-right(@right) {
+  @pxRight: (@right *10);
+  margin-right: ~"@{pxRight}px";
+  margin-right: ~"@{right}rem";
+}
+
 // Margin for all sides with the unit rem and px as fallback.
 .margin(@upper, @right, @lower, @left) {
   @pxUpper: (@upper * 10);
