@@ -45,24 +45,36 @@ $(document).ready(function () {
 
     // Click handler for the start-jamendo-crawling button.
     $('#start-jamendo-crawling').click(function () {
-        $(this).attr('disabled', 'disabled');
+        $(this).prop("disabled", true);
         dashboard.crawl_jamendo(function (data) {
             console.log(data);
-            $(this).removeAttr('disabled');
+            var response = JSON.parse(data);
+            if (response['header']['status'] === 'success') {
+                addCrawlingProcessRow('#jamendo-cp-table', response['result']);
+            } else {
+                console.log(response['header']['error_message']);
+            }
+            $(this).prop("disabled", false); //TODO does not work
         }, function (jqXHR, textStatus, errorThrown) {
             console.log('An error (' + errorThrown + ') occurred for the \'start jamendo crawling\' request !');
-            $(this).removeAttr('disabled');
+            $(this).prop("disabled", false); //TODO does not work
         });
     });
-    // If the jamendo collapse link is clicked, flip the icon and change the text.
-    /*$(document).on('shown.bs.collapse', function () {
-     console.log('Link table collapse !');
-     $(this).removeClass('not-collapsed');
-     $(this).addClass('already-collapsed');
-     });
-     $(document).on('hide.bs.collapse', function () {
-     console.log('Hide table collapse !');
-     $(this).removeClass('already-collapsed');
-     $(this).addClass('not-collapsed');
-     });*/
+
+    /**
+     * Adds the crawling process information as row to the table given with the selector.
+     *
+     * @param selector the selector of the table.
+     * @param cp_data the crawling process information received.
+     */
+    function addCrawlingProcessRow(selector, cp_data) {
+        var execution_date = new Date(cp_data['execution_date'])
+        $(selector + ' tbody').first().prepend('<tr>' +
+            '<td>' + cp_data['service'] + '</td>' +
+            '<td>' + jQuery.format.date(execution_date, 'E dd MM yyyy - HH:mm') + '</td>' +
+            '<td>' + cp_data['status'] + '</td>' +
+            '<td>' + cp_data['exception'] + '</td>' +
+            '</tr>');
+    }
 });
+

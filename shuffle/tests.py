@@ -13,16 +13,37 @@
 
 from django.test import TestCase, Client
 from django.utils import unittest
+from datetime import datetime
 from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
 from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
-from .models import Artist, Song, Album, CrawlingProcess
+from .models import JSONModelEncoder, Artist, Song, Album, CrawlingProcess
+from .views import ResponseObject
 import logging
 
 logger = logging.getLogger(__name__)
 
+import json
+
 
 class HomePageViewTest(TestCase):
     client = Client()
+
+
+class CrawlingDashboardTest(unittest.TestCase):
+    """ Unittests for the jamendo crawling dashboard. """
+
+    def test_crawling_process_json(self):
+        """ Tests if the crawling process class can be serialized with json."""
+        crawling_process = CrawlingProcess(service=CrawlingProcess.Service_Jamendo, execution_date=datetime.now(),
+                                           status=CrawlingProcess.Status_Failed)
+        response_object = ResponseObject(result_obj=crawling_process)
+        json_result = response_object.json(cls=JSONModelEncoder)
+        json_result = json.loads(json_result)
+        self.assertEqual(json_result['result']['status'], 'Failed',
+                         'The info about the crawling process shall not be lost!')
+        self.assertEqual(json_result['result']['service'], CrawlingProcess.Service_Jamendo,
+                         'The info about the crawling process shall not be lost!')
+        self.assertEqual(json_result['header']['status'], 'success', 'The header shall contain the status information')
 
 
 class JamendoEngineTest(TestCase):
@@ -71,6 +92,7 @@ class JamendoEngineTest(TestCase):
             self.assertTrue(Artist.objects.filter(name=artist_name).exists(),
                             "'%s' must be in the database after scanning jamendo for artists" % artist_name)
 
+    @unittest.skip('Long runtime')
     def test_all_artists_wrong_client_id(self):
         """ Tests the behaviour if the jamendo api call is not successful. """
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')

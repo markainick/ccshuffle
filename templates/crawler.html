@@ -9,6 +9,8 @@
 {% endblock headcss %}
 
 {% block headjs %}
+    <!-- JQuery plugin for date format -->
+    <script type="text/javascript" src="{% static 'plugins/jquery/jquery-dateFormat.min.js' %}"></script>
     <!-- Javascript for the crawling dashbaord -->
     <script type="text/javascript" src="{% static 'js/ccshuffle-dashboard-crawling.js' %}"></script>
 {% endblock headjs %}
@@ -44,7 +46,6 @@
                                     <table id="jamendo-cp-table" class="table">
                                         <thead>
                                         <tr class="text-center">
-                                            <th>#</th>
                                             <th>Service name</th>
                                             <th>Execution date</th>
                                             <th>Status</th>
@@ -59,7 +60,6 @@
                                                     <tbody id="jamendo-cp-table-collapse" class="collapse">
                                                 {% endif %}
                                                 <tr {% if entry.status == 'Failed' %} class="failed-row" {% endif %}>
-                                                    <td>{{ forloop.counter }}</td>
                                                     <td>{{ entry.service }}</td>
                                                     <td>{{ entry.execution_date|date:"D d M Y -  H:i" }}</td>
                                                     <td>{{ entry.status }}</td>

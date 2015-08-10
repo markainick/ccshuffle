@@ -20,11 +20,47 @@ from django.template import RequestContext
 from django.views import generic
 from .forms import LoginForm, RegistrationForm
 from .searchengine import JamendoSearchEngine
-from .models import CrawlingProcess
+from .models import JSONModelEncoder, CrawlingProcess
 
 import logging
+import json
 
 logger = logging.getLogger(__name__)
+
+
+class ResponseObject(object):
+    """ Response object for the ajax requests of the dashboard """
+
+    def __init__(self, status='success', error_msg='', result_obj=None):
+        """
+        Initializes the response object.
+
+        :param status: success or fail.
+        :param error_msg: the error message if the status is 'fail'.
+        :param result_obj: the result object, which is json serializable.
+        """
+        self.response_dic = {
+            'header': {'status': status, 'error_message': error_msg},
+            'result': result_obj,
+        }
+
+    def result_object(self):
+        """
+        Returns the the same object passed through the constructor as result object.
+
+        :return: the same object passed through the constructor.
+        """
+        return self.response_dic['result']
+
+    def json(self, cls=None):
+        """
+        Returns the json dump of the result object.
+
+        :param cls: optional the class for serializing the result object, otherwise the default serializer
+                    JSONEncoder.
+        :return: the json dump of the result object.
+        """
+        return json.dumps(self.response_dic, cls=cls)
 
 
 class IndexPageView(generic.TemplateView):
@@ -159,10 +195,15 @@ class CrawlerPageView(generic.TemplateView):
         if 'command' in ajax_data:
             if ajax_data['command'] == 'start-jamendo-crawl':
                 try:
-                    return HttpResponse(JamendoSearchEngine().crawl(), status=200)
+                    response_object = ResponseObject(result_obj=JamendoSearchEngine().crawl())
+                    return HttpResponse(response_object.json(cls=JSONModelEncoder))
                 except BaseException as e:
-                    return HttpResponse('During the crawling an error occurred (%s)' % e, status=500)
+                    print(str(e))
+                    response_object = ResponseObject(status='fail', error_msg=str(e))
+                    return HttpResponse(response_object.json(), status=500)
             else:
-                return HttpResponse('The given command is unknown !', status=400)
+                response_object = ResponseObject(status='fail', error_msg='The given command is unknown !')
+                return HttpResponse(response_object.json(), status=400)
         else:
-            return HttpResponse('No command is given !', status=400)
+            response_object = ResponseObject(status='fail', error_msg='No command is given !')
+            return HttpResponse(response_object.json(), status=400)

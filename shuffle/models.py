@@ -13,6 +13,42 @@
 
 from django.db import models
 from datetime import datetime
+from abc import abstractmethod
+from django.core.serializers.json import DjangoJSONEncoder
+
+
+class ModelSerializable(object):
+    """ This class represents json models that have the function 'serializable' that returns a serializable object.  """
+
+    @abstractmethod
+    def serializable(self, obj):
+        pass
+
+
+class JSONModelEncoder(DjangoJSONEncoder):
+    """  This class represents a json encoder for the models, which are instance of the ModelSerializable class."""
+
+    def default(self, o):
+        if o is None:
+            return ''
+        elif isinstance(o, (str, int, float)):
+            return str(o)
+        elif isinstance(o, ModelSerializable):
+            so = o.serializable()
+            r = dict()
+            if isinstance(so, (dict, set)):
+                for key in so:
+                    r[str(key)] = self.default(so[key])
+                return r
+            elif isinstance(so, (list, tuple)):
+                l = []
+                for value in so:
+                    l.append(self.default(value))
+                return l
+            else:
+                return super(type(self), self).default(so)
+        else:
+            return super(type(self), self).default(o)
 
 
 class Artist(models.Model):
@@ -70,7 +106,7 @@ class Song(models.Model):
         return self.name + (" (Album: " + self.album.__str__() + ")" if self.album is not None else "")
 
 
-class CrawlingProcess(models.Model):
+class CrawlingProcess(models.Model, ModelSerializable):
     """ This class represents planned, executed or failed crawling processes. """
 
     Service_Jamendo = 'Jamendo'
@@ -90,3 +126,7 @@ class CrawlingProcess(models.Model):
 
     def __str__(self):
         return '%s (%s - %s)' % (self.execution_date, self.service, self.status)
+
+    def serializable(self):
+        return dict({'service': str(self.service), 'execution_date': self.execution_date, 'status': str(self.status),
+                     'exception': str(self.exception)})
