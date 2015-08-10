@@ -334,6 +334,7 @@ class JamendoSearchEngine(object):
             crawling_process.exception = e.__str__()
         finally:
             crawling_process.save()
+            return crawling_process
 
     @classmethod
     def __crawl(cls) -> None:

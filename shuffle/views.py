@@ -150,8 +150,7 @@ class CrawlerPageView(generic.TemplateView):
             if ajax_data['command'] == 'start-jamendo-crawl':
                 try:
                     jamendo_engine = JamendoSearchEngine()
-                    jamendo_engine.crawl()
-                    return HttpResponse('The crawling of the jamendo service was successful.', status=200)
+                    return HttpResponse(jamendo_engine.crawl(), status=200)
                 except BaseException as e:
                     return HttpResponse('During the crawling an error occurred (%s)' % e, status=500)
             else:
