@@ -15,7 +15,7 @@ import logging
 import urllib.parse
 import requests
 from abc import abstractmethod
-from .models import Artist, Song, Album, CrawlingProcess
+from .models import Artist, Song, Album, Tag, CrawlingProcess
 
 logger = logging.getLogger(__name__)
 
@@ -277,7 +277,63 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
     """ This class represents the entity song of the jamendo service. """
 
     def __init__(self, jamendo_song: {str: str}):
+        self.tags = list()
         super(JamendoSongEntity, self).__init__(self.__parse_json(jamendo_song))
+        if 'musicinfo' in jamendo_song and 'tags' in jamendo_song['musicinfo']:
+            self.__add_tags(jamendo_song['musicinfo']['tags'])
+
+    def save(self):
+        """
+        Persists this song and returns it.
+
+        :return: the persisted song.
+        """
+        self.entity.save()
+        self.entity.tags = self.tags
+        self.entity.save()
+        return self.entity
+
+    def __add_tags(self, tags_json: {str: str}) -> [Tag]:
+        """
+        Adds the tags in the given json dictionary, if the tags is not already existing.
+
+        :param tags_json: the tags_json dictionary received from jamendo.
+        :return: all tags in the json dictionary
+        """
+        for tag_cat_key in tags_json:
+            for tag_entry in tags_json[tag_cat_key]:
+                tag = Tag.objects.filter(name=tag_entry)
+                if tag.exists():
+                    self.tags.append(tag.first())
+                else:
+                    tag = Tag(name=tag_entry)
+                    tag.save()
+                    self.tags.append(tag)
+
+    @classmethod
+    def get_or_create(cls, name: str=None, jamendo_id: str=None) -> Artist:
+        """
+        Returns the song with the given properties.
+
+        :param name: the name of the song, which shall be returned.
+        :param jamendo_id: the jamendo id of the song, which shall be returned.
+        :return: one song or None.
+        """
+        if jamendo_id is not None:
+            response_set = Song.objects.filter(jamendo_id=jamendo_id)
+            if response_set.exists():
+                return response_set.first()
+            else:
+                response = cls.json_call('tracks', {'id': jamendo_id, 'include': 'musicinfo'})
+                if response['headers']['results_count'] == 1:
+                    song = JamendoSongEntity(response['results'][0]).save()
+                    return song
+                else:
+                    pass  # Todo Implement super.get()
+        elif name is not None:
+            pass  # TODO Implement super.get()
+        else:
+            raise ValueError('The name or the jamendo id must be given !')
 
     @classmethod
     def all_songs(cls) -> [Song]:
@@ -289,12 +345,10 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         """
 
         def process_result(songs_json):
-            songs = [JamendoSongEntity(song).song() for song in songs_json]
-            Song.objects.bulk_create(songs)
-            return songs
+            return [JamendoSongEntity(song).save() for song in songs_json]
 
         logger.info('SE (Jamendo): Crawling for all songs !')
-        return cls.all_query('tracks', process=process_result)
+        return cls.all_query('tracks', {'include': 'musicinfo'}, process=process_result)
 
     @classmethod
     def __parse_json(cls, jamendo_song: {str: str}) -> Song:

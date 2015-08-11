@@ -66,6 +66,21 @@ class JamendoEngineTest(TestCase):
             self.assertTrue(Song.objects.filter(name=song).exists(),
                             '\'%s\' must be in the database after scanning jamendo for songs' % song)
 
+    def test_song_tags(self):
+        """
+        Tests if the transmitted tags of the songs are persisted and connected correctly to the song.
+        The sample data contains the song with the jamendo id
+
+        The song 'Possibilities' of Jasmine Jordan is used for testing.
+        """
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        song_jasmine_pos_tabs = [tag.name for tag in song_jasmine_possibilities.tags.all()]
+        song_jasmine_pos_tabs.sort()
+        self.assertEqual(len(song_jasmine_pos_tabs), 7, 'There must be 7 tags linked to the song \'Possibilities\'.');
+        self.assertListEqual(song_jasmine_pos_tabs,
+                             ['electric', 'funk', 'groove', 'happy', 'pop', 'rnb', 'soulfull'],
+                             'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
+
     @unittest.skip('Long runtime')
     def test_all_albums(self):
         """

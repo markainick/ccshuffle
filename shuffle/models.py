@@ -87,6 +87,8 @@ class Tag(models.Model):
     """ This class represents a tag, which is used to describe the music (f.e. genres). """
     name = models.CharField(max_length=250, blank=False, unique=True)
 
+    def __str__(self):
+        return self.name
 
 class Song(models.Model):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
