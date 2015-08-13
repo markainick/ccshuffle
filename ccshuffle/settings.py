@@ -107,7 +107,7 @@ STATICFILES_DIRS = (os.getcwd() + "/static",)
 # Logging settings
 # https://docs.djangoproject.com/en/1.8/topics/logging/
 
-LOGGING = {
+'''LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
@@ -124,5 +124,5 @@ LOGGING = {
             'propagate': True,
         },
     },
-} 
+}''' 
 

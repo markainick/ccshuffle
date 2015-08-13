@@ -28,21 +28,64 @@ class Entity(object):
         self.entity = entity
 
     @abstractmethod
-    def merge(self, others: []):
+    def persist(self):
         """
-        Search for similar entities and tries to merge them, if they may be the same.
+        Persists the entity and returns it.
 
-        :others: a list of other entities, that are similar to the given entity.
-        :return: the current entity or a new merged one.
+        :return: the persisted entity.
         """
-        pass
+        raise NotImplementedError('The abstract method persist of %s is not implemented !' % self.__class__.__name__)
+
+    def sync_and_persist(self):
+        """
+        Synchronises the entity (calls the method sync) and persists the entity.
+
+        :return: the persisted entity.
+        """
+        self.sync()
+        return self.persist()
+
+    @classmethod
+    @abstractmethod
+    def _merge(cls, new, old):
+        """
+        The old entity is merged with the new entity.
+
+        :param new: the new information about the entity.
+        :param old: the old entity.
+        :return: the merged entity.
+        """
+        raise NotImplementedError('The abstract method merge of %s is not implemented !' % cls.__name__)
+
+    @abstractmethod
+    def sync(self) -> None:
+        """
+        Search for similar entities and tries to merge them, if they may be the same. The entity (or changes) will not
+        be persisted. This must be done explicitly.
+        """
+        raise NotImplementedError('The abstract method merge of %s is not implemented !' % self.__class__.__name__)
 
 
 class ArtistEntity(Entity):
     """ This class represents the entity artist. """
 
-    def merge(self, others: []):
-        pass  # TODO Implement merge
+    def persist(self) -> Artist:
+        assert isinstance(self.entity, Artist)
+        self.sync()
+        self.entity.save()
+        return self.entity
+
+    @classmethod
+    def _merge(cls, new, old) -> Artist:
+        return old
+
+    def sync(self) -> None:
+        assert isinstance(self.entity, Artist)
+        if self.entity.is_on_jamendo():
+            artist = Artist.objects.filter(jamendo_id=self.entity.jamendo_id)
+            self.entity = self._merge(self.entity, artist.first()) if artist.exists() else self.entity
+        else:
+            raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
 
     def artist(self) -> Artist:
         """ Returns the artist. (wrapped in this class) """
@@ -52,8 +95,22 @@ class ArtistEntity(Entity):
 class AlbumEntity(Entity):
     """ This class represents the entity album. """
 
-    def merge(self, others: []):
-        pass  # TODO Implement merge
+    def persist(self) -> Album:
+        assert isinstance(self.entity, Album)
+        self.entity.save()
+        return self.entity
+
+    @classmethod
+    def _merge(cls, new, old) -> Album:
+        return old
+
+    def sync(self) -> None:
+        assert isinstance(self.entity, Album)
+        if self.entity.is_on_jamendo():
+            album = Album.objects.filter(jamendo_id=self.entity.jamendo_id)
+            self.entity = self._merge(self.entity, album.first()) if album.exists() else self.entity
+        else:
+            raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
 
     def album(self) -> Album:
         """ Returns the album. (wrapped in this class) """
@@ -63,8 +120,24 @@ class AlbumEntity(Entity):
 class SongEntity(Entity):
     """ This class represents the entity song. """
 
-    def merge(self, others: []):
-        pass  # TODO Implement merge
+    def persist(self) -> Song:
+        assert isinstance(self.entity, Song)
+        self.entity.save()
+        return self.entity
+
+    @classmethod
+    def _merge(cls, new: Song, old: Song) -> Song:
+        if new.is_on_jamendo() and not old.jamendo_id:
+            old.jamendo_id = new.jamendo_id
+        return old
+
+    def sync(self) -> None:
+        assert isinstance(self.entity, Song)
+        if self.entity.is_on_jamendo():
+            song = Song.objects.filter(jamendo_id=self.entity.jamendo_id)
+            self.entity = self._merge(self.entity, song.first()) if song.exists() else self.entity
+        else:
+            raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
 
     def song(self) -> Song:
         return self.entity
@@ -161,9 +234,7 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('artists', {'id': jamendo_id})
                 if response['headers']['results_count'] == 1:
-                    artist = JamendoArtistEntity(response['results'][0]).artist()
-                    artist.save()
-                    return artist
+                    return JamendoArtistEntity(response['results'][0]).sync_and_persist()
                 else:
                     pass  # Todo Implement super.get()
         elif name is not None:
@@ -182,9 +253,7 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         """
 
         def process_result(artists_json):
-            artists = [JamendoArtistEntity(artist).artist() for artist in artists_json]
-            Artist.objects.bulk_create(artists)
-            return artists
+            return [JamendoArtistEntity(artist).sync_and_persist() for artist in artists_json]
 
         logger.info('SE (Jamendo): Crawling for all artists !')
         return cls.all_query('artists', process=process_result)
@@ -229,9 +298,7 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('albums', {'id': jamendo_id})
                 if response['headers']['results_count'] == 1:
-                    album = JamendoAlbumEntity(response['results'][0]).album()
-                    album.save()
-                    return album
+                    return JamendoAlbumEntity(response['results'][0]).sync_and_persist()
                 else:
                     pass  # Todo Implement super.get()
         elif name is not None:
@@ -249,9 +316,7 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         """
 
         def process_result(albums_json):
-            albums = [JamendoAlbumEntity(album).album() for album in albums_json]
-            Album.objects.bulk_create(albums)
-            return albums
+            return [JamendoAlbumEntity(album).sync_and_persist() for album in albums_json]
 
         logger.info('SE (Jamendo): Crawling for all albums !')
         return cls.all_query('albums', process=process_result)
@@ -277,38 +342,43 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
     """ This class represents the entity song of the jamendo service. """
 
     def __init__(self, jamendo_song: {str: str}):
-        self.tags = list()
         super(JamendoSongEntity, self).__init__(self.__parse_json(jamendo_song))
-        if 'musicinfo' in jamendo_song and 'tags' in jamendo_song['musicinfo']:
-            self.__add_tags(jamendo_song['musicinfo']['tags'])
+        self.tags = self.__get_tags(jamendo_song)
 
-    def save(self):
-        """
-        Persists this song and returns it.
-
-        :return: the persisted song.
-        """
+    def persist(self):
         self.entity.save()
-        self.entity.tags = self.tags
-        self.entity.save()
-        return self.entity
-
-    def __add_tags(self, tags_json: {str: str}) -> [Tag]:
-        """
-        Adds the tags in the given json dictionary, if the tags is not already existing.
-
-        :param tags_json: the tags_json dictionary received from jamendo.
-        :return: all tags in the json dictionary
-        """
-        for tag_cat_key in tags_json:
-            for tag_entry in tags_json[tag_cat_key]:
-                tag = Tag.objects.filter(name=tag_entry)
-                if tag.exists():
-                    self.tags.append(tag.first())
+        if self.tags is not None:
+            # Persists the tags that does not already exist.
+            tags_cache_list = list()
+            for tag in self.tags:
+                tag_queryset = Tag.objects.filter(name=tag.name)
+                if tag_queryset.exists():
+                    tag = tag_queryset.first()
                 else:
-                    tag = Tag(name=tag_entry)
                     tag.save()
-                    self.tags.append(tag)
+                tags_cache_list.append(tag)
+            self.tags = tags_cache_list
+            # Link the tags to the song.
+            self.entity.tags.add(*self.tags)
+        return super(type(self), self).persist()
+
+    @classmethod
+    def __get_tags(cls, jamendo_song: {str: str}) -> [Tag]:
+        """
+        Gets the tags from the given json dictionary of this song.
+
+        :param jamendo_song: the json dictionary of the jamendo song.
+        :return: the tags from the json dictionary of this song.
+        """
+        if 'musicinfo' in jamendo_song and 'tags' in jamendo_song['musicinfo']:
+            tags_list = list()
+            tags_json = jamendo_song['musicinfo']['tags']
+            for tag_cat_key in tags_json:
+                for tag_entry in tags_json[tag_cat_key]:
+                    tags_list.append(Tag(name=tag_entry))
+            return tags_list
+        else:
+            return None
 
     @classmethod
     def get_or_create(cls, name: str=None, jamendo_id: str=None) -> Artist:
@@ -326,8 +396,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('tracks', {'id': jamendo_id, 'include': 'musicinfo'})
                 if response['headers']['results_count'] == 1:
-                    song = JamendoSongEntity(response['results'][0]).save()
-                    return song
+                    return JamendoSongEntity(response['results'][0]).sync_and_persist()
                 else:
                     pass  # Todo Implement super.get()
         elif name is not None:
@@ -345,7 +414,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         """
 
         def process_result(songs_json):
-            return [JamendoSongEntity(song).save() for song in songs_json]
+            return [JamendoSongEntity(song).sync_and_persist() for song in songs_json]
 
         logger.info('SE (Jamendo): Crawling for all songs !')
         return cls.all_query('tracks', {'include': 'musicinfo'}, process=process_result)

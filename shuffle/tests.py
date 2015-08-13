@@ -52,19 +52,24 @@ class JamendoEngineTest(TestCase):
     def __check_connection(self):
         return True
 
-    @unittest.skip('Long runtime')
-    def test_all_songs(self):
+    def test_artist_merge_jamendo_songs(self):
         """
-        Tests the functionality to load all songs, which are stored on jamendo.
+        Tests, if the merge of an already existing jamendo song and the received song with the same id is successful.
 
-        Checks if the following songs are fetched (spot check): 8BIT FAIRY TALE, Bohemia, Melody for the grass,
-                                                                GO!GO!GO!, Skibidubap
+        The test songs are 'Possibilities' from Jasmine Jordan and 'War' of Waterpistols.
         """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        JamendoSongEntity.all_songs()
-        for song in ('8BIT FAIRY TALE', 'Bohemia', 'Melody for the grass', 'GO!GO!GO!', 'Skibidubap'):
-            self.assertTrue(Song.objects.filter(name=song).exists(),
-                            '\'%s\' must be in the database after scanning jamendo for songs' % song)
+        # Jasmin Jordan - Possibilities
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        db_id = song_jasmine_possibilities.id
+        # Test the merge for this song.
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        self.assertEqual(song_jasmine_possibilities.id, db_id, 'The id must stay the same.')
+        # Waterpistol - War
+        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
+        db_id = song_waterpistol_war.id
+        # Test the merge for this song.
+        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
+        self.assertEqual(song_waterpistol_war.id, db_id, 'The id must stay the same.')
 
     def test_song_tags(self):
         """
@@ -80,6 +85,20 @@ class JamendoEngineTest(TestCase):
         self.assertListEqual(song_jasmine_pos_tabs,
                              ['electric', 'funk', 'groove', 'happy', 'pop', 'rnb', 'soulfull'],
                              'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
+
+    @unittest.skip('Long runtime')
+    def test_all_songs(self):
+        """
+        Tests the functionality to load all songs, which are stored on jamendo.
+
+        Checks if the following songs are fetched (spot check): 8BIT FAIRY TALE, Bohemia, Melody for the grass,
+                                                                GO!GO!GO!, Skibidubap
+        """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        JamendoSongEntity.all_songs()
+        for song in ('8BIT FAIRY TALE', 'Bohemia', 'Melody for the grass', 'GO!GO!GO!', 'Skibidubap'):
+            self.assertTrue(Song.objects.filter(name=song).exists(),
+                            '\'%s\' must be in the database after scanning jamendo for songs' % song)
 
     @unittest.skip('Long runtime')
     def test_all_albums(self):
@@ -107,7 +126,6 @@ class JamendoEngineTest(TestCase):
             self.assertTrue(Artist.objects.filter(name=artist_name).exists(),
                             "'%s' must be in the database after scanning jamendo for artists" % artist_name)
 
-    @unittest.skip('Long runtime')
     def test_all_artists_wrong_client_id(self):
         """ Tests the behaviour if the jamendo api call is not successful. """
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
