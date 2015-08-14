@@ -16,7 +16,7 @@ from django.utils import unittest
 from datetime import datetime
 from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
 from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
-from .models import JSONModelEncoder, Artist, Song, Album, CrawlingProcess
+from .models import JSONModelEncoder, Artist, Song, Album, Tag, CrawlingProcess
 from .views import ResponseObject
 import logging
 
@@ -163,3 +163,113 @@ class JamendoEngineTest(TestCase):
         self.assertEqual('Failed', p.status, 'The last crawling must have been failed.')
         self.assertIn('Your credential is not authorized.', p.exception,
                       'The exception message must contain \' Your credential is not authorized. \'')
+
+
+class ModelTest(unittest.TestCase):
+    """ Test the model classes. """
+
+    def test_eq_hash_tag(self):
+        """
+        Tests if tags with the same name are equal (must have also the same hash value) and tags with different
+        names not.
+        """
+        tag_indie_rock_1 = Tag(name='indie rock')
+        tag_indie_rock_2 = Tag(name='indie rock')
+        self.assertEqual(tag_indie_rock_1, tag_indie_rock_2, 'Tags with the same name must be equal.')
+        tag_pop = Tag(name='pop')
+        self.assertNotEqual(tag_indie_rock_1, tag_pop, 'Tags with different names must not be equal.')
+        # Tests the hashing.
+        self.assertEqual(hash(tag_indie_rock_1), hash(tag_indie_rock_2),
+                         'The has value of tags with the same name must be equal.')
+
+    def test_eq_hash_artists(self):
+        """
+        Tests if artists with the same name (and service ids) are equal and artists with different names or different
+        ids.
+        """
+        artist_beatles_1 = Artist(name='The Beatles')
+        artist_beatles_2 = Artist(name='The Beatles')
+        self.assertEqual(artist_beatles_1, artist_beatles_2, 'Artists with the same name must be equal.')
+        artist_pink_floyd_1 = Artist(name='Pink Floyd', jamendo_id=1)
+        self.assertNotEqual(artist_pink_floyd_1, artist_beatles_1,
+                            'Artists with the different names must not be equal.')
+        artist_pink_floyd_2 = Artist(name='Pink Floyd', jamendo_id=1)
+        self.assertEqual(artist_pink_floyd_1, artist_pink_floyd_2,
+                         'Artists with the same name and service id must be equal.')
+        artist_pink_floyd_2 = Artist(name='Pink Floyd', jamendo_id=2)
+        self.assertNotEqual(artist_pink_floyd_1, artist_pink_floyd_2,
+                            'If the jamendo id differs, the artists must not be equal (also if they have the same)')
+        # Tests the hashing.
+        self.assertEqual(hash(artist_beatles_1), hash(artist_beatles_2), 'The hash of two equal artists must be equal.')
+
+    def test_eq_hash_albums(self):
+        """ Tests if albums with the same name and same artist (as well as service id) are equal. """
+        artist_beatles = Artist(name='The Beatles')
+        artist_beatles.save()
+        artist_pink_floyd = Artist(name='Pink Floyd')
+        artist_pink_floyd.save()
+        album_abbey_road_1 = Album(name='Abbey Road', artist=artist_beatles)
+        album_abbey_road_2 = Album(name='Abbey Road', artist=artist_beatles, jamendo_id=1)
+        self.assertEqual(album_abbey_road_1, album_abbey_road_2, 'Albums with the same name and artist must be equal.')
+        album_abbey_road_3 = Album(name='Abbey Road', artist=artist_pink_floyd)
+        self.assertNotEqual(album_abbey_road_1, album_abbey_road_3,
+                            'If the artist differs, the albums must not be equal.')
+        album_the_wall_1 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall_2 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        self.assertEqual(album_the_wall_1, album_the_wall_2,
+                         'If the name and service ids of the albums are the same, they must be equal.')
+        album_the_wall_3 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=4)
+        self.assertNotEqual(album_the_wall_1, album_the_wall_3,
+                            'If one of the service id differs, the albums must not be equal.')
+        # Tests the hashing.
+        self.assertEqual(hash(album_abbey_road_1), hash(album_abbey_road_2),
+                         'The hash of two equal albums must be equal.')
+
+    def test_eq_hash_songs(self):
+        """Tests if songs with the same name, album and artist must be equal (must have also the same hash value). """
+        # Artists
+        artist_beatles = Artist(name='The Beatles')
+        artist_beatles.save()
+        artist_pink_floyd = Artist(name='Pink Floyd')
+        artist_pink_floyd.save()
+        artist_gorillaz = Artist(name='Gorillaz')
+        artist_gorillaz.save()
+        # Album
+        album_abbey_road = Album(name='Abbey Road', artist=artist_beatles).save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3).save()
+        # Test the equal method.
+        song_another_brick_1 = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                    jamendo_id=1)
+        song_another_brick_2 = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall)
+        self.assertEqual(song_another_brick_1, song_another_brick_2,
+                         'The song with same name, artist and album must be equal.')
+        song_clint_eastwood = Song(name='Clint Eastwood (Single)', artist=artist_gorillaz, jamendo_id=2)
+        self.assertEqual(song_clint_eastwood, song_clint_eastwood,
+                         'Singles with the same name and artist must be the same.')
+        self.assertNotEqual(song_another_brick_1, song_clint_eastwood, 'Different songs must not be equal.')
+        song_another_brick_3 = Song(name='Another brick in the wall', artist=artist_beatles, album=album_the_wall)
+        self.assertNotEqual(song_another_brick_1, song_another_brick_3,
+                            'If the artist of the songs differs, they must not be equal.')
+        # Tests the hashing.
+        self.assertEqual(hash(song_another_brick_1), hash(song_another_brick_2),
+                         'The hash of two equal songs must be equal.')
+
+    def test_serializable_tag(self):
+        """ Tests if the the model tag is serializable """
+        self.fail('Not implemented yet')
+
+    def test_serializable_artist(self):
+        """ Tests if the the model artist is serializable """
+        self.fail('Not implemented yet')
+
+    def test_serializable_album(self):
+        """ Tests if the the model album is serializable """
+        self.fail('Not implemented yet')
+
+    def test_serializable_song(self):
+        """ Tests if the the model song is serializable """
+        self.fail('Not implemented yet')
+
+    def test_serializable_crawling_process(self):
+        """ Tests if the the model crawling process is serializable """
+        self.fail('Not implemented yet')
