@@ -17,12 +17,34 @@ from abc import abstractmethod
 from django.core.serializers.json import DjangoJSONEncoder
 
 
+class DeserializableException(Exception):
+    """ This exception will be thrown, if the serialized representation can't be parsed correctly."""
+    pass
+
+
 class ModelSerializable(object):
     """ This class represents json models that have the function 'serializable' that returns a serializable object.  """
 
     @abstractmethod
-    def serializable(self, obj):
-        raise NotImplementedError('The function serializable of %s' % self.__class__.__name__)
+    def serialize(self):
+        """
+        Serializes this object so that it f.e. can be converted to JSON.
+
+        :return:the serialized object.
+        """
+        raise NotImplementedError('The function serialize of %s' % self.__class__.__name__)
+
+    @classmethod
+    @abstractmethod
+    def from_serialized(cls, obj):
+        """
+        Parses the serialized representation of the object of this class and returns a object of this class. Throws a
+        DeserializableException, if the representation can not be pared.
+
+        :param obj: the serialized representation of the object, which shall be parsed.
+        :return: the object of this class.
+        """
+        raise NotImplementedError('The function from_serialized of %s' % self.__class__.__name__)
 
 
 class JSONModelEncoder(DjangoJSONEncoder):
@@ -33,25 +55,18 @@ class JSONModelEncoder(DjangoJSONEncoder):
             return ''
         elif isinstance(o, (str, int, float)):
             return str(o)
+        elif isinstance(o, (dict, set)):
+            return {key: self.default(o[key]) for key in o}
+        elif isinstance(o, (list, tuple)):
+            return [self.default(entry) for entry in o]
         elif isinstance(o, ModelSerializable):
-            so = o.serializable()
-            r = dict()
-            if isinstance(so, (dict, set)):
-                for key in so:
-                    r[str(key)] = self.default(so[key])
-                return r
-            elif isinstance(so, (list, tuple)):
-                l = []
-                for value in so:
-                    l.append(self.default(value))
-                return l
-            else:
-                return super(type(self), self).default(so)
+            # Serialize if the object is serializable.
+            return self.default(o.serialize())
         else:
             return super(type(self), self).default(o)
 
 
-class Artist(models.Model):
+class Artist(models.Model, ModelSerializable):
     """ This class represents the model for artists. """
     name = models.CharField(max_length=250, blank=False)
     abstract = models.CharField(max_length=250, blank=True, default=None, null=True)
@@ -63,6 +78,33 @@ class Artist(models.Model):
 
     def is_on_jamendo(self):
         return self.jamendo_id is not None
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'abstract': self.abstract,
+            'website': self.website,
+            'city': self.city,
+            'country_code': self.country_code,
+            'jamendo_id': self.jamendo_id,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                return cls(id=int(obj['id']), name=obj['name'], abstract=obj['abstract'], website=obj['website'],
+                           city=obj['city'], country_code=obj['country_code'], jamendo_id=int(obj['jamendo_id']))
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -78,7 +120,7 @@ class Artist(models.Model):
         return self.name
 
 
-class Album(models.Model):
+class Album(models.Model, ModelSerializable):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -88,6 +130,34 @@ class Album(models.Model):
 
     def is_on_jamendo(self):
         return self.jamendo_id is not None
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'artist': self.artist,
+            'release_date': self.release_date,
+            'jamendo_id': self.jamendo_id,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                release_date = obj['release_date']
+                if isinstance(release_date, str):
+                    release_date = datetime.strptime(obj['release_date'], '%Y-%m-%dT%H:%M:%S')
+                elif not isinstance(release_date, datetime):
+                    raise DeserializableException('The given release date can\'t be parsed.')
+                return cls(id=int(obj['id']), name=obj['name'], artist=Artist.from_serialized(obj['artist']),
+                           release_date=release_date, jamendo_id=int(obj['jamendo_id']))
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -103,13 +173,35 @@ class Album(models.Model):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '')
 
 
-class Tag(models.Model):
+class Tag(models.Model, ModelSerializable):
     """ This class represents a tag, which is used to describe the music (f.e. genres). """
     name = models.CharField(max_length=250, blank=False, unique=True)
 
+    class Meta(object):
+        ordering = ['name']
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                return cls(id=int(obj['id']), name=obj['name'])
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            return self.name is other.name
+            return self.name == other.name
         else:
             return False
 
@@ -120,7 +212,7 @@ class Tag(models.Model):
         return self.name
 
 
-class Song(models.Model):
+class Song(models.Model, ModelSerializable):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
     name = models.CharField(max_length=250, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -134,6 +226,41 @@ class Song(models.Model):
     def is_on_jamendo(self):
         return self.album is not None
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'artist': self.artist,
+            'album': self.album,
+            'duration': self.duration,
+            'tags': list(self.tags.all()),
+            'release_date': self.release_date,
+            'jamendo_id': self.jamendo_id,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                release_date = obj['release_date']
+                if isinstance(release_date, str):
+                    release_date = datetime.strptime(obj['release_date'], '%Y-%m-%dT%H:%M:%S')
+                elif not isinstance(release_date, datetime):
+                    raise DeserializableException('The given release date can\'t be parsed.')
+                song = cls(id=int(obj['id']), name=obj['name'], artist=Artist.from_serialized(obj['artist']),
+                           album=Album.from_serialized(obj['album']), duration=int(obj['duration']),
+                           release_date=release_date, jamendo_id=int(obj['jamendo_id']))
+                if obj['tags']:
+                    song.tags.add(*[Tag.from_serialized(entry) for entry in obj['tags']])
+                return song
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return self.name == other.name and self.artist == other.artist and self.album == other.album and (
@@ -146,7 +273,7 @@ class Song(models.Model):
 
     def __str__(self):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '') + (
-            ' (Album: %s)' % self.album if self.album else '')
+            ' (Album: %s) ' % self.album if self.album else '')
 
 
 class CrawlingProcess(models.Model, ModelSerializable):
@@ -167,12 +294,32 @@ class CrawlingProcess(models.Model, ModelSerializable):
     status = models.CharField(max_length=100, blank=False)
     exception = models.CharField(max_length=500, blank=True, null=True)
 
-    def serializable(self):
-        return {'service': str(self.service),
-                'execution_date': self.execution_date,
-                'status': str(self.status),
-                'exception': str(self.exception)
-                }
+    def serialize(self):
+        return {
+            'service': self.service,
+            'execution_date': self.execution_date,
+            'status': self.status,
+            'exception': self.exception,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                execution_date = obj['execution_date']
+                if isinstance(execution_date, str):
+                    execution_date = datetime.strptime(obj['execution_date'], '%Y-%m-%dT%H:%M:%S')
+                elif not isinstance(execution_date, datetime):
+                    raise DeserializableException('The given release date can\'t be parsed.')
+                return cls(service=obj['service'], execution_date=execution_date, status=obj['status'],
+                           exception=obj['exception'])
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
 
     def __str__(self):
         return '%s (%s - %s)' % (self.execution_date, self.service, self.status)

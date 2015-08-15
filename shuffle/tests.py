@@ -11,25 +11,25 @@
 #   GNU General Public License for more details.
 #
 
-from django.test import TestCase, Client
-from django.utils import unittest
+from django.test import TestCase, Client, TransactionTestCase
+from django.utils.unittest import skip
 from datetime import datetime
 from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
 from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
 from .models import JSONModelEncoder, Artist, Song, Album, Tag, CrawlingProcess
 from .views import ResponseObject
+
+import json
 import logging
 
 logger = logging.getLogger(__name__)
-
-import json
 
 
 class HomePageViewTest(TestCase):
     client = Client()
 
 
-class CrawlingDashboardTest(unittest.TestCase):
+class CrawlingDashboardTest(TestCase):
     """ Unittests for the jamendo crawling dashboard. """
 
     def test_crawling_process_json(self):
@@ -86,7 +86,7 @@ class JamendoEngineTest(TestCase):
                              ['electric', 'funk', 'groove', 'happy', 'pop', 'rnb', 'soulfull'],
                              'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
 
-    @unittest.skip('Long runtime')
+    @skip('Long runtime')
     def test_all_songs(self):
         """
         Tests the functionality to load all songs, which are stored on jamendo.
@@ -100,7 +100,7 @@ class JamendoEngineTest(TestCase):
             self.assertTrue(Song.objects.filter(name=song).exists(),
                             '\'%s\' must be in the database after scanning jamendo for songs' % song)
 
-    @unittest.skip('Long runtime')
+    @skip('Long runtime')
     def test_all_albums(self):
         """
         Tests the functionality to load all albums, which are stored on jamendo.
@@ -113,7 +113,7 @@ class JamendoEngineTest(TestCase):
             self.assertTrue(Album.objects.filter(name=album).exists(),
                             '\'%s\' must be in the database after scanning jamendo for albums' % album)
 
-    @unittest.skip('Long runtime')
+    @skip('Long runtime')
     def test_all_artists(self):
         """
         Tests the functionality to load all artists, which are stored on jamendo.
@@ -134,7 +134,7 @@ class JamendoEngineTest(TestCase):
         self.assertRaises(JamendoCallException, JamendoArtistEntity.all_artists)
         JamendoServiceMixin.client_id = client_id
 
-    @unittest.skip('Long runtime')
+    @skip('Long runtime')
     def test_crawl(self):
         """ Tests the crawling process """
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
@@ -165,7 +165,7 @@ class JamendoEngineTest(TestCase):
                       'The exception message must contain \' Your credential is not authorized. \'')
 
 
-class ModelTest(unittest.TestCase):
+class ModelTest(TestCase):
     """ Test the model classes. """
 
     def test_eq_hash_tag(self):
@@ -255,21 +255,216 @@ class ModelTest(unittest.TestCase):
                          'The hash of two equal songs must be equal.')
 
     def test_serializable_tag(self):
-        """ Tests if the the model tag is serializable """
-        self.fail('Not implemented yet')
+        """ Tests if the model tag is serializable """
+        tag = Tag(name='indie pop')
+        tag.save()
+        tag_serialized = tag.serialize()
+        tag_des = Tag.from_serialized(tag_serialized)
+        self.assertEqual(tag_des.id, tag.id, 'The information about the id of the tag shall not be lost.')
+        self.assertEqual(tag_des.name, tag.name, 'The information about the tag name shall not be lost.')
+
+    def test_json_encoding_tag(self):
+        """  Tests if the model tag can be converted to JSON """
+        tag = Tag(name='alternative rock')
+        tag.save()
+        tag_json = json.dumps(tag, cls=JSONModelEncoder)
+        tag_json_load = json.loads(tag_json)
+        self.assertEqual(int(tag_json_load['id']), tag.id, 'The information about the id of the tag shall not be lost.')
+        self.assertEqual(tag_json_load['name'], tag.name, 'The information about the tag name shall not be lost.')
 
     def test_serializable_artist(self):
-        """ Tests if the the model artist is serializable """
-        self.fail('Not implemented yet')
+        """ Tests if the model artist is serializable """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1)
+        artist_pink_floyd.save()
+        artist_pink_floyd_serialized = artist_pink_floyd.serialize()
+        artist_pink_floyd_des = artist_pink_floyd.from_serialized(artist_pink_floyd_serialized)
+        self.assertEqual(artist_pink_floyd_des.id, artist_pink_floyd.id,
+                         'The information about the id of the artist shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.name, artist_pink_floyd.name,
+                         'The information about the artist name shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.abstract, artist_pink_floyd.abstract,
+                         'The information about the artist abstract shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.website, artist_pink_floyd.website,
+                         'The information about the artist website shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.city, artist_pink_floyd.city,
+                         'The information about the artist city shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.country_code, artist_pink_floyd.country_code,
+                         'The information about the country code of the artist shall not be lost.')
+        self.assertEqual(artist_pink_floyd_des.jamendo_id, artist_pink_floyd.jamendo_id,
+                         'The information about the jamendo id of the artist shall not be lost.')
+
+    def test_json_encoding_artist(self):
+        """ Tests if the model artist can be converted to JSON """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1)
+        artist_pink_floyd.save()
+        artist_pink_floyd_json = json.dumps(artist_pink_floyd, cls=JSONModelEncoder)
+        artist_pink_floyd_json_load = json.loads(artist_pink_floyd_json)
+        self.assertEqual(int(artist_pink_floyd_json_load['id']), artist_pink_floyd.id,
+                         'The information about the id of the artist shall not be lost.')
+        self.assertEqual(artist_pink_floyd_json_load['name'], artist_pink_floyd.name,
+                         'The information about the artist name shall not be lost.')
+        self.assertEqual(artist_pink_floyd_json_load['abstract'], artist_pink_floyd.abstract,
+                         'The information about the artist abstract shall not be lost.')
+        self.assertEqual(artist_pink_floyd_json_load['website'], artist_pink_floyd.website,
+                         'The information about the artist website shall not be lost.')
+        self.assertEqual(artist_pink_floyd_json_load['city'], artist_pink_floyd.city,
+                         'The information about the artist city shall not be lost.')
+        self.assertEqual(artist_pink_floyd_json_load['country_code'], artist_pink_floyd.country_code,
+                         'The information about the artist country code shall not be lost.')
+        self.assertEqual(int(artist_pink_floyd_json_load['jamendo_id']), artist_pink_floyd.jamendo_id,
+                         'The information about the jamendo id of the artist shall not be lost.')
 
     def test_serializable_album(self):
-        """ Tests if the the model album is serializable """
-        self.fail('Not implemented yet')
+        """ Tests if the model album is serializable """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1)
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
+                               release_date=datetime(year=1979, month=10, day=30),
+                               jamendo_id=1)
+        album_the_wall.save()
+        album_the_wall_serialized = album_the_wall.serialize()
+        album_the_wall_des = Album.from_serialized(album_the_wall_serialized)
+        self.assertEqual(album_the_wall_des.id, album_the_wall.id,
+                         'The information about the id of the album shall not be lost.')
+        self.assertEqual(album_the_wall_des.name, album_the_wall.name,
+                         'The information about the album name shall not be lost.')
+        self.assertEqual(album_the_wall_des.artist, album_the_wall.artist,
+                         'The information about the artist id of the album shall not be lost.')
+        self.assertEqual(album_the_wall_des.release_date, album_the_wall.release_date,
+                         'The information about the release date of the album shall not be lost')
+        self.assertEqual(album_the_wall_des.jamendo_id, album_the_wall.jamendo_id,
+                         'The information about the jamendo id of the album shall not be lost.')
+
+    def test_json_encode_album(self):
+        """ """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1)
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
+                               release_date=datetime(year=1979, month=10, day=30),
+                               jamendo_id=1200042)
+        album_the_wall.save()
+        album_the_wall_json = json.dumps(album_the_wall, cls=JSONModelEncoder)
+        album_the_wall_json_load = json.loads(album_the_wall_json)
+        self.assertEqual(int(album_the_wall_json_load['id']), album_the_wall.id,
+                         'The information about the id of the album shall not be lost.')
+        self.assertEqual(album_the_wall_json_load['name'], album_the_wall.name,
+                         'The information about the album name shall not be lost.')
+        self.assertEqual(int(album_the_wall_json_load['artist']['id']), album_the_wall.artist.id,
+                         'The information about the artist id of the album shall not be lost.')
+        self.assertEqual(datetime.strptime(album_the_wall_json_load['release_date'], '%Y-%m-%dT%H:%M:%S'),
+                         album_the_wall.release_date,
+                         'The information about the release date of the album shall not be lost')
+        self.assertEqual(int(album_the_wall_json_load['jamendo_id']), album_the_wall.jamendo_id,
+                         'The information about the jamendo id of the album shall not be lost.')
 
     def test_serializable_song(self):
-        """ Tests if the the model song is serializable """
-        self.fail('Not implemented yet')
+        """ Tests if the model song is serializable """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1200042)
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
+                               release_date=datetime(year=1979, month=10, day=30),
+                               jamendo_id=1)
+        album_the_wall.save()
+        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                  duration=221, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
+        tag_rock = Tag(name='progressive rock')
+        tag_rock.save()
+        tag_cult = Tag(name='cult')
+        tag_cult.save()
+        song_another_brick.save()
+        song_another_brick.tags.add(tag_rock, tag_cult)
+        song_another_brick.save()
+        song_another_brick_serialized = song_another_brick.serialize()
+        song_another_brick_des = Song.from_serialized(song_another_brick_serialized)
+        self.assertEqual(song_another_brick_des.id, song_another_brick.id,
+                         'The information about the id of the album shall not be lost.')
+        self.assertEqual(song_another_brick_des.name, song_another_brick.name,
+                         'The information about the name of the song shall not be lost.')
+        self.assertEqual(song_another_brick_des.duration, song_another_brick.duration,
+                         'The information about the duration of the song shall not be lost.')
+        self.assertEqual(song_another_brick_des.release_date, song_another_brick.release_date,
+                         'The information about the release date of the song shall not be lost.')
+        self.assertEqual(song_another_brick_des.album, song_another_brick.album,
+                         'The information about the album of the song shall not be lost.')
+        self.assertEqual(song_another_brick_des.artist, song_another_brick.artist,
+                         'The information about the artist of the song shall not be lost.')
+        self.assertListEqual(list(song_another_brick_des.tags.all()), list(song_another_brick.tags.all()),
+                             'The information about the tags of the song shall not be lost.')
+        self.assertEqual(song_another_brick_des.jamendo_id, song_another_brick.jamendo_id,
+                         'The information about the jamendo id of the album shall not be lost.')
+
+    def test_json_encode_song(self):
+        """ Tests if the model song can be converted to JSON """
+        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
+                                   city='London', country_code='UK', jamendo_id=1)
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
+                               release_date=datetime(year=1979, month=10, day=30),
+                               jamendo_id=1)
+        album_the_wall.save()
+        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                  duration=221, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
+        tag_rock = Tag(name='progressive rock')
+        tag_rock.save()
+        tag_cult = Tag(name='cult')
+        tag_cult.save()
+        song_another_brick.save()
+        song_another_brick.tags.add(tag_rock, tag_cult)
+        song_another_brick.save()
+        song_another_brick_json = json.dumps(song_another_brick, cls=JSONModelEncoder)
+        song_another_brick_json_load = json.loads(song_another_brick_json)
+        self.assertEqual(int(song_another_brick_json_load['id']), song_another_brick.id,
+                         'The information about the id of the album shall not be lost.')
+        self.assertEqual(song_another_brick_json_load['name'], song_another_brick.name,
+                         'The information about the name of the song shall not be lost.')
+        self.assertEqual(int(song_another_brick_json_load['duration']), song_another_brick.duration,
+                         'The information about the duration of the song shall not be lost.')
+        self.assertEqual(datetime.strptime(song_another_brick_json_load['release_date'], '%Y-%m-%dT%H:%M:%S'),
+                         song_another_brick.release_date,
+                         'The information about the release date of the song shall not be lost.')
+        self.assertEqual(int(song_another_brick_json_load['album']['id']), song_another_brick.album.id,
+                         'The information about the album of the song shall not be lost.')
+        self.assertEqual(int(song_another_brick_json_load['artist']['id']), song_another_brick.artist.id,
+                         'The information about the artist of the song shall not be lost.')
+        self.assertListEqual([Tag.from_serialized(tag) for tag in song_another_brick_json_load['tags']],
+                             list(song_another_brick.tags.all()),
+                             'The information about the tags of the song shall not be lost.')
+        self.assertEqual(int(song_another_brick_json_load['jamendo_id']), song_another_brick.jamendo_id,
+                         'The information about the jamendo id of the album shall not be lost.')
 
     def test_serializable_crawling_process(self):
-        """ Tests if the the model crawling process is serializable """
-        self.fail('Not implemented yet')
+        """ Tests if the model crawling process is serializable """
+        crawling_process = CrawlingProcess(service=CrawlingProcess.Service_Jamendo,
+                                           execution_date=datetime(year=1979, month=10, day=30),
+                                           status=CrawlingProcess.Status_Failed, exception='This is a exception.')
+        crawling_process_serialized = crawling_process.serialize()
+        crawling_process_des = crawling_process.from_serialized(crawling_process_serialized)
+        self.assertEqual(crawling_process_des.service, crawling_process.service,
+                         'The information about the service shall not be lost.')
+        self.assertEqual(crawling_process_des.status, crawling_process.status,
+                         'The information about the status shall not be lost.')
+        self.assertEqual(crawling_process_des.execution_date, crawling_process.execution_date,
+                         'The information about the execution date shall not be lost.')
+        self.assertEqual(crawling_process_des.exception, crawling_process.exception,
+                         'The information about the exception shall not be lost.')
+
+    def test_json_encoding_crawling_process(self):
+        """ Tests if the model crawling process can be converted to JSON """
+        crawling_process = CrawlingProcess(service=CrawlingProcess.Service_Jamendo,
+                                           execution_date=datetime(year=1979, month=10, day=30),
+                                           status=CrawlingProcess.Status_Failed, exception='This is a exception.')
+        crawling_process_json = json.dumps(crawling_process, cls=JSONModelEncoder)
+        crawling_process_load = json.loads(crawling_process_json)
+        self.assertEqual(crawling_process_load['service'], crawling_process.service,
+                         'The information about the service shall not be lost.')
+        self.assertEqual(crawling_process_load['status'], crawling_process.status,
+                         'The information about the status shall not be lost.')
+        self.assertEqual(datetime.strptime(crawling_process_load['execution_date'], '%Y-%m-%dT%H:%M:%S'),
+                         crawling_process.execution_date, 'The information about the execution date shall not be lost.')
+        self.assertEqual(crawling_process_load['exception'], crawling_process.exception,
+                         'The information about the exception shall not be lost.')
