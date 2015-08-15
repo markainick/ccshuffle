@@ -44,7 +44,7 @@ class ModelSerializable(object):
         :param obj: the serialized representation of the object, which shall be parsed.
         :return: the object of this class.
         """
-        raise NotImplementedError('The function from_serialized of %s' % self.__class__.__name__)
+        raise NotImplementedError('The function from_serialized of %s' % cls.__class__.__name__)
 
 
 class JSONModelEncoder(DjangoJSONEncoder):
@@ -171,6 +171,44 @@ class Album(models.Model, ModelSerializable):
 
     def __str__(self):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '')
+
+
+class Source(models.Model, ModelSerializable):
+    """ This class represents a source of a song. (f.e. stream or download link) """
+
+    TYPE_DOWNLOAD = 'D'
+    TYPE_STREAM = 'S'
+
+    CODEC_MP3 = 'MP3'
+    CODEC_OGG = 'OGG'
+
+    SOURCE_TYPE = (
+        (TYPE_DOWNLOAD, 'Download'),
+        (TYPE_STREAM, 'Stream'),
+    )
+
+    CODEC_TYPE = (
+        (CODEC_MP3, 'MP3'),
+        (CODEC_OGG, 'OGG'),
+    )
+
+    type = models.CharField(choices=SOURCE_TYPE, max_length=2, blank=False)
+    link = models.URLField(blank=False)
+    codec = models.CharField(choices=CODEC_TYPE, max_length=4, blank=False)
+
+
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.type == other.type and self.link == other.link and self.codec == other.codec
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.type) ^ hash(self.link) ^ hash(self.codec)
+
+    def __str__(self):
+        return 'Type: %s Link: %s (Codec: %s)' % (self.type, self.link, self.codec)
 
 
 class Tag(models.Model, ModelSerializable):
