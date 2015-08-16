@@ -16,7 +16,7 @@ from django.utils.unittest import skip
 from datetime import datetime
 from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
 from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
-from .models import JSONModelEncoder, Artist, Song, Album, Tag, CrawlingProcess
+from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, CrawlingProcess
 from .views import ResponseObject
 
 import json
@@ -182,9 +182,18 @@ class ModelTest(TestCase):
         self.assertEqual(hash(tag_indie_rock_1), hash(tag_indie_rock_2),
                          'The has value of tags with the same name must be equal.')
 
+    def test_eq_hash_source(self):
+        """ Tests, if the source objects with the same information (type, link, codec) are equal, otherwise not. """
+        source_1 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3)
+        source_2 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3)
+        self.assertEqual(source_1, source_2, 'Sources with the same type, link and codec must be equal.')
+        source_3 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.ogg', codec=Source.CODEC_OGG)
+        self.assertNotEqual(source_1, source_3, 'Sources with different typ, link or codec must not be equal.')
+
     def test_eq_hash_artists(self):
         """
-        Tests if artists with the same name (and service ids) are equal and artists with different names or different
+        Tests if artists
+        with the same name ( and service ids) are equal and artists with different names or different
         ids.
         """
         artist_beatles_1 = Artist(name='The Beatles')
@@ -203,7 +212,9 @@ class ModelTest(TestCase):
         self.assertEqual(hash(artist_beatles_1), hash(artist_beatles_2), 'The hash of two equal artists must be equal.')
 
     def test_eq_hash_albums(self):
-        """ Tests if albums with the same name and same artist (as well as service id) are equal. """
+        """
+        Tests if albums
+        with the same name and same artist (as well as service id) are equal."""
         artist_beatles = Artist(name='The Beatles')
         artist_beatles.save()
         artist_pink_floyd = Artist(name='Pink Floyd')
@@ -226,7 +237,7 @@ class ModelTest(TestCase):
                          'The hash of two equal albums must be equal.')
 
     def test_eq_hash_songs(self):
-        """Tests if songs with the same name, album and artist must be equal (must have also the same hash value). """
+        """Tests if songs with the same name, album and artist must be equal (must have also the same hash value)."""
         # Artists
         artist_beatles = Artist(name='The Beatles')
         artist_beatles.save()
@@ -235,8 +246,10 @@ class ModelTest(TestCase):
         artist_gorillaz = Artist(name='Gorillaz')
         artist_gorillaz.save()
         # Album
-        album_abbey_road = Album(name='Abbey Road', artist=artist_beatles).save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3).save()
+        album_abbey_road = Album(name='Abbey Road', artist=artist_beatles)
+        album_abbey_road.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall.save()
         # Test the equal method.
         song_another_brick_1 = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
                                     jamendo_id=1)
@@ -271,6 +284,47 @@ class ModelTest(TestCase):
         tag_json_load = json.loads(tag_json)
         self.assertEqual(int(tag_json_load['id']), tag.id, 'The information about the id of the tag shall not be lost.')
         self.assertEqual(tag_json_load['name'], tag.name, 'The information about the tag name shall not be lost.')
+
+    def test_serializable_source(self):
+        """ Tests if the model source is serializable """
+        artist_pink_floyd = Artist(name='Pink Floyd')
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall.save()
+        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
+        song_another_brick.save()
+        source = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3,
+                        song=song_another_brick)
+        source.save()
+        source_serialized = source.serialize()
+        source_des = Source.from_serialized(source_serialized)
+        self.assertEqual(source_des.id, source.id, 'The id of the source shall not be lost.')
+        self.assertEqual(source_des.type, source.type, 'The type of the source shall not be lost.')
+        self.assertEqual(source_des.song, source.song, 'The song of the source shall not be lost.')
+        self.assertEqual(source_des.link, source.link, 'The link of the source shall not be lost.')
+        self.assertEqual(source_des.codec, source.codec, 'The codec of the source shall not be lost.')
+
+    def test_json_encoding_source(self):
+        """ Tests if the model source can be converted to json. """
+        artist_pink_floyd = Artist(name='Pink Floyd')
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall.save()
+        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
+        song_another_brick.save()
+        source = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_MP3,
+                        link='http://source-link.org/audio.mp3')
+        source.save()
+        source_json = json.dumps(source, cls=JSONModelEncoder)
+        source_loaded = json.loads(source_json)
+        self.assertEqual(int(source_loaded['id']), source.id, 'The id of the source shall not be lost.')
+        self.assertEqual(source_loaded['type'], source.type, 'The type of the source shall not be lost.')
+        self.assertEqual(int(source_loaded['song_id']), source.song.id,
+                         'The song (id) of the source shall not be lost.')
+        self.assertEqual(source_loaded['link'], source.link, 'The link of the source shall not be lost.')
+        self.assertEqual(source_loaded['codec'], source.codec, 'The codec of the source shall not be lost.')
 
     def test_serializable_artist(self):
         """ Tests if the model artist is serializable """
@@ -468,3 +522,46 @@ class ModelTest(TestCase):
                          crawling_process.execution_date, 'The information about the execution date shall not be lost.')
         self.assertEqual(crawling_process_load['exception'], crawling_process.exception,
                          'The information about the exception shall not be lost.')
+
+    def test_sources_of_song(self):
+        """ Tests if the sources function of the model song works. """
+        artist_pink_floyd = Artist(name='Pink Floyd')
+        artist_pink_floyd.save()
+        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall.save()
+        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
+                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
+        song_another_brick.save()
+        source_download_mp3 = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_MP3,
+                                     link='http://source-link.org/audio.mp3')
+        source_download_ogg = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_OGG,
+                                     link='http://source-link.org/audio.ogg')
+        source_download_mp3.save()
+        source_download_ogg.save()
+        source_stream_mp3 = Source(type=Source.TYPE_STREAM, song=song_another_brick, codec=Source.CODEC_MP3,
+                                   link='http://stream-link.org/audio.mp3')
+        source_stream_ogg = Source(type=Source.TYPE_STREAM, song=song_another_brick, codec=Source.CODEC_OGG,
+                                   link='http://stream-link.org/audio.ogg')
+        source_stream_mp3.save()
+        source_stream_ogg.save()
+        # Tests the source method (codec).
+        self.assertIn(source_download_mp3, song_another_brick.sources(codec=Source.CODEC_MP3),
+                      'The MP3 download source must be returned.')
+        self.assertIn(source_stream_mp3, song_another_brick.sources(codec=Source.CODEC_MP3),
+                      'The MP3 stream source must be returned.')
+        self.assertIn(source_download_ogg, song_another_brick.sources(codec=Source.CODEC_OGG),
+                      'The OGG download source must be returned.')
+        self.assertIn(source_stream_ogg, song_another_brick.sources(codec=Source.CODEC_OGG),
+                      'The OGG stream source must be returned.')
+        # Tests the source method (codec & type)
+        self.assertEqual(len(song_another_brick.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_OGG)), 1,
+                         'Only the ogg stream source must be returned.')
+        self.assertEqual(source_stream_ogg, song_another_brick.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_OGG)[0],
+                         'The OGG stream must be returned as only one.')
+        # All sources.
+        sources_saved = [source_download_mp3, source_download_ogg, source_stream_mp3, source_stream_ogg]
+        sources_from_db = song_another_brick.sources()
+        for source in sources_from_db:
+            self.assertIn(source, sources_saved)
+            sources_saved.remove(source)
+        self.assertEqual(len(sources_saved), 0, 'All sources of the song \'Another brick in the wall \'')

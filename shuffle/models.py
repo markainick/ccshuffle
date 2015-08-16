@@ -77,6 +77,11 @@ class Artist(models.Model, ModelSerializable):
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
     def is_on_jamendo(self):
+        """
+        Checks if the artist has a jamendo id (profile).
+
+        :return: True, if the artist has a jamendo id, otherwise False.
+        """
         return self.jamendo_id is not None
 
     def serialize(self):
@@ -94,12 +99,12 @@ class Artist(models.Model, ModelSerializable):
     def from_serialized(cls, obj):
         if isinstance(obj, cls):
             return obj
-        elif isinstance(obj, cls):
-            return obj
         elif isinstance(obj, (dict, set)):
             try:
-                return cls(id=int(obj['id']), name=obj['name'], abstract=obj['abstract'], website=obj['website'],
-                           city=obj['city'], country_code=obj['country_code'], jamendo_id=int(obj['jamendo_id']))
+                aid = (int(obj['id']) if obj['id'] else None)
+                jamendo_id = (int(obj['jamendo_id']) if obj['jamendo_id'] else None)
+                return cls(id=aid, name=obj['name'], abstract=obj['abstract'], website=obj['website'],
+                           city=obj['city'], country_code=obj['country_code'], jamendo_id=jamendo_id)
             except KeyError as e:
                 raise DeserializableException('The given serialized representation is corrupted.') from e
         else:
@@ -124,11 +129,17 @@ class Album(models.Model, ModelSerializable):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
+    cover = models.URLField(blank=False, null=True)
     release_date = models.DateField(blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
     def is_on_jamendo(self):
+        """
+        Checks if the album has a jamendo id (profile).
+
+        :return: True, if the album has a jamendo id, otherwise False.
+        """
         return self.jamendo_id is not None
 
     def serialize(self):
@@ -136,6 +147,7 @@ class Album(models.Model, ModelSerializable):
             'id': self.id,
             'name': self.name,
             'artist': self.artist,
+            'cover': self.cover,
             'release_date': self.release_date,
             'jamendo_id': self.jamendo_id,
         }
@@ -146,13 +158,16 @@ class Album(models.Model, ModelSerializable):
             return obj
         elif isinstance(obj, (dict, set)):
             try:
+                aid = (int(obj['id']) if obj['id'] else None)
+                artist = (Artist.from_serialized(obj['artist']) if obj['artist'] else None)
                 release_date = obj['release_date']
                 if isinstance(release_date, str):
                     release_date = datetime.strptime(obj['release_date'], '%Y-%m-%dT%H:%M:%S')
                 elif not isinstance(release_date, datetime):
                     raise DeserializableException('The given release date can\'t be parsed.')
-                return cls(id=int(obj['id']), name=obj['name'], artist=Artist.from_serialized(obj['artist']),
-                           release_date=release_date, jamendo_id=int(obj['jamendo_id']))
+                jamendo_id = (int(obj['jamendo_id']) if obj['jamendo_id'] else None)
+                return cls(id=aid, name=obj['name'], artist=artist, cover=obj['cover'], release_date=release_date,
+                           jamendo_id=jamendo_id)
             except KeyError as e:
                 raise DeserializableException('The given serialized representation is corrupted.') from e
         else:
@@ -171,44 +186,6 @@ class Album(models.Model, ModelSerializable):
 
     def __str__(self):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '')
-
-
-class Source(models.Model, ModelSerializable):
-    """ This class represents a source of a song. (f.e. stream or download link) """
-
-    TYPE_DOWNLOAD = 'D'
-    TYPE_STREAM = 'S'
-
-    CODEC_MP3 = 'MP3'
-    CODEC_OGG = 'OGG'
-
-    SOURCE_TYPE = (
-        (TYPE_DOWNLOAD, 'Download'),
-        (TYPE_STREAM, 'Stream'),
-    )
-
-    CODEC_TYPE = (
-        (CODEC_MP3, 'MP3'),
-        (CODEC_OGG, 'OGG'),
-    )
-
-    type = models.CharField(choices=SOURCE_TYPE, max_length=2, blank=False)
-    link = models.URLField(blank=False)
-    codec = models.CharField(choices=CODEC_TYPE, max_length=4, blank=False)
-
-
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.type == other.type and self.link == other.link and self.codec == other.codec
-        else:
-            return False
-
-    def __hash__(self):
-        return hash(self.type) ^ hash(self.link) ^ hash(self.codec)
-
-    def __str__(self):
-        return 'Type: %s Link: %s (Codec: %s)' % (self.type, self.link, self.codec)
 
 
 class Tag(models.Model, ModelSerializable):
@@ -230,7 +207,8 @@ class Tag(models.Model, ModelSerializable):
             return obj
         elif isinstance(obj, (dict, set)):
             try:
-                return cls(id=int(obj['id']), name=obj['name'])
+                tid = (int(obj['id']) if obj['id'] else None)
+                return cls(id=tid, name=obj['name'])
             except KeyError as e:
                 raise DeserializableException('The given serialized representation is corrupted.') from e
         else:
@@ -254,15 +232,32 @@ class Song(models.Model, ModelSerializable):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
     name = models.CharField(max_length=250, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
-    album = models.ForeignKey(Album, blank=True, null=True, related_name='songs')
+    album = models.ForeignKey(Album, blank=True, null=True, related_name='song')
+    cover = models.URLField(blank=False, null=True)
     duration = models.IntegerField(blank=True, default=None)
     tags = models.ManyToManyField(Tag)
     release_date = models.DateField(blank=True, default=None)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
+    def sources(self, **source_fields):
+        """
+        Returns the sources of the song.
+
+        :param source_fields: the optional fields for filtering the results.
+        :return: the list of sources.
+        """
+        if self.id is None:
+            raise ValueError('The song must be saved to call this method.')
+        return list(Source.objects.filter(song=self, **source_fields))
+
     def is_on_jamendo(self):
-        return self.album is not None
+        """
+        Checks if the song has a jamendo id (profile).
+
+        :return: True, if the song has a jamendo id, otherwise False.
+        """
+        return self.jamendo_id is not None
 
     def serialize(self):
         return {
@@ -270,6 +265,7 @@ class Song(models.Model, ModelSerializable):
             'name': self.name,
             'artist': self.artist,
             'album': self.album,
+            'cover': self.cover,
             'duration': self.duration,
             'tags': list(self.tags.all()),
             'release_date': self.release_date,
@@ -287,9 +283,12 @@ class Song(models.Model, ModelSerializable):
                     release_date = datetime.strptime(obj['release_date'], '%Y-%m-%dT%H:%M:%S')
                 elif not isinstance(release_date, datetime):
                     raise DeserializableException('The given release date can\'t be parsed.')
-                song = cls(id=int(obj['id']), name=obj['name'], artist=Artist.from_serialized(obj['artist']),
-                           album=Album.from_serialized(obj['album']), duration=int(obj['duration']),
-                           release_date=release_date, jamendo_id=int(obj['jamendo_id']))
+                sid = (int(obj['id']) if obj['id'] else None)
+                artist = (Artist.from_serialized(obj['artist']) if obj['artist'] else None)
+                album = (Album.from_serialized(obj['album']) if obj['album'] else None)
+                jamendo_id = (int(obj['jamendo_id']) if obj['jamendo_id'] else None)
+                song = cls(id=sid, name=obj['name'], artist=artist, album=album, cover=obj['cover'],
+                           duration=int(obj['duration']), release_date=release_date, jamendo_id=jamendo_id)
                 if obj['tags']:
                     song.tags.add(*[Tag.from_serialized(entry) for entry in obj['tags']])
                 return song
@@ -312,6 +311,70 @@ class Song(models.Model, ModelSerializable):
     def __str__(self):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '') + (
             ' (Album: %s) ' % self.album if self.album else '')
+
+
+class Source(models.Model, ModelSerializable):
+    """ This class represents a source of a song. (f.e. stream or download link) """
+
+    TYPE_DOWNLOAD = 'D'
+    TYPE_STREAM = 'S'
+
+    CODEC_MP3 = 'MP3'
+    CODEC_OGG = 'OGG'
+
+    SOURCE_TYPE = (
+        (TYPE_DOWNLOAD, 'Download'),
+        (TYPE_STREAM, 'Stream'),
+    )
+
+    CODEC_TYPE = (
+        (CODEC_MP3, 'MP3'),
+        (CODEC_OGG, 'OGG'),
+    )
+
+    type = models.CharField(choices=SOURCE_TYPE, max_length=2, blank=False)
+    link = models.URLField(blank=False)
+    song = models.ForeignKey(Song, blank=False)
+    codec = models.CharField(choices=CODEC_TYPE, max_length=4, blank=False)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'type': self.type,
+            'link': self.link,
+            'song_id': self.song.id,
+            'codec': self.codec,
+        }
+
+    @classmethod
+    def from_serialized(cls, obj):
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                sid = (int(obj['id']) if obj['id'] else None)
+                song = None
+                if obj['song_id']:
+                    song_query_set = Song.objects.filter(id=int(obj['song_id']))
+                    song = (song_query_set.first() if song_query_set.exists() else None)
+                return cls(id=sid, type=obj['type'], link=obj['link'], song=song, codec=obj['codec'])
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.type == other.type and self.link == other.link and self.codec == other.codec
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.type) ^ hash(self.link) ^ hash(self.codec)
+
+    def __str__(self):
+        return 'Type: %s Link: %s (Codec: %s)' % (self.type, self.link, self.codec)
 
 
 class CrawlingProcess(models.Model, ModelSerializable):
