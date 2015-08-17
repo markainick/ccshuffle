@@ -16,7 +16,7 @@ from django.utils.unittest import skip
 from datetime import datetime
 from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
 from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
-from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, CrawlingProcess
+from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, License, CrawlingProcess
 from .views import ResponseObject
 
 import json
@@ -222,6 +222,17 @@ class ModelTest(TestCase):
         }
         for key in cls.TAGS_DB:
             cls.TAGS_DB[key].save()
+        # Test data for the model license.
+        cls.LICENSE_DB = {
+            'CC-BY': License(type=License.CC_BY),
+            'CC-BY-SA': License(type=License.CC_BY_SA),
+            'CC-BY-ND': License(type=License.CC_BY_ND),
+            'CC-BY-NC': License(type=License.CC_BY_NC),
+            'CC-BY-NC_ND': License(type=License.CC_BY_NC_ND),
+            'CC-BY-NC-SA': License(type=License.CC_BY_NC_SA),
+        }
+        for key in cls.LICENSE_DB:
+            cls.LICENSE_DB[key].save()
         # Test data for the model song.
         cls.SONG_DB = {
             'Clint Eastwood': Song(name='Clint Eastwood (Single)', artist=cls.ARTIST_DB['Gorillaz'], duration=274,
@@ -251,6 +262,17 @@ class ModelTest(TestCase):
         }
         for key in cls.SOURCE_DB:
             cls.SOURCE_DB[key].save()
+
+    def test_eq_hash_license(self):
+        """ Tests if only licenses with the same type are equal (must also have the same hash value). """
+        license_cc_by_1 = self.LICENSE_DB['CC-BY']
+        license_cc_by_2 = copy.deepcopy(license_cc_by_1)
+        self.assertEqual(license_cc_by_1, license_cc_by_2, 'Licenses with the same type must be equal.')
+        license_cc_by_sa_1 = self.LICENSE_DB['CC-BY-SA']
+        self.assertNotEqual(license_cc_by_1, license_cc_by_sa_1, 'Licenses with different types must not be equal.')
+        # Tests the hashing.
+        self.assertEqual(hash(license_cc_by_1), hash(license_cc_by_2),
+                         'The hash value of equal licenses must be the same.')
 
     def test_eq_hash_tag(self):
         """
@@ -334,6 +356,24 @@ class ModelTest(TestCase):
         # Tests the hashing.
         self.assertEqual(hash(song_another_brick_1), hash(song_another_brick_2),
                          'The hash of two equal songs must be equal.')
+
+    def test_serializable_license(self):
+        """ Tests if the model license is serializable. """
+        license_cc_by = self.LICENSE_DB['CC-BY']
+        license_cc_by_serialized = license_cc_by.serialize()
+        license_cc_by_des = License.from_serialized(license_cc_by_serialized)
+        self.assertEqual(license_cc_by_des.id, license_cc_by.id, 'The information about the id shall not be lost')
+        self.assertEqual(license_cc_by_des.type, license_cc_by.type, 'The information about the type shall not be lost')
+
+    def test_json_encoding_license(self):
+        """ Tests if the model license """
+        license_cc_sa = self.LICENSE_DB['CC-BY-SA']
+        license_cc_sa_json = json.dumps(license_cc_sa, cls=JSONModelEncoder)
+        license_cc_sa_load = json.loads(license_cc_sa_json)
+        self.assertEqual(int(license_cc_sa_load['id']), license_cc_sa.id,
+                         'The information about the id shall not be lost.')
+        self.assertEqual(license_cc_sa_load['type'], license_cc_sa.type,
+                         'The information about the type shall not be lost')
 
     def test_serializable_tag(self):
         """ Tests if the model tag is serializable """

@@ -265,7 +265,7 @@ class License(models.Model, ModelSerializable):
         :return: the human readable name of the license.
         """
         if self.type in (entry[0] for entry in self.LICENSE_TYPE):
-            return (entry[1] for entry in self.LICENSE_TYPE if entry[0] == self.type)
+            return (entry[1] for entry in self.LICENSE_TYPE if entry[0] == self.type).__next__()
         else:
             raise ValueError('The license type is unknown.')
 
@@ -283,13 +283,31 @@ class License(models.Model, ModelSerializable):
 
     def serialize(self):
         return {
+            'id': self.id,
             'type': self.type,
             'name': self.name,
             'link': self.web_link,
         }
 
+    @classmethod
     def from_serialized(cls, obj):
-        pass
+        if isinstance(obj, cls):
+            return obj
+        elif isinstance(obj, (dict, set)):
+            try:
+                lid = (int(obj['id']) if obj['id'] else None)
+                return cls(id=lid, type=obj['type'])
+            except KeyError as e:
+                raise DeserializableException('The given serialized representation is corrupted.') from e
+        else:
+            raise DeserializableException(
+                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
+
+    def __eq__(self, other):
+        return self.type == other.type
+
+    def __hash__(self):
+        return hash(type)
 
     def __str__(self):
         return '%s (Link: %s)' % (self.name, self.web_link)
