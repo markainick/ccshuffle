@@ -72,9 +72,30 @@ class JamendoEngineTest(TestCase):
         song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
         self.assertEqual(song_waterpistol_war.id, db_id, 'The id must stay the same.')
 
+    def test_song_source(self):
+        """
+        Tests if the sources receveived from jamendo for the song are persisted correctly and can be accessed by the
+        source method.
+
+        The test song is 'Possibilities' from Jasmine Jordan.
+            Audio stream link: https://storage.jamendo.com/?trackid=1230403&format=mp31
+            Download link: https://storage.jamendo.com/download/track/1230403/mp32/
+        """
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)), 1,
+                         'There must be one streaming link persisted for this song (Codec: MP3).')
+        self.assertIn('https://storage.jamendo.com/?trackid=1230403&format=mp31',
+                      song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)[0].link,
+                      'The link for streaming the audio (codec: MP3) must be persisted.')
+        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)), 1,
+                         'There must be one download link persisted for this song (Codec: MP3).')
+        self.assertIn('https://storage.jamendo.com/download/track/1230403/mp32/',
+                      song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)[0].link,
+                      'The link for downloading the audio track (codec: MP3) must be persisted.')
+
     def test_song_tags(self):
         """
-        Tests if the transmitted tags of the songs are persisted and connected correctly to the song.
+        Tests if the received tags of the songs are persisted correctly and connected to the song.
         The sample data contains the song with the jamendo id
 
         The song 'Possibilities' of Jasmine Jordan is used for testing.
