@@ -20,6 +20,7 @@ from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, Crawling
 from .views import ResponseObject
 
 import json
+import copy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -168,15 +169,77 @@ class JamendoEngineTest(TestCase):
 class ModelTest(TestCase):
     """ Test the model classes. """
 
+    @classmethod
+    def setUpTestData(cls):
+        # Test data for the artist model.
+        cls.ARTIST_DB = {
+            'The Beatles': Artist(name='The Beatles', website='https://the-beatles.org', jamendo_id=1),
+            'Pink Floyd': Artist(name='Pink Floyd', website='https://pink-floyd.org', jamendo_id=2),
+            'Gorillaz': Artist(name='Gorillaz', website='https://gorillaz.org', jamendo_id=3),
+        }
+        for key in cls.ARTIST_DB:
+            cls.ARTIST_DB[key].save()
+        # Test data for the album model.
+        cls.ALBUM_DB = {
+            'Abbey Road': Album(name='Abbey Road', artist=cls.ARTIST_DB['The Beatles'],
+                                release_date=datetime(year=1969, month=9, day=26), jamendo_id=1),
+            'The Wall': Album(name='The Wall', artist=cls.ARTIST_DB['Pink Floyd'],
+                              release_date=datetime(year=1979, month=10, day=30), jamendo_id=2),
+            'Gorillaz': Album(name='Demon Days', artist=cls.ARTIST_DB['Gorillaz'], jamendo_id=3),
+        }
+        for key in cls.ALBUM_DB:
+            cls.ALBUM_DB[key].save()
+        # Test data for the model tag.
+        cls.TAGS_DB = {
+            'indie': Tag(name='indie'),
+            'pop': Tag(name='pop'),
+            'rock': Tag(name='rock'),
+            'progressive rock': Tag(name='progressive rock'),
+            'cult': Tag(name='cult'),
+            'trip hop': Tag(name='trip hop'),
+            'alternativ hop': Tag(name='alternative hop'),
+        }
+        for key in cls.TAGS_DB:
+            cls.TAGS_DB[key].save()
+        # Test data for the model song.
+        cls.SONG_DB = {
+            'Clint Eastwood': Song(name='Clint Eastwood (Single)', artist=cls.ARTIST_DB['Gorillaz'], duration=274,
+                                   jamendo_id=1),
+            'Another brick in the wall': Song(name='Another brick in the wall', artist=cls.ARTIST_DB['Pink Floyd'],
+                                              album=cls.ALBUM_DB['The Wall'], duration=191,
+                                              release_date=datetime(year=1979, month=10, day=30), jamendo_id=2),
+        }
+        for key in cls.SONG_DB:
+            cls.SONG_DB[key].save()
+        cls.SONG_DB['Another brick in the wall'].tags.add(cls.TAGS_DB['progressive rock'], cls.TAGS_DB['cult'])
+        cls.SONG_DB['Clint Eastwood'].tags.add(cls.TAGS_DB['trip hop'], cls.TAGS_DB['alternativ hop'])
+        # Test data for the model source.
+        cls.SOURCE_DB = {
+            'CE: MP3 Download': Source(type=Source.TYPE_DOWNLOAD, song=cls.SONG_DB['Clint Eastwood'],
+                                       link='http://clint-eastwood.org/audio.mp3', codec=Source.CODEC_MP3),
+            'CE OGG Stream': Source(type=Source.TYPE_STREAM, song=cls.SONG_DB['Clint Eastwood'],
+                                    link='http://clint-eastwood.stream/audio.ogg', codec=Source.CODEC_OGG),
+            'ABITW MP3 Download': Source(type=Source.TYPE_STREAM, song=cls.SONG_DB['Another brick in the wall'],
+                                         codec=Source.CODEC_MP3, link='http://stream-link.org/audio.mp3'),
+            'ABITW OGG Download': Source(type=Source.TYPE_DOWNLOAD, song=cls.SONG_DB['Another brick in the wall'],
+                                         codec=Source.CODEC_OGG, link='http://stream-link.org/audio.ogg'),
+            'ABITW MP3 Stream': Source(type=Source.TYPE_STREAM, song=cls.SONG_DB['Another brick in the wall'],
+                                       codec=Source.CODEC_MP3, link='http://stream-link.stream/audio.mp3'),
+            'ABITW OGG Stream': Source(type=Source.TYPE_STREAM, song=cls.SONG_DB['Another brick in the wall'],
+                                       codec=Source.CODEC_OGG, link='http://stream-link.stream/audio.ogg'),
+        }
+        for key in cls.SOURCE_DB:
+            cls.SOURCE_DB[key].save()
+
     def test_eq_hash_tag(self):
         """
         Tests if tags with the same name are equal (must have also the same hash value) and tags with different
         names not.
         """
-        tag_indie_rock_1 = Tag(name='indie rock')
-        tag_indie_rock_2 = Tag(name='indie rock')
+        tag_indie_rock_1 = self.TAGS_DB['indie']
+        tag_indie_rock_2 = copy.deepcopy(self.TAGS_DB['indie'])
         self.assertEqual(tag_indie_rock_1, tag_indie_rock_2, 'Tags with the same name must be equal.')
-        tag_pop = Tag(name='pop')
+        tag_pop = self.TAGS_DB['pop']
         self.assertNotEqual(tag_indie_rock_1, tag_pop, 'Tags with different names must not be equal.')
         # Tests the hashing.
         self.assertEqual(hash(tag_indie_rock_1), hash(tag_indie_rock_2),
@@ -184,83 +247,67 @@ class ModelTest(TestCase):
 
     def test_eq_hash_source(self):
         """ Tests, if the source objects with the same information (type, link, codec) are equal, otherwise not. """
-        source_1 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3)
-        source_2 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3)
+        source_1 = self.SOURCE_DB['ABITW MP3 Stream']
+        source_2 = copy.deepcopy(self.SOURCE_DB['ABITW MP3 Stream'])
         self.assertEqual(source_1, source_2, 'Sources with the same type, link and codec must be equal.')
-        source_3 = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.ogg', codec=Source.CODEC_OGG)
-        self.assertNotEqual(source_1, source_3, 'Sources with different typ, link or codec must not be equal.')
+        source_2.link = 'http://source-link.org/audio.ogg'
+        source_2.codec = Source.CODEC_OGG
+        self.assertNotEqual(source_1, source_2, 'Sources with different typ, link or codec must not be equal.')
 
     def test_eq_hash_artists(self):
         """
-        Tests if artists
-        with the same name ( and service ids) are equal and artists with different names or different
+        Tests if artists with the same name ( and service ids) are equal and artists with different names or different
         ids.
         """
-        artist_beatles_1 = Artist(name='The Beatles')
-        artist_beatles_2 = Artist(name='The Beatles')
+        artist_beatles_1 = self.ARTIST_DB['The Beatles']
+        artist_beatles_2 = copy.deepcopy(self.ARTIST_DB['The Beatles'])
         self.assertEqual(artist_beatles_1, artist_beatles_2, 'Artists with the same name must be equal.')
-        artist_pink_floyd_1 = Artist(name='Pink Floyd', jamendo_id=1)
+        artist_pink_floyd_1 = self.ARTIST_DB['Pink Floyd']
         self.assertNotEqual(artist_pink_floyd_1, artist_beatles_1,
                             'Artists with the different names must not be equal.')
-        artist_pink_floyd_2 = Artist(name='Pink Floyd', jamendo_id=1)
+        artist_pink_floyd_2 = copy.deepcopy(self.ARTIST_DB['Pink Floyd'])
         self.assertEqual(artist_pink_floyd_1, artist_pink_floyd_2,
                          'Artists with the same name and service id must be equal.')
-        artist_pink_floyd_2 = Artist(name='Pink Floyd', jamendo_id=2)
+        artist_pink_floyd_2.jamendo_id = 10
         self.assertNotEqual(artist_pink_floyd_1, artist_pink_floyd_2,
                             'If the jamendo id differs, the artists must not be equal (also if they have the same)')
         # Tests the hashing.
         self.assertEqual(hash(artist_beatles_1), hash(artist_beatles_2), 'The hash of two equal artists must be equal.')
 
     def test_eq_hash_albums(self):
-        """
-        Tests if albums
-        with the same name and same artist (as well as service id) are equal."""
-        artist_beatles = Artist(name='The Beatles')
-        artist_beatles.save()
-        artist_pink_floyd = Artist(name='Pink Floyd')
-        artist_pink_floyd.save()
-        album_abbey_road_1 = Album(name='Abbey Road', artist=artist_beatles)
-        album_abbey_road_2 = Album(name='Abbey Road', artist=artist_beatles, jamendo_id=1)
+        """ Tests if albums with the same name and same artist (as well as service id) are equal."""
+        album_abbey_road_1 = self.ALBUM_DB['Abbey Road']
+        album_abbey_road_2 = copy.deepcopy(self.ALBUM_DB['Abbey Road'])
+        album_abbey_road_2.jamendo_id = None
         self.assertEqual(album_abbey_road_1, album_abbey_road_2, 'Albums with the same name and artist must be equal.')
-        album_abbey_road_3 = Album(name='Abbey Road', artist=artist_pink_floyd)
-        self.assertNotEqual(album_abbey_road_1, album_abbey_road_3,
+        album_abbey_road_2.artist = self.ARTIST_DB['Pink Floyd']
+        self.assertNotEqual(album_abbey_road_1, album_abbey_road_2,
                             'If the artist differs, the albums must not be equal.')
-        album_the_wall_1 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
-        album_the_wall_2 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
+        album_the_wall_1 = self.ALBUM_DB['The Wall']
+        album_the_wall_2 = copy.deepcopy(self.ALBUM_DB['The Wall'])
         self.assertEqual(album_the_wall_1, album_the_wall_2,
                          'If the name and service ids of the albums are the same, they must be equal.')
-        album_the_wall_3 = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=4)
-        self.assertNotEqual(album_the_wall_1, album_the_wall_3,
+        album_the_wall_2.jamendo_id = 4
+        self.assertNotEqual(album_the_wall_1, album_the_wall_2,
                             'If one of the service id differs, the albums must not be equal.')
         # Tests the hashing.
-        self.assertEqual(hash(album_abbey_road_1), hash(album_abbey_road_2),
+        self.assertEqual(hash(album_abbey_road_1), hash(copy.deepcopy(self.ALBUM_DB['Abbey Road'])),
                          'The hash of two equal albums must be equal.')
 
     def test_eq_hash_songs(self):
         """Tests if songs with the same name, album and artist must be equal (must have also the same hash value)."""
-        # Artists
-        artist_beatles = Artist(name='The Beatles')
-        artist_beatles.save()
-        artist_pink_floyd = Artist(name='Pink Floyd')
-        artist_pink_floyd.save()
-        artist_gorillaz = Artist(name='Gorillaz')
-        artist_gorillaz.save()
-        # Album
-        album_abbey_road = Album(name='Abbey Road', artist=artist_beatles)
-        album_abbey_road.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
-        album_the_wall.save()
         # Test the equal method.
-        song_another_brick_1 = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                    jamendo_id=1)
-        song_another_brick_2 = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall)
+        song_another_brick_1 = self.SONG_DB['Another brick in the wall']
+        song_another_brick_2 = copy.deepcopy(self.SONG_DB['Another brick in the wall'])
         self.assertEqual(song_another_brick_1, song_another_brick_2,
                          'The song with same name, artist and album must be equal.')
-        song_clint_eastwood = Song(name='Clint Eastwood (Single)', artist=artist_gorillaz, jamendo_id=2)
-        self.assertEqual(song_clint_eastwood, song_clint_eastwood,
+        song_clint_eastwood_1 = self.SONG_DB['Clint Eastwood']
+        song_clint_eastwood_2 = copy.deepcopy(self.SONG_DB['Clint Eastwood'])
+        self.assertEqual(song_clint_eastwood_1, song_clint_eastwood_2,
                          'Singles with the same name and artist must be the same.')
-        self.assertNotEqual(song_another_brick_1, song_clint_eastwood, 'Different songs must not be equal.')
-        song_another_brick_3 = Song(name='Another brick in the wall', artist=artist_beatles, album=album_the_wall)
+        self.assertNotEqual(song_another_brick_1, song_clint_eastwood_2, 'Different songs must not be equal.')
+        song_another_brick_3 = copy.deepcopy(song_another_brick_2)
+        song_another_brick_3.artist = self.ARTIST_DB['The Beatles']
         self.assertNotEqual(song_another_brick_1, song_another_brick_3,
                             'If the artist of the songs differs, they must not be equal.')
         # Tests the hashing.
@@ -287,16 +334,7 @@ class ModelTest(TestCase):
 
     def test_serializable_source(self):
         """ Tests if the model source is serializable """
-        artist_pink_floyd = Artist(name='Pink Floyd')
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
-        album_the_wall.save()
-        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
-        song_another_brick.save()
-        source = Source(type=Source.TYPE_DOWNLOAD, link='http://source-link.org/audio.mp3', codec=Source.CODEC_MP3,
-                        song=song_another_brick)
-        source.save()
+        source = self.SOURCE_DB['ABITW OGG Download']
         source_serialized = source.serialize()
         source_des = Source.from_serialized(source_serialized)
         self.assertEqual(source_des.id, source.id, 'The id of the source shall not be lost.')
@@ -307,16 +345,7 @@ class ModelTest(TestCase):
 
     def test_json_encoding_source(self):
         """ Tests if the model source can be converted to json. """
-        artist_pink_floyd = Artist(name='Pink Floyd')
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
-        album_the_wall.save()
-        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
-        song_another_brick.save()
-        source = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_MP3,
-                        link='http://source-link.org/audio.mp3')
-        source.save()
+        source = self.SOURCE_DB['CE OGG Stream']
         source_json = json.dumps(source, cls=JSONModelEncoder)
         source_loaded = json.loads(source_json)
         self.assertEqual(int(source_loaded['id']), source.id, 'The id of the source shall not be lost.')
@@ -328,9 +357,7 @@ class ModelTest(TestCase):
 
     def test_serializable_artist(self):
         """ Tests if the model artist is serializable """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1)
-        artist_pink_floyd.save()
+        artist_pink_floyd = self.ARTIST_DB['Pink Floyd']
         artist_pink_floyd_serialized = artist_pink_floyd.serialize()
         artist_pink_floyd_des = artist_pink_floyd.from_serialized(artist_pink_floyd_serialized)
         self.assertEqual(artist_pink_floyd_des.id, artist_pink_floyd.id,
@@ -350,9 +377,7 @@ class ModelTest(TestCase):
 
     def test_json_encoding_artist(self):
         """ Tests if the model artist can be converted to JSON """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1)
-        artist_pink_floyd.save()
+        artist_pink_floyd = self.ARTIST_DB['Pink Floyd']
         artist_pink_floyd_json = json.dumps(artist_pink_floyd, cls=JSONModelEncoder)
         artist_pink_floyd_json_load = json.loads(artist_pink_floyd_json)
         self.assertEqual(int(artist_pink_floyd_json_load['id']), artist_pink_floyd.id,
@@ -372,13 +397,7 @@ class ModelTest(TestCase):
 
     def test_serializable_album(self):
         """ Tests if the model album is serializable """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1)
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
-                               release_date=datetime(year=1979, month=10, day=30),
-                               jamendo_id=1)
-        album_the_wall.save()
+        album_the_wall = self.ALBUM_DB['The Wall']
         album_the_wall_serialized = album_the_wall.serialize()
         album_the_wall_des = Album.from_serialized(album_the_wall_serialized)
         self.assertEqual(album_the_wall_des.id, album_the_wall.id,
@@ -393,14 +412,8 @@ class ModelTest(TestCase):
                          'The information about the jamendo id of the album shall not be lost.')
 
     def test_json_encode_album(self):
-        """ """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1)
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
-                               release_date=datetime(year=1979, month=10, day=30),
-                               jamendo_id=1200042)
-        album_the_wall.save()
+        """ Tests if the album can be converted to JSON """
+        album_the_wall = self.ALBUM_DB['The Wall']
         album_the_wall_json = json.dumps(album_the_wall, cls=JSONModelEncoder)
         album_the_wall_json_load = json.loads(album_the_wall_json)
         self.assertEqual(int(album_the_wall_json_load['id']), album_the_wall.id,
@@ -417,22 +430,7 @@ class ModelTest(TestCase):
 
     def test_serializable_song(self):
         """ Tests if the model song is serializable """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1200042)
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
-                               release_date=datetime(year=1979, month=10, day=30),
-                               jamendo_id=1)
-        album_the_wall.save()
-        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                  duration=221, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
-        tag_rock = Tag(name='progressive rock')
-        tag_rock.save()
-        tag_cult = Tag(name='cult')
-        tag_cult.save()
-        song_another_brick.save()
-        song_another_brick.tags.add(tag_rock, tag_cult)
-        song_another_brick.save()
+        song_another_brick = self.SONG_DB['Another brick in the wall']
         song_another_brick_serialized = song_another_brick.serialize()
         song_another_brick_des = Song.from_serialized(song_another_brick_serialized)
         self.assertEqual(song_another_brick_des.id, song_another_brick.id,
@@ -454,22 +452,7 @@ class ModelTest(TestCase):
 
     def test_json_encode_song(self):
         """ Tests if the model song can be converted to JSON """
-        artist_pink_floyd = Artist(name='Pink Floyd', abstract='This is a abstract.', website='http://pink-floyd.com',
-                                   city='London', country_code='UK', jamendo_id=1)
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd,
-                               release_date=datetime(year=1979, month=10, day=30),
-                               jamendo_id=1)
-        album_the_wall.save()
-        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                  duration=221, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
-        tag_rock = Tag(name='progressive rock')
-        tag_rock.save()
-        tag_cult = Tag(name='cult')
-        tag_cult.save()
-        song_another_brick.save()
-        song_another_brick.tags.add(tag_rock, tag_cult)
-        song_another_brick.save()
+        song_another_brick = self.SONG_DB['Another brick in the wall']
         song_another_brick_json = json.dumps(song_another_brick, cls=JSONModelEncoder)
         song_another_brick_json_load = json.loads(song_another_brick_json)
         self.assertEqual(int(song_another_brick_json_load['id']), song_another_brick.id,
@@ -525,41 +508,24 @@ class ModelTest(TestCase):
 
     def test_sources_of_song(self):
         """ Tests if the sources function of the model song works. """
-        artist_pink_floyd = Artist(name='Pink Floyd')
-        artist_pink_floyd.save()
-        album_the_wall = Album(name='The Wall', artist=artist_pink_floyd, jamendo_id=3)
-        album_the_wall.save()
-        song_another_brick = Song(name='Another brick in the wall', artist=artist_pink_floyd, album=album_the_wall,
-                                  duration=320, release_date=datetime(year=1979, month=10, day=30), jamendo_id=1)
-        song_another_brick.save()
-        source_download_mp3 = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_MP3,
-                                     link='http://source-link.org/audio.mp3')
-        source_download_ogg = Source(type=Source.TYPE_DOWNLOAD, song=song_another_brick, codec=Source.CODEC_OGG,
-                                     link='http://source-link.org/audio.ogg')
-        source_download_mp3.save()
-        source_download_ogg.save()
-        source_stream_mp3 = Source(type=Source.TYPE_STREAM, song=song_another_brick, codec=Source.CODEC_MP3,
-                                   link='http://stream-link.org/audio.mp3')
-        source_stream_ogg = Source(type=Source.TYPE_STREAM, song=song_another_brick, codec=Source.CODEC_OGG,
-                                   link='http://stream-link.org/audio.ogg')
-        source_stream_mp3.save()
-        source_stream_ogg.save()
-        # Tests the source method (codec).
-        self.assertIn(source_download_mp3, song_another_brick.sources(codec=Source.CODEC_MP3),
+        song_another_brick = self.SONG_DB['Another brick in the wall']
+        self.assertIn(self.SOURCE_DB['ABITW MP3 Download'], song_another_brick.sources(codec=Source.CODEC_MP3),
                       'The MP3 download source must be returned.')
-        self.assertIn(source_stream_mp3, song_another_brick.sources(codec=Source.CODEC_MP3),
+        self.assertIn(self.SOURCE_DB['ABITW MP3 Stream'], song_another_brick.sources(codec=Source.CODEC_MP3),
                       'The MP3 stream source must be returned.')
-        self.assertIn(source_download_ogg, song_another_brick.sources(codec=Source.CODEC_OGG),
+        self.assertIn(self.SOURCE_DB['ABITW OGG Download'], song_another_brick.sources(codec=Source.CODEC_OGG),
                       'The OGG download source must be returned.')
-        self.assertIn(source_stream_ogg, song_another_brick.sources(codec=Source.CODEC_OGG),
+        self.assertIn(self.SOURCE_DB['ABITW OGG Stream'], song_another_brick.sources(codec=Source.CODEC_OGG),
                       'The OGG stream source must be returned.')
         # Tests the source method (codec & type)
         self.assertEqual(len(song_another_brick.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_OGG)), 1,
                          'Only the ogg stream source must be returned.')
-        self.assertEqual(source_stream_ogg, song_another_brick.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_OGG)[0],
+        self.assertEqual(self.SOURCE_DB['ABITW OGG Stream'],
+                         song_another_brick.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_OGG)[0],
                          'The OGG stream must be returned as only one.')
         # All sources.
-        sources_saved = [source_download_mp3, source_download_ogg, source_stream_mp3, source_stream_ogg]
+        sources_saved = [self.SOURCE_DB['ABITW MP3 Download'], self.SOURCE_DB['ABITW OGG Download'],
+                         self.SOURCE_DB['ABITW MP3 Stream'], self.SOURCE_DB['ABITW OGG Stream']]
         sources_from_db = song_another_brick.sources()
         for source in sources_from_db:
             self.assertIn(source, sources_saved)

@@ -234,9 +234,9 @@ class Song(models.Model, ModelSerializable):
     artist = models.ForeignKey(Artist, blank=True, null=True)
     album = models.ForeignKey(Album, blank=True, null=True, related_name='song')
     cover = models.URLField(blank=False, null=True)
-    duration = models.IntegerField(blank=True, default=None)
+    duration = models.IntegerField(blank=True, default=None, null=True)
     tags = models.ManyToManyField(Tag)
-    release_date = models.DateField(blank=True, default=None)
+    release_date = models.DateField(blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
@@ -321,6 +321,8 @@ class Source(models.Model, ModelSerializable):
 
     CODEC_MP3 = 'MP3'
     CODEC_OGG = 'OGG'
+    CODEC_FLAC = 'FLAC'
+    CODEC_UNKNOWN = 'UNK'
 
     SOURCE_TYPE = (
         (TYPE_DOWNLOAD, 'Download'),
@@ -330,6 +332,8 @@ class Source(models.Model, ModelSerializable):
     CODEC_TYPE = (
         (CODEC_MP3, 'MP3'),
         (CODEC_OGG, 'OGG'),
+        (CODEC_FLAC, 'FLAC'),
+        (CODEC_UNKNOWN, 'Unknown Codec')
     )
 
     type = models.CharField(choices=SOURCE_TYPE, max_length=2, blank=False)
@@ -374,7 +378,7 @@ class Source(models.Model, ModelSerializable):
         return hash(self.type) ^ hash(self.link) ^ hash(self.codec)
 
     def __str__(self):
-        return 'Type: %s Link: %s (Codec: %s)' % (self.type, self.link, self.codec)
+        return 'Song: %s Type: %s Link: %s (Codec: %s)' % (repr(self.song), self.type, self.link, self.codec)
 
 
 class CrawlingProcess(models.Model, ModelSerializable):
