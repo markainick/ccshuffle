@@ -228,6 +228,73 @@ class Tag(models.Model, ModelSerializable):
         return self.name
 
 
+class License(models.Model, ModelSerializable):
+    """ This class represents a license. """
+    CC_BY = 'CC-BY'
+    CC_BY_SA = 'CC-BY-SA'
+    CC_BY_ND = 'CC-BY-ND'
+    CC_BY_NC = 'CC-BY-NC'
+    CC_BY_NC_SA = 'CC-BY-NC-SA'
+    CC_BY_NC_ND = 'CC-BY-NC-ND'
+
+    LICENSE_TYPE = (
+        (CC_BY, 'Attribution'),
+        (CC_BY_SA, 'Attribution-ShareAlike'),
+        (CC_BY_ND, 'Attribution-NoDerivs'),
+        (CC_BY_NC, 'Attribution-NonCommercial'),
+        (CC_BY_NC_SA, 'Attribution-NonCommercial-ShareAlike'),
+        (CC_BY_NC_ND, 'Attribution-NonCommercial-NoDerivs'),
+    )
+
+    LICENSE_WEB_LINK = {
+        CC_BY: 'http://creativecommons.org/licenses/by/4.0/',
+        CC_BY_SA: 'http://creativecommons.org/licenses/by-sa/4.0/',
+        CC_BY_ND: 'http://creativecommons.org/licenses/by-nd/4.0/',
+        CC_BY_NC: 'http://creativecommons.org/licenses/by-nc/4.0/',
+        CC_BY_NC_SA: 'http://creativecommons.org/licenses/by-nc-sa/4.0/',
+        CC_BY_NC_ND: 'http://creativecommons.org/licenses/by-nc-nd/4.0/',
+    }
+
+    type = models.CharField(max_length=15, choices=LICENSE_TYPE, blank=False)
+
+    @property
+    def name(self):
+        """
+        Returns the human readable name of the license.
+
+        :return: the human readable name of the license.
+        """
+        if self.type in (entry[0] for entry in self.LICENSE_TYPE):
+            return (entry[1] for entry in self.LICENSE_TYPE if entry[0] == self.type)
+        else:
+            raise ValueError('The license type is unknown.')
+
+    @property
+    def web_link(self):
+        """
+        Returns the web link to the license.
+
+        :return: the web link to the license.
+        """
+        if self.type in self.LICENSE_WEB_LINK:
+            return self.LICENSE_WEB_LINK[self.type]
+        else:
+            raise ValueError('The license type is unknown.')
+
+    def serialize(self):
+        return {
+            'type': self.type,
+            'name': self.name,
+            'link': self.web_link,
+        }
+
+    def from_serialized(cls, obj):
+        pass
+
+    def __str__(self):
+        return '%s (Link: %s)' % (self.name, self.web_link)
+
+
 class Song(models.Model, ModelSerializable):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
     name = models.CharField(max_length=250, blank=False)
