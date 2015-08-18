@@ -72,6 +72,25 @@ class JamendoEngineTest(TestCase):
         song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
         self.assertEqual(song_waterpistol_war.id, db_id, 'The id must stay the same.')
 
+    def test_song_license(self):
+        """
+        Tests if the license of the fetched songs are persisted correctly.
+
+        The test songs are:
+             'Melody for the grass' from Waterpistols > License: CC-BY-NC-SA.
+             'I Don't Know What I'm Doing' from Brad Sucks > License: CC-BY-NC-SA.
+             'Celebrate' from Devinjai > License: CC-BY-ND
+        """
+        song_melody_for_the_grass = JamendoSongEntity.get_or_create(jamendo_id=30058)
+        self.assertEqual(song_melody_for_the_grass.license.type, License.CC_BY_NC_SA,
+                         'The license of the song \'Melody for the grass\' must be CC-BY-NC-SA')
+        song_i_dont_know_what_im_doing = JamendoSongEntity.get_or_create(jamendo_id=1241183)
+        self.assertEqual(song_i_dont_know_what_im_doing.license.type, License.CC_BY_NC_SA,
+                         'The license of the song \'I Don\'t Know What I\'m Doing\' must be CC-BY-NC-SA')
+        song_celebrate = JamendoSongEntity.get_or_create(jamendo_id=1233793)
+        self.assertEqual(song_celebrate.license.type, License.CC_BY_ND,
+                         'The license of the song \'Celebrate\' must be CC-BY-ND')
+
     def test_song_source(self):
         """
         Tests if the sources receveived from jamendo for the song are persisted correctly and can be accessed by the
@@ -236,9 +255,10 @@ class ModelTest(TestCase):
         # Test data for the model song.
         cls.SONG_DB = {
             'Clint Eastwood': Song(name='Clint Eastwood (Single)', artist=cls.ARTIST_DB['Gorillaz'], duration=274,
-                                   jamendo_id=1),
+                                   license=cls.LICENSE_DB['CC-BY'], jamendo_id=1),
             'Another brick in the wall': Song(name='Another brick in the wall', artist=cls.ARTIST_DB['Pink Floyd'],
                                               album=cls.ALBUM_DB['The Wall'], duration=191,
+                                              license=cls.LICENSE_DB['CC-BY-NC-SA'],
                                               release_date=datetime(year=1979, month=10, day=30), jamendo_id=2),
         }
         for key in cls.SONG_DB:

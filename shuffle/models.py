@@ -236,6 +236,7 @@ class License(models.Model, ModelSerializable):
     CC_BY_NC = 'CC-BY-NC'
     CC_BY_NC_SA = 'CC-BY-NC-SA'
     CC_BY_NC_ND = 'CC-BY-NC-ND'
+    CC_UNKNOWN = 'Unknown'
 
     LICENSE_TYPE = (
         (CC_BY, 'Attribution'),
@@ -304,7 +305,10 @@ class License(models.Model, ModelSerializable):
                 'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
 
     def __eq__(self, other):
-        return self.type == other.type
+        if isinstance(other, type(self)):
+            return self.type == other.type
+        else:
+            return False
 
     def __hash__(self):
         return hash(type)
@@ -319,6 +323,7 @@ class Song(models.Model, ModelSerializable):
     artist = models.ForeignKey(Artist, blank=True, null=True)
     album = models.ForeignKey(Album, blank=True, null=True, related_name='song')
     cover = models.URLField(blank=False, null=True)
+    license = models.ForeignKey(License, blank=False)
     duration = models.IntegerField(blank=True, default=None, null=True)
     tags = models.ManyToManyField(Tag)
     release_date = models.DateField(blank=True, default=None, null=True)
@@ -351,6 +356,7 @@ class Song(models.Model, ModelSerializable):
             'artist': self.artist,
             'album': self.album,
             'cover': self.cover,
+            'license': self.license,
             'duration': self.duration,
             'tags': list(self.tags.all()),
             'release_date': self.release_date,

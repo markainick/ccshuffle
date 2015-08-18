@@ -15,7 +15,7 @@ import logging
 import urllib.parse
 import requests
 from abc import abstractmethod
-from .models import Artist, Song, Album, Tag, Source, CrawlingProcess
+from .models import Artist, Song, Album, Tag, Source, License, CrawlingProcess
 
 logger = logging.getLogger(__name__)
 
@@ -413,6 +413,29 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             return None
 
     @classmethod
+    def __get_or_create_license(cls, jamendo_song: {str: str}) -> License:
+        """
+        Gets the license from the received json formatted song. If the license is not already persisted, it will be
+        created.
+
+        :param jamendo_song: the json dictionary of the jamendo song.
+        :return: license from the given json dictionary of this song.
+        """
+        license_str = License.CC_UNKNOWN
+        if 'licenses' in jamendo_song:
+            license_str = 'CC-BY'
+            if jamendo_song['licenses']['ccnc'] == 'true':
+                license_str += '-NC'
+            if jamendo_song['licenses']['ccnd'] == 'true':
+                license_str += '-ND'
+            if jamendo_song['licenses']['ccsa'] == 'true':
+                license_str += '-SA'
+        license_tuple = License.objects.get_or_create(type=license_str)
+        if license_tuple[1]:
+            license_tuple[0].save()
+        return license_tuple[0]
+
+    @classmethod
     def __get_sources(cls, jamendo_song: {str: str}) -> [Source]:
         """
         Gets the sources from the given json dictionary of this song.
@@ -499,6 +522,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
                                                       jamendo_id=jamendo_song['album_id'])
         song.artist = JamendoArtistEntity.get_or_create(name=jamendo_song['artist_name'],
                                                         jamendo_id=jamendo_song['artist_id'])
+        song.license = cls.__get_or_create_license(jamendo_song)
         song.cover = jamendo_song['image']
         return song
 
