@@ -115,6 +115,11 @@ svg #svg-shuffle-text {
 #search-section .search-container {
   max-width: 750px;
   max-width: 75rem;
+  /*   @media (max-height: 750px) {
+         .brand {
+           .max-width(25);
+         }
+       }*/
 }
 #search-section .search-container .row {
   padding: 5px 50px 5px 50px;
@@ -134,12 +139,6 @@ svg #svg-shuffle-text {
   #search-section .search-container .row {
     padding: 5px 2px 5px 2px;
     padding: 0.5rem 0.2rem 0.5rem 0.2rem;
-  }
-}
-@media (max-height: 750px) {
-  #search-section .search-container .brand {
-    max-width: 250px;
-    max-width: 25rem;
   }
 }
 @media (min-height: 760px) {

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block headjs %}
+    <!-- Search container javascript -->
+    <script type="text/javascript" src="{% static 'js/ccshuffle-searchboard.js' %}"></script>
+{% endblock headjs %}
+
+{% block content %}
+    <div id="content">
+        {% if not search_result %}
+            <section id="search-section">
+                <div class="container search-container">
+                    <div class="row brand">
+                        <a href="{% url 'home' %}">
+                            {% include 'ccshuffle-logo.svg' %}
+                        </a>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <ul class="nav nav-tabs">
+                                <li role="tab"
+                                        {% if request.GET.search_for == None or request.GET.search_for == 'tags' %}
+                                    class="active" {% endif %} >
+                                    <a href="#tags" data-toggle="tab">Tags</a>
+                                </li>
+                                <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
+                                    <a href="#artists" data-toggle="tab">Artists</a>
+                                </li>
+                                <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
+                                    <a href="#albums" data-toggle="tab">Albums</a>
+                                </li>
+                                <li role="tab" {% if request.GET.search_for == 'songs' %} class="active" {% endif %}>
+                                    <a href="#songs" data-toggle="tab">Songs</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <form id="search-form" class="{% url 'home' %}">
+                                <div class="input-group">
+                                    <input name="search_phrase" type="text" class="form-control"
+                                           placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
+                                    <input type="hidden" name="search_for"
+                                           value="{{ request.GET.search_for|default:'tags' }}"/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">
+                                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                                </button>
+                            </span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+        <section id="search-results-section">
+            <div class="container">
+                {% for result in search_result %}
+                    {% if forloop.counter0|divisibleby:2 %}
+                        <div class="row">
+                    {% endif %}
+                <div class="col-xs-12 col-sm-6">
+                    <img class="cover" src="{{ result.cover }}" alt="Cover of {{ result.name }}"/>
+
+                    <p>{{ result.artist.name }} - {{ result.name }}</p>
+                </div>
+                {% if forloop.counter0|divisibleby:2 %}
+                    </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock content %}
