@@ -36,12 +36,19 @@ class RegistrationForm(UserCreationForm):
 
         self.fields['email'] = forms.EmailField(label=_("Email"), max_length=2048, required=False)
 
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Username',
-                                                     'aria-describedby': 'basic-username', 'required': 'required'})
-        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password',
-                                                      'aria-describedby': 'basic-password', 'required': 'required'})
-        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password',
+        self.fields['username'].widget.attrs.update({'id': 'id_username_register',
+                                                     'class': 'form-control',
+                                                     'placeholder': 'Username',
+                                                     'aria-describedby': 'basic-username',
+                                                     'required': 'required'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control',
+                                                      'placeholder': 'Password',
+                                                      'aria-describedby': 'basic-password',
+                                                      'required': 'required'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control',
+                                                      'placeholder': 'Password',
                                                       'aria-describedby': 'basic-password-confirm',
                                                       'required': 'required'})
-        self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Your email',
+        self.fields['email'].widget.attrs.update({'class': 'form-control',
+                                                  'placeholder': 'Your email',
                                                   'aria-describedby': 'basic-email'})

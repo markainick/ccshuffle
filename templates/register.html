@@ -32,7 +32,7 @@
         <section id="register-form-section">
             <h1>Register</h1>
 
-            <form id="register-form" action="" method="post">
+            <form action="{% url 'register' %}" id="register-form" method="post">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}">Username *</label>
@@ -40,7 +40,7 @@
                     <div class="input-group">
                         {{ form.username }}
 	                <span class="input-group-addon" id="basic-username"><span
-                            class="glyphicon glyphicon-user"/></span>
+                            class="glyphicon glyphicon-user"></span></span>
                     </div>
                     {% if form.username.errors %}
                         <div class="error-container">
@@ -54,7 +54,7 @@
                     <div class="input-group">
                         {{ form.password1 }}
 	                <span class="input-group-addon" id="basic-password"><span
-                            class="glyphicon glyphicon-lock"/></span>
+                            class="glyphicon glyphicon-lock"></span></span>
                     </div>
                     {% if form.password1.errors %}
                         <div class="error-container">
@@ -68,7 +68,7 @@
                     <div class="input-group">
                         {{ form.password2 }}
 	                <span class="input-group-addon" id="basic-password-confirm"><span
-                            class="glyphicon glyphicon-lock"/></span>
+                            class="glyphicon glyphicon-lock"></span></span>
                     </div>
                     {% if form.password2.errors %}
                         <div class="error-container">
@@ -82,7 +82,7 @@
                     <div class="input-group">
                         {{ form.email }}
 	                        <span class="input-group-addon" id="basic-email"><span
-                                    class="glyphicon glyphicon-envelope"/></span>
+                                    class="glyphicon glyphicon-envelope"></span></span>
                     </div>
                     {% if form.email.errors %}
                         <div class="error-container">
