@@ -55,23 +55,22 @@ svg {
 
   @media (max-width: @screen-xs-max) {
 
-    .nav-menu {
-      /* Navbar hack */
-      float: left;
-      list-style: outside none none;
-    }
-
     .login-button {
       .min-width(12);
+      .margin-hr(1, 1);
     }
 
-    .desktop-login-container {
+    .register-button {
+      .margin-hr(1, 1);
+    }
+
+    .mobile-invisible {
       .hide-content;
     }
   }
 
   @media (min-width: @screen-sm-min) {
-    .mobil-login-container {
+    .desktop-invisible {
       .hide-content;
     }
   }
@@ -116,6 +115,17 @@ svg {
 
     .row {
       .padding(0.5, 5, 0.5, 5);
+    }
+
+    .nav-tabs {
+      .active {
+        a {
+          border-top: none;
+          border-left: none;
+          border-right: none;
+          border-bottom: 2px solid red;
+        }
+      }
     }
 
     .brand {

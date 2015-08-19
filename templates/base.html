@@ -33,50 +33,60 @@
 <body xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <nav id="navigation-bar" class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
-        {% block navigation %}
-            {% if not user.is_authenticated %}
-                <a id="link_register" class="btn btn-primary navbar-btn register-button"
-                   href="{% url 'register' %}">Register</a>
-                <div class="desktop-login-container pull-right">
-                    <form id="login-form" action="{% url 'signin' %}" class="form-inline" method="post">
+        <div class="navbar-header">
+            {% block navigation-header %}
+                {% if user.is_authenticated %}
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    {% comment %}<a class="navbar-brand" href="{% url 'home' %}">
+                        {% include 'ccshuffle-logo.svg' %}
+                    </a> {% endcomment %}
+                {% else %}
+                    <a id="link_register" class="btn btn-primary navbar-btn register-button"
+                       href="{% url 'register' %}">Register</a>
+                    <a class="btn btn-default navbar-btn login-button pull-right desktop-invisible"
+                       href="{% url 'signin' %}">Sign in</a>
+                {% endif %}
+            {% endblock %}
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            {% block navigation %}
+                {% if user.is_authenticated %}
+                    <ul id="user-nav" class="nav navbar-nav navbar-right">
+                        <li class="dropdown">
+                        <li><a href="#">Profile</a></li>
+                        <li><a href="#">Favorites</a></li>
+                        <li><a href="#">Playlists</a></li>
+                        <li><a href="{% url 'signout' %}?next={{ request.path }}">Sign out</a></li>
+                    </ul>
+                {% else %}
+                    <form id="login-form" action="{% url 'signin' %}"
+                          class="navbar-form navbar-right form-inline mobile-invisible"
+                          role="form" method="post">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label class="sr-only" for="{{ globalLoginForm.username.id_for_label }}">Username</label>
+                            <label class="sr-only"
+                                   for="{{ globalLoginForm.username.id_for_label }}">Username</label>
                             {{ globalLoginForm.username }}
                         </div>
                         <div class="form-group">
-                            <label class="sr-only" for="{{ globalLoginForm.password.id_for_label }}">Password</label>
+                            <label class="sr-only"
+                                   for="{{ globalLoginForm.password.id_for_label }}">Password</label>
                             {{ globalLoginForm.password }}
                         </div>
                         <input type="hidden" name="next" value="{{ request.path }}"/>
-                        <button id="btn_login" type="submit" class="btn btn-default navbar-btn login-button"
+                        <button id="btn_login" type="submit" class="btn btn-default login-button"
                                 value="Login">Sign in
                         </button>
                     </form>
-                </div>
-                <div class="mobil-login-container pull-right">
-                    <a class="btn btn-default navbar-btn login-button" href="{% url 'signin' %}">Sign in</a>
-                </div>
-            {% else %}
-                <ul class="nav navbar-nav nav-menu">
-                    <li class="dropdown dropdown-menu-left">
-                        <a id="dropdownUserMenu" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                           aria-haspopup="true" aria-expanded="false">
-                            <span class="glyphicon glyphicon-user"></span>
-                            {{ user.username }}
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownUserMenu">
-                            <li><a href="#">Profile</a></li>
-                            <li><a href="#">Favorites</a></li>
-                            <li><a href="#">Change Password</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <a class="btn btn-danger navbar-btn logout-button pull-right"
-                   href="{% url 'signout' %}?next={{ request.path }}">Sign out</a>
-            {% endif %}
-        {% endblock navigation %}
+                {% endif %}
+            {% endblock navigation %}
+        </div>
     </div>
 </nav>
 {% block content %} {% endblock content %}

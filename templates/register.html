@@ -2,27 +2,34 @@
 
 {% block title %} Register | {{ block.super }} {% endblock title %}
 
+{% block navigation-header %}
+    {% if not user.is_authenticated %}
+        <a class="btn btn-default navbar-btn login-button pull-right desktop-invisible"
+           href="{% url 'signin' %}">Sign in</a>
+    {% endif %}
+{% endblock navigation-header %}
+
 {% block navigation %}
     {% if not user.is_authenticated %}
-        <div class="desktop-login-container pull-right">
-            <form action="{% url 'signin' %}" class="form-inline" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label class="sr-only" for="{{ globalLoginForm.username.id_for_label }}">Username</label>
-                    {{ globalLoginForm.username }}
-                </div>
-                <div class="form-group">
-                    <label class="sr-only" for="{{ globalLoginForm.password.id_for_label }}">Password</label>
-                    {{ globalLoginForm.password }}
-                </div>
-                <button type="submit" class="btn btn-default navbar-btn login-button" value="Login">Sign in</button>
-            </form>
-        </div>
-        <div class="mobil-login-container pull-right">
-            <a class="btn btn-default navbar-btn login-button" href="{% url 'signin' %}">Sign in</a>
-        </div>
-    {% else %} <!-- Should not happen -->
-        <a class="btn btn-danger navbar-btn logout-button pull-right" href="{% url 'signout' %}">Sign out</a>
+        <form id="login-form" action="{% url 'signin' %}"
+              class="navbar-form navbar-right form-inline mobile-invisible"
+              role="form" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="sr-only"
+                       for="{{ globalLoginForm.username.id_for_label }}">Username</label>
+                {{ globalLoginForm.username }}
+            </div>
+            <div class="form-group">
+                <label class="sr-only"
+                       for="{{ globalLoginForm.password.id_for_label }}">Password</label>
+                {{ globalLoginForm.password }}
+            </div>
+            <input type="hidden" name="next" value="{{ request.path }}"/>
+            <button id="btn_login" type="submit" class="btn btn-default login-button"
+                    value="Login">Sign in
+            </button>
+        </form>
     {% endif %}
 {% endblock navigation %}
 

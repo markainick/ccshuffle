@@ -53,16 +53,21 @@ svg #svg-shuffle-text {
   margin-left: 0.5rem;
 }
 @media (max-width: 767px) {
-  .navbar-default .nav-menu {
-    /* Navbar hack */
-    float: left;
-    list-style: outside none none;
-  }
   .navbar-default .login-button {
     min-width: 120px;
     min-width: 12rem;
+    margin-right: 10px;
+    margin-right: 1rem;
+    margin-left: 10px;
+    margin-left: 1rem;
   }
-  .navbar-default .desktop-login-container {
+  .navbar-default .register-button {
+    margin-right: 10px;
+    margin-right: 1rem;
+    margin-left: 10px;
+    margin-left: 1rem;
+  }
+  .navbar-default .mobile-invisible {
     position: absolute !important;
     top: -9999px !important;
     left: -9999px !important;
@@ -70,7 +75,7 @@ svg #svg-shuffle-text {
   }
 }
 @media (min-width: 768px) {
-  .navbar-default .mobil-login-container {
+  .navbar-default .desktop-invisible {
     position: absolute !important;
     top: -9999px !important;
     left: -9999px !important;
@@ -124,6 +129,12 @@ svg #svg-shuffle-text {
 #search-section .search-container .row {
   padding: 5px 50px 5px 50px;
   padding: 0.5rem 5rem 0.5rem 5rem;
+}
+#search-section .search-container .nav-tabs .active a {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 2px solid red;
 }
 #search-section .search-container .brand {
   margin-right: auto;

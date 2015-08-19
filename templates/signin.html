@@ -2,13 +2,14 @@
 
 {% block title %} Login | {{ block.super }} {% endblock title %}
 
-{% block navigation %}
+{% block navigation-header %}
     {% if not user.is_authenticated %}
-        <a class="btn btn-primary navbar-btn register-button" href="{% url 'register' %}">Register</a>
-    {% else %} <!-- Should not happen -->
-        <a class="btn btn-danger navbar-btn logout-button pull-right" href="{% url 'signout' %}">Sign out</a>
+        <a id="link_register" class="btn btn-primary navbar-btn register-button"
+           href="{% url 'register' %}">Register</a>
     {% endif %}
-{% endblock navigation %}
+{% endblock %}
+
+{% block navigation %}{% endblock navigation %}
 
 {% block content %}
     <div id="content" class="container login-container">
@@ -19,8 +20,9 @@
                 {% csrf_token %}
                 <div class="notification-container">
                     {% if login_notification %}
-                        <!--  TODO Issue #3 <https://github.com/outofbits/ccshuffle/issues/3>-->
-                        <!-- <p id="login-notification" class="alert alert-info" role="alert"> {{ login_notification }} </p> -->
+                        {% comment %} TODO Issue #3 <https://github.com/outofbits/ccshuffle/issues/3>
+                        <p id="login-notification" class="alert alert-info" role="alert"> {{ login_notification }} </p>
+                        {% endcomment %}
                     {% endif %}
                 </div>
                 <div class="form-group">
