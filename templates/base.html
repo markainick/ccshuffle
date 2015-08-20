@@ -15,12 +15,17 @@
     <link rel="icon" href="{% static 'favicon/favicon.png' %}"/>
     <!-- Bootstrap stylesheet-->
     <link rel="stylesheet" href="{% static 'plugins/bootstrap/dist/css/bootstrap.min.css' %}" type="text/css"/>
+    {% comment %} Bootstrap theme {% endcomment %}
+    {% block bootstrap-theme %}
+        <link rel="stylesheet" href="{% static 'plugins/bootstrap/dist/css/bootstrap-theme.min.css' %}"
+              type="text/css"/>
+    {% endblock %}
     <!-- Font awesome stylesheet -->
     <link rel="stylesheet" href="{% static 'plugins/font-awesome/css/font-awesome.min.css' %}" type="text/css"/>
     <!-- Creative commons shuffle stylesheet -->
     <link rel="stylesheet" href="{% static 'css/ccshuffle.min.css' %}" type="text/css"/>
     {% comment %} Container for further stylesheets {% endcomment %}
-    {% block headcss %} {% endblock headcss %}
+    {% block headcss %}{% endblock headcss %}
     <!-- JQuery -->
     <script type="text/javascript" src="{% static 'plugins/jquery/jquery-2.1.4.min.js' %}"></script>
     <!-- Bootstrap javascript-->
