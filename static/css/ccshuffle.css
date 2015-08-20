@@ -67,20 +67,6 @@ svg #svg-shuffle-text {
     margin-left: 10px;
     margin-left: 1rem;
   }
-  .navbar-default .mobile-invisible {
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    visibility: hidden;
-  }
-}
-@media (min-width: 768px) {
-  .navbar-default .desktop-invisible {
-    position: absolute !important;
-    top: -9999px !important;
-    left: -9999px !important;
-    visibility: hidden;
-  }
 }
 /* Style for the brand container */
 .brand-container {

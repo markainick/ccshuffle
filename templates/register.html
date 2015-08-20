@@ -4,7 +4,7 @@
 
 {% block navigation-header %}
     {% if not user.is_authenticated %}
-        <a class="btn btn-default navbar-btn login-button pull-right desktop-invisible"
+        <a class="btn btn-default navbar-btn login-button pull-right visible-xs"
            href="{% url 'signin' %}">Sign in</a>
     {% endif %}
 {% endblock navigation-header %}
@@ -12,7 +12,7 @@
 {% block navigation %}
     {% if not user.is_authenticated %}
         <form id="login-form" action="{% url 'signin' %}"
-              class="navbar-form navbar-right form-inline mobile-invisible"
+              class="navbar-form navbar-right form-inline hidden-xs"
               role="form" method="post">
             {% csrf_token %}
             <div class="form-group">
