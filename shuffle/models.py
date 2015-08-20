@@ -330,6 +330,15 @@ class Song(models.Model, ModelSerializable):
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
 
+    @property
+    def tags_names(self):
+        """
+        Returns the name of the tags as list.
+
+        :return: the name of the tags as list.
+        """
+        return [tag.name for tag in self.tags.all()]
+
     def sources(self, **source_fields):
         """
         Returns the sources of the song.
