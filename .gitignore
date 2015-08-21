@@ -3,6 +3,7 @@
 *.pyc
 db.sqlite3
 *.log
+shuffle/migrations/
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio
 
