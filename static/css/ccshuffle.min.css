@@ -24,3 +24,6 @@
 .login-container .error-container{margin-top:5px;margin-top:.5rem;margin-bottom:5px;margin-bottom:.5rem}.login-container .login-button{min-width:120px;min-width:12rem;margin-top:10px;margin-top:1rem;margin-bottom:10px;margin-bottom:1rem}
 .register-container{min-width:200px;min-width:20rem;max-width:600px;max-width:60rem;margin-left:auto;margin-right:auto}.register-container form{margin-top:20px;margin-top:2rem;margin-bottom:20px;margin-bottom:2rem}
 .register-container .error-container{margin-top:10px;margin-top:1rem;margin-bottom:10px;margin-bottom:1rem}.register-container .register-button{min-width:120px;min-width:12rem;margin-top:10px;margin-top:1rem;margin-bottom:10px;margin-bottom:1rem}
+#search-results-section{padding-top:15px;padding-top:1.5rem;padding-bottom:15px;padding-bottom:1.5rem}.song-card-container .panel-footer{background-color:transparent}.song-card-container .cover{padding:5px 5px 5px 5px;padding:.5rem .5rem .5rem .5rem}
+.song-card-container .license-container a:hover,.song-card-container .license-container a:focus{text-decoration:none}.song-card-container .license-container img{max-width:25px;max-width:2.5rem;max-height:25px;max-height:2.5rem}
+#player-section{position:absolute;bottom:0}

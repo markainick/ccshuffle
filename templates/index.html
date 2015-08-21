@@ -9,69 +9,140 @@
 {% block content %}
     <div id="content">
         {% if not search_result %}
-            <section id="search-section">
-                <div class="container search-container">
-                    <div class="row brand">
-                        <a href="{% url 'home' %}">
-                            {% include 'ccshuffle-logo.svg' %}
-                        </a>
+            <section id="search-section" class="container search-container">
+                <div class="row brand"> <!-- Creative Commons shuffle logo -->
+                    <a href="{% url 'home' %}">{% include 'ccshuffle-logo.svg' %}</a>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <ul class="nav nav-tabs">
+                            <li role="tab"
+                                    {% if request.GET.search_for == None or request.GET.search_for == 'tags' %}
+                                class="active" {% endif %} >
+                                <a href="#tags" data-toggle="tab">Tags</a>
+                            </li>
+                            <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
+                                <a href="#artists" data-toggle="tab">Artists</a>
+                            </li>
+                            <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
+                                <a href="#albums" data-toggle="tab">Albums</a>
+                            </li>
+                            <li role="tab" {% if request.GET.search_for == 'songs' %} class="active" {% endif %}>
+                                <a href="#songs" data-toggle="tab">Songs</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <ul class="nav nav-tabs">
-                                <li role="tab"
-                                        {% if request.GET.search_for == None or request.GET.search_for == 'tags' %}
-                                    class="active" {% endif %} >
-                                    <a href="#tags" data-toggle="tab">Tags</a>
-                                </li>
-                                <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
-                                    <a href="#artists" data-toggle="tab">Artists</a>
-                                </li>
-                                <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
-                                    <a href="#albums" data-toggle="tab">Albums</a>
-                                </li>
-                                <li role="tab" {% if request.GET.search_for == 'songs' %} class="active" {% endif %}>
-                                    <a href="#songs" data-toggle="tab">Songs</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <form id="search-form" class="{% url 'home' %}">
-                                <div class="input-group">
-                                    <input name="search_phrase" type="text" class="form-control"
-                                           placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
-                                    <input type="hidden" name="search_for"
-                                           value="{{ request.GET.search_for|default:'tags' }}"/>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <form id="search-form" class="{% url 'home' %}">
+                            <div class="input-group">
+                                <input name="search_phrase" type="text" class="form-control"
+                                       placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
+                                <input type="hidden" name="search_for"
+                                       value="{{ request.GET.search_for|default:'tags' }}"/>
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </section>
-        {% endif %}
-        <section id="search-results-section">
-            <div class="container">
-                {% for result in search_result %}
-                    {% if forloop.counter0|divisibleby:2 %}
-                        <div class="row">
-                    {% endif %}
-                <div class="col-xs-12 col-sm-6">
-                    <img class="cover" src="{{ result.cover }}" alt="Cover of {{ result.name }}"/>
-
-                    <p>{{ result.artist.name }} - {{ result.name }}</p>
-                </div>
-                {% if forloop.counter0|divisibleby:2 %}
+        {% else %}
+            <section id="search-results-section" class="container">
+                <!-- Grid for the search result -->
+                <div class="row">
+                    {% for result in search_result %}
+                        {% if forloop.counter0|divisibleby:2 %}
+                            </div>
+                            <div class="row">
+                        {% endif %}
+                        <div class="col-sm-12 col-md-6">
+                            <!-- Song as search result -->
+                            <div class="panel panel-default song-card-container">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-8">
+                                            <h3 class="panel-title"><a
+                                                    href="#link-to-artist-profile">{{ result.artist }}</a>
+                                                - {{ result.name }}</h3>
+                                        </div>
+                                        <div class="col-xs-2">
+                                            {% comment %}
+                                                TODO: the social, favorite bar for the song.
+                                            {% endcomment %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-xs-10">
+                                            <div class="row">
+                                                {% comment %}
+                                                    TODO: Details about the song
+                                                {% endcomment %}
+                                            </div>
+                                        </div>
+                                        <img class="col-xs-2 cover img-responsive" src="{{ result.cover }}"
+                                             alt="Cover of {{ result.name }}"/>
+                                    </div>
+                                </div>
+                                <div class="panel-footer">
+                                    <div class="row">
+                                        <!-- License of the song -->
+                                        <div class="col-xs-4 license-container">
+                                            <a href="{{ result.license.web_link }}" target="_blank">
+                                                {% if 'CC' in result.license.type %}
+                                                    {% if 'BY' in result.license.type %}
+                                                        <img src="{% static 'img/cc-icons-svg/by.svg' %}"
+                                                             alt="Attribution"/>
+                                                    {% endif %}
+                                                    {% if 'NC' in result.license.type %}
+                                                        <img src="{% static 'img/cc-icons-svg/nc.svg' %}"
+                                                             alt="NonCommercial"/>
+                                                    {% endif %}
+                                                    {% if 'ND' in result.license.type %}
+                                                        <img src="{% static 'img/cc-icons-svg/nd.svg' %}"
+                                                             alt="NoDerivatives"/>
+                                                    {% endif %}
+                                                    {% if 'SA' in result.license.type %}
+                                                        <img src="{% static 'img/cc-icons-svg/sa.svg' %}"
+                                                             alt="ShareAlike"/>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </a>
+                                        </div>
+                                        <!-- end license of the song -->
+                                        <!-- Container for highlighting the keywords, which were hit -->
+                                        <div class="col-xs-8 search-phrase-container">
+                                            <div class="pull-right">
+                                                {% if searched_tags %}
+                                                    {% for tag in searched_tags %}
+                                                        {% if tag in result.tags_names %}
+                                                            <span class="label label-primary">
+                                                                {{ tag }}</span>
+                                                        {% else %}
+                                                            <span class="label label-default">
+                                                                <s>{{ tag }}</s></span>
+                                                        {% endif %}
+                                                        <span></span>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <!-- end container for highlighting the keywords, which were hit -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end song as search result -->
+                        </div>
+                    {% endfor %}
                     </div>
-                {% endif %}
-                {% endfor %}
-            </div>
-        </section>
+                <!-- end grid for the search result -->
+            </section>
+        {% endif %}
     </div>
 {% endblock content %}

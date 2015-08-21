@@ -209,3 +209,33 @@ svg #svg-shuffle-text {
   margin-bottom: 10px;
   margin-bottom: 1rem;
 }
+/* Style for the search result section */
+#search-results-section {
+  padding-top: 15px;
+  padding-top: 1.5rem;
+  padding-bottom: 15px;
+  padding-bottom: 1.5rem;
+}
+/* Style for the song card. */
+.song-card-container .panel-footer {
+  background-color: transparent;
+}
+.song-card-container .cover {
+  padding: 5px 5px 5px 5px;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
+}
+.song-card-container .license-container a:hover,
+.song-card-container .license-container a:focus {
+  text-decoration: none;
+}
+.song-card-container .license-container img {
+  max-width: 25px;
+  max-width: 2.5rem;
+  max-height: 25px;
+  max-height: 2.5rem;
+}
+/* Style for the audio player */
+#player-section {
+  position: absolute;
+  bottom: 0px;
+}

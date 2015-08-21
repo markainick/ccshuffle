@@ -153,3 +153,42 @@ svg {
 
 @import "ccshuffle-login-area.less";
 @import "ccshuffle-register-area.less";
+
+/* Style for the search result section */
+#search-results-section {
+  .padding-vr(1.5, 1.5);
+}
+
+/* Style for the song card. */
+.song-card-container {
+
+  .panel-footer {
+    background-color: transparent;
+  }
+
+  .cover {
+    .padding(0.5, 0.5, 0.5, 0.5);
+  }
+
+  .license-container {
+
+    a {
+      &:hover, &:focus {
+        text-decoration: none;
+      }
+    }
+
+    img {
+      .max-width(2.5);
+      .max-height(2.5);
+    }
+
+  }
+
+}
+
+/* Style for the audio player */
+#player-section {
+  position: absolute;
+  bottom: 0px;
+}

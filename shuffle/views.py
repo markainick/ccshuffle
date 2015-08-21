@@ -20,7 +20,7 @@ from django.template import RequestContext
 from django.views import generic
 from .forms import LoginForm, RegistrationForm
 from .searchengine import JamendoSearchEngine
-from .models import JSONModelEncoder, CrawlingProcess
+from .models import JSONModelEncoder, CrawlingProcess, Song
 
 import logging
 import json
@@ -64,10 +64,14 @@ class ResponseObject(object):
 
 
 class IndexPageView(generic.TemplateView):
-    template_name = 'base.html'
+    template_name = 'index.html'
 
     def get(self, request, *args, **kwargs):
         request.session['last_url'] = request.get_full_path()
+        if request.GET.get('search_for', None):
+            kwargs['search_result'] = list(Song.objects.all()[:20])
+            if 'tags' == request.GET.get('search_for'):
+                kwargs['searched_tags'] = request.GET.get('search_phrase', '').split(' ')
         return super(IndexPageView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
