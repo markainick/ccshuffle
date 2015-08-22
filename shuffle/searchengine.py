@@ -87,10 +87,6 @@ class ArtistEntity(Entity):
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
 
-    def artist(self) -> Artist:
-        """ Returns the artist. (wrapped in this class) """
-        return self.entity
-
 
 class AlbumEntity(Entity):
     """ This class represents the entity album. """
@@ -111,10 +107,6 @@ class AlbumEntity(Entity):
             self.entity = self._merge(self.entity, album.first()) if album.exists() else self.entity
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
-
-    def album(self) -> Album:
-        """ Returns the album. (wrapped in this class) """
-        return self.entity
 
 
 class SongEntity(Entity):
@@ -139,19 +131,10 @@ class SongEntity(Entity):
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
 
-    def song(self) -> Song:
-        return self.entity
-
 
 class JamendoCallException(Exception):
     """ The exception will be raised, if the jamendo api call has been resulted in an error or unexpected state """
-
-    def __init__(self, message, *args, **kwargs):
-        super(JamendoCallException, self).__init__(*args, **kwargs)
-        self.message = message
-
-    def __str__(self):
-        return self.message
+    pass
 
 
 class JamendoServiceMixin(object):
@@ -215,8 +198,23 @@ class JamendoServiceMixin(object):
 class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
     """ This class represents the entity artist of the jamendo service. """
 
-    def __init__(self, jamendo_artist: {str: str}):
-        super(JamendoArtistEntity, self).__init__(self.__parse_json(jamendo_artist))
+    def __init__(self, artist: Artist):
+        assert isinstance(artist, Artist)
+        super(JamendoArtistEntity, self).__init__(artist)
+
+    @classmethod
+    def new_by_json(cls, json):
+        """
+        Create a new JamendoArtistEntity from the artist received from jamendo as json dictionary.
+
+        :param json: the artist received from jamendo as json dictionary.
+        :return: the JamendoArtistEntity of the given json dictionary.
+        """
+        artist = Artist()
+        artist.name = json['name']
+        artist.jamendo_id = json['id']
+        artist.website = json['website']
+        return cls(artist)
 
     @classmethod
     def get_or_create(cls, name: str=None, jamendo_id: str=None) -> Artist:
@@ -234,7 +232,7 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('artists', {'id': jamendo_id})
                 if response['headers']['results_count'] == 1:
-                    return JamendoArtistEntity(response['results'][0]).sync_and_persist()
+                    return JamendoArtistEntity.new_by_json(response['results'][0]).sync_and_persist()
                 else:
                     pass  # Todo Implement super.get()
         elif name is not None:
@@ -253,31 +251,35 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         """
 
         def process_result(artists_json):
-            return [JamendoArtistEntity(artist).sync_and_persist() for artist in artists_json]
+            return [JamendoArtistEntity.new_by_json(artist_json).sync_and_persist() for artist_json in artists_json]
 
         logger.info('SE (Jamendo): Crawling for all artists !')
         return cls.all_query('artists', process=process_result)
-
-    @classmethod
-    def __parse_json(cls, jamendo_artist: {str: str}) -> Artist:
-        """
-        Parses the given information about an artist (retrieved from jamendo - formatted as json) into an artist model.
-
-        :param jamendo_artist: the artist information, which has been retrieved from jamendo formatted as json.
-        :return: the artist model.
-        """
-        artist = Artist()
-        artist.name = jamendo_artist['name']
-        artist.jamendo_id = jamendo_artist['id']
-        artist.website = jamendo_artist['website']
-        return artist
 
 
 class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
     """ This class represents the entity artist of the jamendo service. """
 
-    def __init__(self, jamendo_album: {str: str}):
-        super(JamendoAlbumEntity, self).__init__(self.__parse_json(jamendo_album))
+    def __init__(self, album: Album):
+        assert isinstance(album, Album)
+        super(JamendoAlbumEntity, self).__init__(album)
+
+    @classmethod
+    def new_by_json(cls, json):
+        """
+        Create a new JamendoAlbumEntity from the album received from jamendo as json dictionary.
+
+        :param json: the album received from jamendo as json dictionary.
+        :return: the JamendoAlbumEntity of the given json dictionary.
+        """
+        album = Album()
+        album.jamendo_id = json['id']
+        album.name = json['name']
+        album.artist = JamendoArtistEntity.get_or_create(jamendo_id=json['artist_id'],
+                                                         name=json['artist_name'])
+        album.release_date = json['releasedate']
+        album.cover = json['image']
+        return cls(album)
 
     @classmethod
     def get_or_create(cls, name: str=None, jamendo_id: str=None) -> Artist:
@@ -295,13 +297,15 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('albums', {'id': jamendo_id})
                 if response['headers']['results_count'] == 1:
-                    return JamendoAlbumEntity(response['results'][0]).sync_and_persist()
+                    return JamendoAlbumEntity.new_by_json(response['results'][0]).sync_and_persist()
+        if name is not None:
+            response_set = Album.objects.filter(name=name)
+            if response_set.exists():
+                if len(response_set) == 1:
+                    return response_set.first()
                 else:
-                    pass  # Todo Implement super.get()
-        elif name is not None:
-            pass  # TODO Implement super.get()
-        else:
-            raise ValueError('The name or the jamendo id must be given !')
+                    pass  # TODO: Find the correct album ?
+        raise ValueError('The album can\'t be created.')
 
     @classmethod
     def all_albums(cls) -> [Album]:
@@ -313,36 +317,39 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         """
 
         def process_result(albums_json):
-            return [JamendoAlbumEntity(album).sync_and_persist() for album in albums_json]
+            return [JamendoAlbumEntity.new_by_json(album_json).sync_and_persist() for album_json in albums_json]
 
         logger.info('SE (Jamendo): Crawling for all albums !')
         return cls.all_query('albums', process=process_result)
-
-    @classmethod
-    def __parse_json(cls, jamendo_album: {str: str}) -> Album:
-        """
-        Parses the given information about an album (retrieved from jamendo - formatted as json) into an album model.
-
-        :param album_json: the album information, which has been retrieved from jamendo formatted as json.
-        :return: the album model.
-        """
-        album = Album()
-        album.jamendo_id = jamendo_album['id']
-        album.name = jamendo_album['name']
-        album.artist = JamendoArtistEntity.get_or_create(jamendo_id=jamendo_album['artist_id'],
-                                                         name=jamendo_album['artist_name'])
-        album.release_date = jamendo_album['releasedate']
-        album.cover = jamendo_album['image']
-        return album
 
 
 class JamendoSongEntity(SongEntity, JamendoServiceMixin):
     """ This class represents the entity song of the jamendo service. """
 
-    def __init__(self, jamendo_song: {str: str}):
-        super(JamendoSongEntity, self).__init__(self.__parse_json(jamendo_song))
-        self.tags = self.__get_tags(jamendo_song)
-        self.sources = self.__get_sources(jamendo_song)
+    def __init__(self, song: Song, tags: [Tag]=None, sources: [Source]=None):
+        assert isinstance(song, Song)
+        super(JamendoSongEntity, self).__init__(song)
+        self.tags = (tags if tags else song.tags.all())
+        self.sources = (sources if sources else song.sources())
+
+    @classmethod
+    def new_by_json(cls, json: {str: str}):
+        """
+        Create a new JamendoSongEntity from the song received from jamendo as json dictionary.
+
+        :param json: the song received from jamendo as json dictionary.
+        :return: the JamendoSongEntity of the given json dictionary.
+        """
+        song = Song()
+        song.jamendo_id = json['id']
+        song.name = json['name']
+        song.album = JamendoAlbumEntity.get_or_create(name=json['album_name'], jamendo_id=json['album_id'])
+        song.artist = JamendoArtistEntity.get_or_create(name=json['artist_name'], jamendo_id=json['artist_id'])
+        song.duration = int(json['duration'])
+        song.release_date = json['releasedate']
+        song.cover = json['image']
+        song.license = cls.__get_or_create_license(json)
+        return cls(song, tags=cls.__get_tags(json), sources=cls.__get_sources(json))
 
     def persist(self):
         self.entity.save()
@@ -357,114 +364,6 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             source.song = song
         self.sources = self.__persist_sources(self.sources)
         return song
-
-    @classmethod
-    def __persist_tags(cls, tags):
-        """
-        Persists the given tags, that are not already persisted.
-
-        :param tags: the tags that shall be persisted.
-        :return: the tags with their id.
-        """
-        tags_cache_list = list()
-        for tag in tags:
-            tag_queryset = Tag.objects.filter(name=tag.name)
-            if tag_queryset.exists():
-                tag = tag_queryset.first()
-            else:
-                tag.save()
-            tags_cache_list.append(tag)
-        return tags_cache_list
-
-    @classmethod
-    def __persist_sources(cls, sources):
-        """
-        Persists the given sources, that are not already persisted. Returns for all sources the object  with the id.
-
-        :param sources: the sources, which shall be persisted.
-        :return: the sources with their id.
-        """
-        sources_cache_list = list()
-        for source in sources:
-            source_queryset = Source.objects.filter(type=source.type, codec=source.codec, link=source.link)
-            if source_queryset.exists():
-                source = source_queryset.first()
-            else:
-                source.save()
-            sources_cache_list.append(source)
-        return sources_cache_list
-
-    @classmethod
-    def __get_tags(cls, jamendo_song: {str: str}) -> [Tag]:
-        """
-        Gets the tags from the given json dictionary of this song.
-
-        :param jamendo_song: the json dictionary of the jamendo song.
-        :return: the tags from the json dictionary of this song.
-        """
-        if 'musicinfo' in jamendo_song and 'tags' in jamendo_song['musicinfo']:
-            tags_list = list()
-            tags_json = jamendo_song['musicinfo']['tags']
-            for tag_cat_key in tags_json:
-                for tag_entry in tags_json[tag_cat_key]:
-                    tags_list.append(Tag(name=tag_entry))
-            return tags_list
-        else:
-            return None
-
-    @classmethod
-    def __get_or_create_license(cls, jamendo_song: {str: str}) -> License:
-        """
-        Gets the license from the received json formatted song. If the license is not already persisted, it will be
-        created.
-
-        :param jamendo_song: the json dictionary of the jamendo song.
-        :return: license from the given json dictionary of this song.
-        """
-        license_str = License.CC_UNKNOWN
-        if 'licenses' in jamendo_song:
-            license_str = 'CC-BY'
-            if jamendo_song['licenses']['ccnc'] == 'true':
-                license_str += '-NC'
-            if jamendo_song['licenses']['ccnd'] == 'true':
-                license_str += '-ND'
-            if jamendo_song['licenses']['ccsa'] == 'true':
-                license_str += '-SA'
-        license_tuple = License.objects.get_or_create(type=license_str)
-        if license_tuple[1]:
-            license_tuple[0].save()
-        return license_tuple[0]
-
-    @classmethod
-    def __get_sources(cls, jamendo_song: {str: str}) -> [Source]:
-        """
-        Gets the sources from the given json dictionary of this song.
-
-        :param jamendo_song: the json dictionary of the jamendo song.
-        :return: sources from the given json dictionary of this song.
-        """
-        audio_stream_codec = Source.CODEC_UNKNOWN
-        audio_link_parsed = urllib.parse.urlparse(jamendo_song['audio'])
-        audio_link_params = urllib.parse.parse_qs(audio_link_parsed.query, strict_parsing=False)
-        if audio_link_params and 'format' in audio_link_params:
-            if 'mp3' in audio_link_params['format'][0]:
-                audio_stream_codec = Source.CODEC_MP3
-            elif 'ogg' in audio_link_params['format'][0]:
-                audio_stream_codec = Source.CODEC_OGG
-            elif 'flac' in audio_link_params['format'][0]:
-                audio_stream_codec = Source.CODEC_FLAC
-        audio_download_codec = Source.CODEC_UNKNOWN
-        audio_download_link_path = urllib.parse.urlparse(jamendo_song['audiodownload']).path
-        if 'mp3' in audio_download_link_path:
-            audio_download_codec = Source.CODEC_MP3
-        elif 'ogg' in audio_download_link_path:
-            audio_download_codec = Source.CODEC_OGG
-        elif 'flac' in audio_download_link_path:
-            audio_download_codec = Source.CODEC_FLAC
-        return [
-            Source(type=Source.TYPE_DOWNLOAD, link=jamendo_song['audiodownload'], codec=audio_download_codec),
-            Source(type=Source.TYPE_STREAM, link=jamendo_song['audio'], codec=audio_stream_codec),
-        ]
 
     @classmethod
     def get_or_create(cls, name: str=None, jamendo_id: str=None) -> Song:
@@ -482,13 +381,15 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             else:
                 response = cls.json_call('tracks', {'id': jamendo_id, 'include': 'musicinfo stats licenses'})
                 if response['headers']['results_count'] == 1:
-                    return JamendoSongEntity(response['results'][0]).sync_and_persist()
+                    return JamendoSongEntity.new_by_json(response['results'][0]).sync_and_persist()
+        if name is not None:
+            response_set = Song.objects.filter(name=name)
+            if response_set.exists():
+                if len(response_set) == 1:
+                    return response_set.first()
                 else:
-                    pass  # Todo Implement super.get()
-        elif name is not None:
-            pass  # TODO Implement super.get()
-        else:
-            raise ValueError('The name or the jamendo id must be given !')
+                    pass  # TODO: Find the correct song ?
+        raise ValueError('The song can\'t be created.')
 
     @classmethod
     def all_songs(cls) -> [Song]:
@@ -500,31 +401,118 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         """
 
         def process_result(songs_json):
-            return [JamendoSongEntity(song).sync_and_persist() for song in songs_json]
+            return [JamendoSongEntity.new_by_json(song_json).sync_and_persist() for song_json in songs_json]
 
         logger.info('SE (Jamendo): Crawling for all songs !')
         return cls.all_query('tracks', {'include': 'musicinfo stats licenses'}, process=process_result)
 
     @classmethod
-    def __parse_json(cls, jamendo_song: {str: str}) -> Song:
+    def __persist_tags(cls, tags: [Tag]) -> [Tag]:
         """
-        Parses the given information about a song (retrieved from jamendo - formatted as json) into an song model.
+        Persists the given tags, that are not already persisted.
 
-        :param: the song information, which has been retrieved from jamendo formatted as json.
-        :return: the song model.
+        :param tags: the tags that shall be persisted.
+        :return: the tags with their id.
         """
-        song = Song()
-        song.jamendo_id = jamendo_song['id']
-        song.name = jamendo_song['name']
-        song.duration = int(jamendo_song['duration'])
-        song.release_date = jamendo_song['releasedate']
-        song.album = JamendoAlbumEntity.get_or_create(name=jamendo_song['album_name'],
-                                                      jamendo_id=jamendo_song['album_id'])
-        song.artist = JamendoArtistEntity.get_or_create(name=jamendo_song['artist_name'],
-                                                        jamendo_id=jamendo_song['artist_id'])
-        song.license = cls.__get_or_create_license(jamendo_song)
-        song.cover = jamendo_song['image']
-        return song
+        tags_cache_list = list()
+        for tag in tags:
+            tag_queryset = Tag.objects.filter(name=tag.name)
+            if tag_queryset.exists():
+                tag = tag_queryset.first()
+            else:
+                tag.save()
+            tags_cache_list.append(tag)
+        return tags_cache_list
+
+    @classmethod
+    def __persist_sources(cls, sources: [Source]) -> [Source]:
+        """
+        Persists the given sources, that are not already persisted. Returns for all sources the object  with the id.
+
+        :param sources: the sources, which shall be persisted.
+        :return: the sources with their id.
+        """
+        sources_cache_list = list()
+        for source in sources:
+            source_queryset = Source.objects.filter(type=source.type, codec=source.codec, link=source.link)
+            if source_queryset.exists():
+                source = source_queryset.first()
+            else:
+                source.save()
+            sources_cache_list.append(source)
+        return sources_cache_list
+
+    @classmethod
+    def __get_tags(cls, song_json: {str: str}) -> [Tag]:
+        """
+        Gets the tags from the given json dictionary of this song.
+
+        :param song_json: the json dictionary of the jamendo song.
+        :return: the tags from the json dictionary of this song.
+        """
+        if 'musicinfo' in song_json and 'tags' in song_json['musicinfo']:
+            tags_list = list()
+            tags_json = song_json['musicinfo']['tags']
+            for tag_cat_key in tags_json:
+                for tag_entry in tags_json[tag_cat_key]:
+                    tags_list.append(Tag(name=tag_entry))
+            return tags_list
+        else:
+            return None
+
+    @classmethod
+    def __get_or_create_license(cls, song_json: {str: str}) -> License:
+        """
+        Gets the license from the received json formatted song. If the license is not already persisted, it will be
+        created.
+
+        :param song_json: the json dictionary of the jamendo song.
+        :return: license from the given json dictionary of this song.
+        """
+        license_str = License.CC_UNKNOWN
+        if 'licenses' in song_json:
+            license_str = 'CC-BY'
+            if song_json['licenses']['ccnc'] == 'true':
+                license_str += '-NC'
+            if song_json['licenses']['ccnd'] == 'true':
+                license_str += '-ND'
+            if song_json['licenses']['ccsa'] == 'true':
+                license_str += '-SA'
+        license_tuple = License.objects.get_or_create(type=license_str)
+        if license_tuple[1]:
+            license_tuple[0].save()
+        return license_tuple[0]
+
+    @classmethod
+    def __get_sources(cls, song_json: {str: str}) -> [Source]:
+        """
+        Gets the sources from the given json dictionary of this song.
+
+        :param jamendo_song: the json dictionary of the jamendo song.
+        :return: sources from the given json dictionary of this song.
+        """
+        audio_stream_codec = Source.CODEC_UNKNOWN
+        audio_link_parsed = urllib.parse.urlparse(song_json['audio'])
+        audio_link_params = urllib.parse.parse_qs(audio_link_parsed.query, strict_parsing=False)
+        if audio_link_params and 'format' in audio_link_params:
+            if 'mp3' in audio_link_params['format'][0]:
+                audio_stream_codec = Source.CODEC_MP3
+            elif 'ogg' in audio_link_params['format'][0]:
+                audio_stream_codec = Source.CODEC_OGG
+            elif 'flac' in audio_link_params['format'][0]:
+                audio_stream_codec = Source.CODEC_FLAC
+        audio_download_codec = Source.CODEC_UNKNOWN
+        audio_download_link_path = urllib.parse.urlparse(song_json['audiodownload']).path
+        if 'mp3' in audio_download_link_path:
+            audio_download_codec = Source.CODEC_MP3
+        elif 'ogg' in audio_download_link_path:
+            audio_download_codec = Source.CODEC_OGG
+        elif 'flac' in audio_download_link_path:
+            audio_download_codec = Source.CODEC_FLAC
+        return [
+            Source(type=Source.TYPE_DOWNLOAD, link=song_json['audiodownload'], codec=audio_download_codec),
+            Source(type=Source.TYPE_STREAM, link=song_json['audio'], codec=audio_stream_codec),
+        ]
 
 
 class JamendoSearchEngine(object):
