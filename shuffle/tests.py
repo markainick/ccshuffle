@@ -120,11 +120,11 @@ class JamendoEngineTest(TestCase):
         The song 'Possibilities' of Jasmine Jordan is used for testing.
         """
         song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
-        song_jasmine_pos_tabs = [tag.name for tag in song_jasmine_possibilities.tags.all()]
-        song_jasmine_pos_tabs.sort()
-        self.assertEqual(len(song_jasmine_pos_tabs), 7, 'There must be 7 tags linked to the song \'Possibilities\'.');
-        self.assertListEqual(song_jasmine_pos_tabs,
-                             ['electric', 'funk', 'groove', 'happy', 'pop', 'rnb', 'soulfull'],
+        song_jasmine_pos_tags = [tag.name for tag in song_jasmine_possibilities.tags.all()]
+        song_jasmine_pos_tags.sort()
+        tags = ['pop', '90s', 'rnb', 'groove', 'dream', 'happy', 'peaceful', 'electric', 'soulfull']
+        tags.sort()
+        self.assertListEqual(song_jasmine_pos_tags, tags,
                              'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
 
     @skip('Long runtime')
