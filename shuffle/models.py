@@ -15,6 +15,7 @@ from django.db import models
 from datetime import datetime
 from abc import abstractmethod
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 
 
 class DeserializableException(Exception):
@@ -329,6 +330,24 @@ class Song(models.Model, ModelSerializable):
     release_date = models.DateField(blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    @classmethod
+    def search(cls, phrase: str, tags: [str]):
+        """
+        Searches for songs, which fulfill all or some search criteria. The result is sorted by the amount of tags, that
+        the song matches.
+
+        :param phrase: the name of the song
+        :param tags: the tags that describe the music.
+        :return: the songs, which fulfill all or some search criteria.
+        """
+        query = Q(name__icontains=phrase)
+        if tags:
+            tags_query = None
+            for tag in tags:
+                tags_query = (tags_query | Q(tags__name=tag) if tags_query else Q(tags__name=tag))
+            query |= tags_query
+        return Song.objects.filter(query).distinct()
 
     @property
     def tags_names(self):

@@ -19,7 +19,8 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.views import generic
 from .forms import LoginForm, RegistrationForm
-from .searchengine import JamendoSearchEngine
+from .crawler import JamendoCrawler
+from .searchengine import SearchEngine
 from .models import JSONModelEncoder, CrawlingProcess, Song
 
 import logging
@@ -68,10 +69,14 @@ class IndexPageView(generic.TemplateView):
 
     def get(self, request, *args, **kwargs):
         request.session['last_url'] = request.get_full_path()
-        if request.GET.get('search_for', None):
-            kwargs['search_result'] = list(Song.objects.all()[:20])
-            if 'tags' == request.GET.get('search_for'):
-                kwargs['searched_tags'] = request.GET.get('search_phrase', '').split(' ')
+        kwargs['tags'] = SearchEngine.all_tags()
+        search_for = request.GET.get('search_for', None)
+        if search_for:
+            search_phrase = request.GET.get('search_phrase', '')
+            search_result = SearchEngine.search(search_phrase, search_for)
+            kwargs['search_result'] = list(search_result[0][:20])
+            if search_for == 'songs':
+                kwargs['searched_tags'] = search_result[1]
         return super(IndexPageView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -199,10 +204,9 @@ class CrawlerPageView(generic.TemplateView):
         if 'command' in ajax_data:
             if ajax_data['command'] == 'start-jamendo-crawl':
                 try:
-                    response_object = ResponseObject(result_obj=JamendoSearchEngine().crawl())
+                    response_object = ResponseObject(result_obj=JamendoCrawler.crawl())
                     return HttpResponse(response_object.json(cls=JSONModelEncoder))
                 except BaseException as e:
-                    print(str(e))
                     response_object = ResponseObject(status='fail', error_msg=str(e))
                     return HttpResponse(response_object.json(), status=500)
             else:

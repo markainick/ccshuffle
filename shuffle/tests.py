@@ -14,8 +14,8 @@
 from django.test import TestCase, Client, TransactionTestCase
 from django.utils.unittest import skip
 from datetime import datetime
-from .searchengine import JamendoSearchEngine, JamendoCallException, JamendoServiceMixin
-from .searchengine import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
+from .crawler import JamendoCrawler, JamendoCallException, JamendoServiceMixin
+from .crawler import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
 from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, License, CrawlingProcess
 from .views import ResponseObject
 
@@ -179,7 +179,7 @@ class JamendoEngineTest(TestCase):
     def test_crawl(self):
         """ Tests the crawling process """
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        JamendoSearchEngine.crawl()
+        JamendoCrawler.crawl()
         # Song with the name 'Possibilities' must exist.
         possibilities_songs = Song.objects.filter(name='Possibilities')
         self.assertTrue(possibilities_songs.exists(), 'The song \'Possibilities\' of Jasmin Jordan must exist.')
@@ -196,7 +196,7 @@ class JamendoEngineTest(TestCase):
         self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
         client_id = JamendoServiceMixin.client_id
         JamendoServiceMixin.client_id = '#####'
-        JamendoSearchEngine.crawl()
+        JamendoCrawler.crawl()
         JamendoServiceMixin.client_id = client_id
         # Check if the crawling process was logged into the database.
         p = CrawlingProcess.objects.all().last()

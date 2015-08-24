@@ -8,52 +8,50 @@
 
 {% block content %}
     <div id="content">
-        {% if not search_result %}
-            <section id="search-section">
-                <div class="container search-container">
+        <section id="search-section">
+            <div class="container search-container">
+                {% if not search_result %}
                     <div class="row brand"> <!-- Creative Commons shuffle logo -->
                         <a href="{% url 'home' %}">{% include 'ccshuffle-logo.svg' %}</a>
                     </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <ul class="nav nav-tabs">
-                                <li role="tab"
-                                        {% if request.GET.search_for == None or request.GET.search_for == 'tags' %}
-                                    class="active" {% endif %} >
-                                    <a href="#tags" data-toggle="tab">Tags</a>
-                                </li>
-                                <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
-                                    <a href="#artists" data-toggle="tab">Artists</a>
-                                </li>
-                                <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
-                                    <a href="#albums" data-toggle="tab">Albums</a>
-                                </li>
-                                <li role="tab" {% if request.GET.search_for == 'songs' %} class="active" {% endif %}>
-                                    <a href="#songs" data-toggle="tab">Songs</a>
-                                </li>
-                            </ul>
-                        </div>
+                {% endif %}
+                <div class="row">
+                    <div id="search-navigation" class="col-xs-12">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="tab"
+                                    {% if request.GET.search_for == None or request.GET.search_for == 'songs' %}
+                                class="active" {% endif %} >
+                                <a href="#songs" data-toggle="tab">Songs</a>
+                            </li>
+                            <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
+                                <a href="#artists" data-toggle="tab">Artists</a>
+                            </li>
+                            <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
+                                <a href="#albums" data-toggle="tab">Albums</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <form id="search-form" class="{% url 'home' %}">
-                                <div class="input-group">
-                                    <input name="search_phrase" type="text" class="form-control"
-                                           placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
-                                    <input type="hidden" name="search_for"
-                                           value="{{ request.GET.search_for|default:'tags' }}"/>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <form id="search-form" class="{% url 'home' %}">
+                            <div class="input-group">
+                                <input name="search_phrase" type="text" class="form-control"
+                                       placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
+                                <input type="hidden" name="search_for"
+                                       value="{{ request.GET.search_for|default:'songs' }}"/>
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
                                     <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                                 </button>
                             </span>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-            </section>
-        {% else %}
+            </div>
+        </section>
+        {% if search_result %}
             <section id="search-results-section" class="container">
                 <!-- Grid for the search result -->
                 <div class="row">
