@@ -15,7 +15,7 @@ from django.db import models
 from datetime import datetime
 from abc import abstractmethod
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
+from django.db.models import Q, Count
 
 
 class DeserializableException(Exception):
@@ -347,7 +347,7 @@ class Song(models.Model, ModelSerializable):
             for tag in tags:
                 tags_query = (tags_query | Q(tags__name=tag) if tags_query else Q(tags__name=tag))
             query |= tags_query
-        return Song.objects.filter(query).distinct()
+        return Song.objects.filter(query).annotate(match_count=Count('id')).order_by('-match_count')
 
     @property
     def tags_names(self):
