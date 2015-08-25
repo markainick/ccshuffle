@@ -11,16 +11,17 @@
 #   GNU General Public License for more details.
 #
 
-from django.test import TestCase, Client, TransactionTestCase
+from django.test import TestCase, Client
 from django.utils.unittest import skip
 from datetime import datetime
+from .searchengine import SearchEngine
 from .crawler import JamendoCrawler, JamendoCallException, JamendoServiceMixin
 from .crawler import JamendoArtistEntity, JamendoSongEntity, JamendoAlbumEntity
 from .models import JSONModelEncoder, Artist, Song, Album, Tag, Source, License, CrawlingProcess
-from .views import ResponseObject
 
 import json
 import copy
+import time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,182 +29,6 @@ logger = logging.getLogger(__name__)
 
 class HomePageViewTest(TestCase):
     client = Client()
-
-
-class CrawlingDashboardTest(TestCase):
-    """ Unittests for the jamendo crawling dashboard. """
-
-    def test_crawling_process_json(self):
-        """ Tests if the crawling process class can be serialized with json."""
-        crawling_process = CrawlingProcess(service=CrawlingProcess.Service_Jamendo, execution_date=datetime.now(),
-                                           status=CrawlingProcess.Status_Failed)
-        response_object = ResponseObject(result_obj=crawling_process)
-        json_result = response_object.json(cls=JSONModelEncoder)
-        json_result = json.loads(json_result)
-        self.assertEqual(json_result['result']['status'], 'Failed',
-                         'The info about the crawling process shall not be lost!')
-        self.assertEqual(json_result['result']['service'], CrawlingProcess.Service_Jamendo,
-                         'The info about the crawling process shall not be lost!')
-        self.assertEqual(json_result['header']['status'], 'success', 'The header shall contain the status information')
-
-
-class JamendoEngineTest(TestCase):
-    """ Unittests for the jamendo crawler. """
-
-    def __check_connection(self):
-        return True
-
-    def test_artist_merge_jamendo_songs(self):
-        """
-        Tests, if the merge of an already existing jamendo song and the received song with the same id is successful.
-
-        The test songs are 'Possibilities' from Jasmine Jordan and 'War' of Waterpistols.
-        """
-        # Jasmin Jordan - Possibilities
-        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
-        db_id = song_jasmine_possibilities.id
-        # Test the merge for this song.
-        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
-        self.assertEqual(song_jasmine_possibilities.id, db_id, 'The id must stay the same.')
-        # Waterpistol - War
-        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
-        db_id = song_waterpistol_war.id
-        # Test the merge for this song.
-        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
-        self.assertEqual(song_waterpistol_war.id, db_id, 'The id must stay the same.')
-
-    def test_song_license(self):
-        """
-        Tests if the license of the fetched songs are persisted correctly.
-
-        The test songs are:
-             'Melody for the grass' from Waterpistols > License: CC-BY-NC-SA.
-             'I Don't Know What I'm Doing' from Brad Sucks > License: CC-BY-NC-SA.
-             'Celebrate' from Devinjai > License: CC-BY-ND
-        """
-        song_melody_for_the_grass = JamendoSongEntity.get_or_create(jamendo_id=30058)
-        self.assertEqual(song_melody_for_the_grass.license.type, License.CC_BY_NC_SA,
-                         'The license of the song \'Melody for the grass\' must be CC-BY-NC-SA')
-        song_i_dont_know_what_im_doing = JamendoSongEntity.get_or_create(jamendo_id=1241183)
-        self.assertEqual(song_i_dont_know_what_im_doing.license.type, License.CC_BY_NC_SA,
-                         'The license of the song \'I Don\'t Know What I\'m Doing\' must be CC-BY-NC-SA')
-        song_celebrate = JamendoSongEntity.get_or_create(jamendo_id=1233793)
-        self.assertEqual(song_celebrate.license.type, License.CC_BY_ND,
-                         'The license of the song \'Celebrate\' must be CC-BY-ND')
-
-    def test_song_source(self):
-        """
-        Tests if the sources receveived from jamendo for the song are persisted correctly and can be accessed by the
-        source method.
-
-        The test song is 'Possibilities' from Jasmine Jordan.
-            Audio stream link: https://storage.jamendo.com/?trackid=1230403&format=mp31
-            Download link: https://storage.jamendo.com/download/track/1230403/mp32/
-        """
-        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
-        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)), 1,
-                         'There must be one streaming link persisted for this song (Codec: MP3).')
-        self.assertIn('https://storage.jamendo.com/?trackid=1230403&format=mp31',
-                      song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)[0].link,
-                      'The link for streaming the audio (codec: MP3) must be persisted.')
-        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)), 1,
-                         'There must be one download link persisted for this song (Codec: MP3).')
-        self.assertIn('https://storage.jamendo.com/download/track/1230403/mp32/',
-                      song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)[0].link,
-                      'The link for downloading the audio track (codec: MP3) must be persisted.')
-
-    def test_song_tags(self):
-        """
-        Tests if the received tags of the songs are persisted correctly and connected to the song.
-        The sample data contains the song with the jamendo id
-
-        The song 'Possibilities' of Jasmine Jordan is used for testing.
-        """
-        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
-        song_jasmine_pos_tags = [tag.name for tag in song_jasmine_possibilities.tags.all()]
-        song_jasmine_pos_tags.sort()
-        tags = ['pop', '90s', 'rnb', 'groove', 'dream', 'happy', 'peaceful', 'electric', 'soulfull']
-        tags.sort()
-        self.assertListEqual(song_jasmine_pos_tags, tags,
-                             'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
-
-    @skip('Long runtime')
-    def test_all_songs(self):
-        """
-        Tests the functionality to load all songs, which are stored on jamendo.
-
-        Checks if the following songs are fetched (spot check): 8BIT FAIRY TALE, Bohemia, Melody for the grass,
-                                                                GO!GO!GO!, Skibidubap
-        """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        JamendoSongEntity.all_songs()
-        for song in ('8BIT FAIRY TALE', 'Bohemia', 'Melody for the grass', 'GO!GO!GO!', 'Skibidubap'):
-            self.assertTrue(Song.objects.filter(name=song).exists(),
-                            '\'%s\' must be in the database after scanning jamendo for songs' % song)
-
-    @skip('Long runtime')
-    def test_all_albums(self):
-        """
-        Tests the functionality to load all albums, which are stored on jamendo.
-
-        Checks if the following albums are fetched (spot check): Blue Waters EP, Connection, After, 8-bit lagerfeuer
-        """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        JamendoAlbumEntity.all_albums()
-        for album in ('Blue Waters EP', 'Connection', 'After', '8-bit lagerfeuer'):
-            self.assertTrue(Album.objects.filter(name=album).exists(),
-                            '\'%s\' must be in the database after scanning jamendo for albums' % album)
-
-    @skip('Long runtime')
-    def test_all_artists(self):
-        """
-        Tests the functionality to load all artists, which are stored on jamendo.
-
-        Checks if the following artists are fetched (spot check): Jasmine Jordan, LukHash, Terrible Terrible, Bellevue
-        """
-        self.assertTrue(self.__check_connection(), "The jamendo webservice must be reachable.")
-        JamendoArtistEntity.all_artists()
-        for artist_name in ('Jasmine Jordan', 'LukHash', 'Terrible Terrible', 'Bellevue'):
-            self.assertTrue(Artist.objects.filter(name=artist_name).exists(),
-                            "'%s' must be in the database after scanning jamendo for artists" % artist_name)
-
-    def test_all_artists_wrong_client_id(self):
-        """ Tests the behaviour if the jamendo api call is not successful. """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        client_id = JamendoServiceMixin.client_id
-        JamendoServiceMixin.client_id = '#####'
-        self.assertRaises(JamendoCallException, JamendoArtistEntity.all_artists)
-        JamendoServiceMixin.client_id = client_id
-
-    @skip('Long runtime')
-    def test_crawl(self):
-        """ Tests the crawling process """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        JamendoCrawler.crawl()
-        # Song with the name 'Possibilities' must exist.
-        possibilities_songs = Song.objects.filter(name='Possibilities')
-        self.assertTrue(possibilities_songs.exists(), 'The song \'Possibilities\' of Jasmin Jordan must exist.')
-        self.assertIn('Jasmine Jordan', [song.artist.name for song in possibilities_songs if song.artist is not None])
-        self.assertIn('Time Travel EP', [song.album.name for song in possibilities_songs if song.album is not None])
-        # Song with the name 'Kick Drum'n Bass' must exist
-        kick_dnb_songs = Song.objects.filter(name='Kick Drum\'n Bass')
-        self.assertTrue(kick_dnb_songs.exists(), 'The song \'Possibilities\' of Jasmin Jordan must exist.')
-        self.assertIn('Kick Drum\'n Bass', [song.artist.name for song in kick_dnb_songs if song.artist is not None])
-        self.assertIn('Trip\'N\'Bass', [song.album.name for song in kick_dnb_songs if song.album is not None])
-
-    def test_crawl_fails(self):
-        """ Tests the behaviour, if the crawling fails. """
-        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
-        client_id = JamendoServiceMixin.client_id
-        JamendoServiceMixin.client_id = '#####'
-        JamendoCrawler.crawl()
-        JamendoServiceMixin.client_id = client_id
-        # Check if the crawling process was logged into the database.
-        p = CrawlingProcess.objects.all().last()
-        self.assertEqual('Jamendo', p.service, 'The last crawling process must be a jamendo job.')
-        self.assertEqual('Failed', p.status, 'The last crawling must have been failed.')
-        self.assertIn('Your credential is not authorized.', p.exception,
-                      'The exception message must contain \' Your credential is not authorized. \'')
 
 
 class ModelTest(TestCase):
@@ -612,3 +437,258 @@ class ModelTest(TestCase):
             self.assertIn(source, sources_saved)
             sources_saved.remove(source)
         self.assertEqual(len(sources_saved), 0, 'All sources of the song \'Another brick in the wall \'')
+
+
+class SearchEngineTest(TestCase):
+    """ Unittests for the search engine."""
+
+    fixtures = ['fixtures/se_test_db.json']
+
+    def __measure(self, func, *args, **kwargs):
+        """
+        Measures and returns the execution time  of the given function.
+
+        :param func: the function, which shall be measured.
+        :param args: the positional arguments of the given function.
+        :param kwargs: the keyword arguments of the given function.
+        :return: the execution time.
+        """
+        start = time.time()
+        func(*args, **kwargs)
+        return time.time() - start
+
+    def __performance(self, func, *args, iterations=100, **kwargs):
+        """
+        Tests the performance of the function and returns the average, as
+        well as the minimum and maximum execution time. The returned type is
+        a tuple (min, avg, max).
+
+        :param func: the function, of which the performance shall be checked.
+        :param args: the positional arguments of the given function.
+        :param kwargs: the keyword arguments of the given function.
+        :return: the performance.
+        """
+        avg = None
+        min = 10 ** 1000
+        max = 0
+        for n in range(iterations):
+            exe_time = self.__measure(func, *args, **kwargs)
+            avg = (exe_time if avg is None else (avg + exe_time) / 2)
+            min = (min if min <= exe_time else exe_time)
+            max = (max if max >= exe_time else exe_time)
+            time.sleep(0.1)
+        return min, avg, max
+
+    def test_search_songs_encapsulated_tags(self):
+        """
+        Tests, if the tags of search phrases are encapsulated correctly.
+        """
+        # Search phrase: 'Jazz is my love'
+        se_tags_in_search_phrase = SearchEngine.search(search_phrase='Jazz is my love',
+                                                       search_for=SearchEngine.SEARCH_FOR_SONGS)[1]
+        self.assertIn('jazz', se_tags_in_search_phrase, 'The tag \'jazz\' must be returned.')
+        self.assertIn('love', se_tags_in_search_phrase, 'The tag \'love\' must be returned.')
+        # Search phrase: 'forever indie rock!'
+        se_tags_in_search_phrase = SearchEngine.search(search_phrase='forever indie rock!',
+                                                       search_for=SearchEngine.SEARCH_FOR_SONGS)[1]
+        self.assertIn('indie', se_tags_in_search_phrase, 'The tag \'indie\' must be returned.')
+        self.assertIn('rock', se_tags_in_search_phrase, 'The tag \'rock\' must be returned.')
+
+    def test_search_songs(self):
+        """
+        Tests, if the search for songs works correctly.
+        """
+        # Search phrase: 'rock Indie alternative'
+        search_phrase = 'rock Indie alternative'
+        search_result = SearchEngine.search(search_phrase, search_for=SearchEngine.SEARCH_FOR_SONGS)[0]
+        self.assertIn('punk storm mario', [song.name.lower() for song in search_result],
+                      '\'Punk storm mario\' must be in the search result (search phrase: %s).' % search_phrase)
+        self.assertIn('land of a beautiful experience', [song.name.lower() for song in search_result],
+                      '\'land of a beautiful experience\' must be in the search result (search phrase: %s).' % search_phrase)
+        # Search phrase: 'Jazz is my love'
+        search_phrase = 'Jazz is my love'
+        search_result = SearchEngine.search(search_phrase, search_for=SearchEngine.SEARCH_FOR_SONGS)[0]
+        self.assertIn('i see beauty', [song.name.lower() for song in search_result],
+                      '\'i see beauty\' must be in the search result (search phrase: %s).' % search_phrase)
+        self.assertIn('moonlight dance', [song.name.lower() for song in search_result],
+                      '\'moonlight dance\' must be in the search result (search phrase: %s).' % search_phrase)
+        # Search phrase: 'Love!'
+        search_phrase = 'Long dreams, short nights'
+        search_result = SearchEngine.search(search_phrase, search_for=SearchEngine.SEARCH_FOR_SONGS)[0]
+        self.assertIn('the night drives the wolf', [song.name.lower() for song in search_result],
+                      '\'the night drives the wolf\' must be in the search result (search phrase: %s).' % search_phrase)
+        self.assertIn('long dreams, short nights', [song.name.lower() for song in search_result],
+                      '\'long dreams, short nights\' must be in the search result (search phrase: %s).' % search_phrase)
+
+    def __search_song(self, search_phrase, search_for):
+        """ Wrapper-function for testing the performance of the search."""
+        return list(SearchEngine.search(search_phrase, search_for))
+
+    def test_performance_search_songs(self):
+        """
+        Tests the performance of searching a song. The average response time must be under 1 second for the
+        test database.
+        """
+        response_times = self.__performance(
+            func=self.__search_song, search_phrase='Jazz is my love', search_for=SearchEngine.SEARCH_FOR_SONGS)
+        self.assertLess(response_times[2], 1.5, 'The peek of the response time must be less than 1.5 seconds.')
+        self.assertLess(response_times[1], 1.0, 'The average of the response time must be less than 1.0 seconds.')
+
+
+class JamendoCrawlerTest(TestCase):
+    """ Unittests for the jamendo crawler. """
+
+    def __check_connection(self):
+        return True
+
+    def test_artist_merge_jamendo_songs(self):
+        """
+        Tests, if the merge of an already existing jamendo song and the received song with the same id is successful.
+
+        The test songs are 'Possibilities' from Jasmine Jordan and 'War' of Waterpistols.
+        """
+        # Jasmin Jordan - Possibilities
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        db_id = song_jasmine_possibilities.id
+        # Test the merge for this song.
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        self.assertEqual(song_jasmine_possibilities.id, db_id, 'The id must stay the same.')
+        # Waterpistol - War
+        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
+        db_id = song_waterpistol_war.id
+        # Test the merge for this song.
+        song_waterpistol_war = JamendoSongEntity.get_or_create(jamendo_id=1241182)
+        self.assertEqual(song_waterpistol_war.id, db_id, 'The id must stay the same.')
+
+    def test_song_license(self):
+        """
+        Tests if the license of the fetched songs are persisted correctly.
+
+        The test songs are:
+             'Melody for the grass' from Waterpistols > License: CC-BY-NC-SA.
+             'I Don't Know What I'm Doing' from Brad Sucks > License: CC-BY-NC-SA.
+             'Celebrate' from Devinjai > License: CC-BY-ND
+        """
+        song_melody_for_the_grass = JamendoSongEntity.get_or_create(jamendo_id=30058)
+        self.assertEqual(song_melody_for_the_grass.license.type, License.CC_BY_NC_SA,
+                         'The license of the song \'Melody for the grass\' must be CC-BY-NC-SA')
+        song_i_dont_know_what_im_doing = JamendoSongEntity.get_or_create(jamendo_id=1241183)
+        self.assertEqual(song_i_dont_know_what_im_doing.license.type, License.CC_BY_NC_SA,
+                         'The license of the song \'I Don\'t Know What I\'m Doing\' must be CC-BY-NC-SA')
+        song_celebrate = JamendoSongEntity.get_or_create(jamendo_id=1233793)
+        self.assertEqual(song_celebrate.license.type, License.CC_BY_ND,
+                         'The license of the song \'Celebrate\' must be CC-BY-ND')
+
+    def test_song_source(self):
+        """
+        Tests if the sources receveived from jamendo for the song are persisted correctly and can be accessed by the
+        source method.
+
+        The test song is 'Possibilities' from Jasmine Jordan.
+            Audio stream link: https://storage.jamendo.com/?trackid=1230403&format=mp31
+            Download link: https://storage.jamendo.com/download/track/1230403/mp32/
+        """
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)), 1,
+                         'There must be one streaming link persisted for this song (Codec: MP3).')
+        self.assertIn('https://storage.jamendo.com/?trackid=1230403&format=mp31',
+                      song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)[0].link,
+                      'The link for streaming the audio (codec: MP3) must be persisted.')
+        self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)), 1,
+                         'There must be one download link persisted for this song (Codec: MP3).')
+        self.assertIn('https://storage.jamendo.com/download/track/1230403/mp32/',
+                      song_jasmine_possibilities.sources(type=Source.TYPE_DOWNLOAD, codec=Source.CODEC_MP3)[0].link,
+                      'The link for downloading the audio track (codec: MP3) must be persisted.')
+
+    def test_song_tags(self):
+        """
+        Tests if the received tags of the songs are persisted correctly and connected to the song.
+        The sample data contains the song with the jamendo id
+
+        The song 'Possibilities' of Jasmine Jordan is used for testing.
+        """
+        song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
+        song_jasmine_pos_tags = [tag.name for tag in song_jasmine_possibilities.tags.all()]
+        song_jasmine_pos_tags.sort()
+        tags = ['pop', '90s', 'rnb', 'groove', 'dream', 'happy', 'peaceful', 'electric', 'soulfull']
+        tags.sort()
+        self.assertListEqual(song_jasmine_pos_tags, tags,
+                             'The linked tags of the song \'Possibilities\' of Jasmine must be equal to the given list.')
+
+    @skip('Long runtime')
+    def test_all_songs(self):
+        """
+        Tests the functionality to load all songs, which are stored on jamendo.
+
+        Checks if the following songs are fetched (spot check): 8BIT FAIRY TALE, Bohemia, Melody for the grass,
+                                                                GO!GO!GO!, Skibidubap
+        """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        JamendoSongEntity.all_songs()
+        for song in ('8BIT FAIRY TALE', 'Bohemia', 'Melody for the grass', 'GO!GO!GO!', 'Skibidubap'):
+            self.assertTrue(Song.objects.filter(name=song).exists(),
+                            '\'%s\' must be in the database after scanning jamendo for songs' % song)
+
+    @skip('Long runtime')
+    def test_all_albums(self):
+        """
+        Tests the functionality to load all albums, which are stored on jamendo.
+
+        Checks if the following albums are fetched (spot check): Blue Waters EP, Connection, After, 8-bit lagerfeuer
+        """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        JamendoAlbumEntity.all_albums()
+        for album in ('Blue Waters EP', 'Connection', 'After', '8-bit lagerfeuer'):
+            self.assertTrue(Album.objects.filter(name=album).exists(),
+                            '\'%s\' must be in the database after scanning jamendo for albums' % album)
+
+    @skip('Long runtime')
+    def test_all_artists(self):
+        """
+        Tests the functionality to load all artists, which are stored on jamendo.
+
+        Checks if the following artists are fetched (spot check): Jasmine Jordan, LukHash, Terrible Terrible, Bellevue
+        """
+        self.assertTrue(self.__check_connection(), "The jamendo webservice must be reachable.")
+        JamendoArtistEntity.all_artists()
+        for artist_name in ('Jasmine Jordan', 'LukHash', 'Terrible Terrible', 'Bellevue'):
+            self.assertTrue(Artist.objects.filter(name=artist_name).exists(),
+                            "'%s' must be in the database after scanning jamendo for artists" % artist_name)
+
+    def test_all_artists_wrong_client_id(self):
+        """ Tests the behaviour if the jamendo api call is not successful. """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        client_id = JamendoServiceMixin.client_id
+        JamendoServiceMixin.client_id = '#####'
+        self.assertRaises(JamendoCallException, JamendoArtistEntity.all_artists)
+        JamendoServiceMixin.client_id = client_id
+
+    @skip('Long runtime')
+    def test_crawl(self):
+        """ Tests the crawling process """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        JamendoCrawler.crawl()
+        # Song with the name 'Possibilities' must exist.
+        possibilities_songs = Song.objects.filter(name='Possibilities')
+        self.assertTrue(possibilities_songs.exists(), 'The song \'Possibilities\' of Jasmin Jordan must exist.')
+        self.assertIn('Jasmine Jordan', [song.artist.name for song in possibilities_songs if song.artist is not None])
+        self.assertIn('Time Travel EP', [song.album.name for song in possibilities_songs if song.album is not None])
+        # Song with the name 'Kick Drum'n Bass' must exist
+        kick_dnb_songs = Song.objects.filter(name='Kick Drum\'n Bass')
+        self.assertTrue(kick_dnb_songs.exists(), 'The song \'Possibilities\' of Jasmin Jordan must exist.')
+        self.assertIn('Kick Drum\'n Bass', [song.artist.name for song in kick_dnb_songs if song.artist is not None])
+        self.assertIn('Trip\'N\'Bass', [song.album.name for song in kick_dnb_songs if song.album is not None])
+
+    def test_crawl_fails(self):
+        """ Tests the behaviour, if the crawling fails. """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
+        client_id = JamendoServiceMixin.client_id
+        JamendoServiceMixin.client_id = '#####'
+        JamendoCrawler.crawl()
+        JamendoServiceMixin.client_id = client_id
+        # Check if the crawling process was logged into the database.
+        p = CrawlingProcess.objects.all().last()
+        self.assertEqual('Jamendo', p.service, 'The last crawling process must be a jamendo job.')
+        self.assertEqual('Failed', p.status, 'The last crawling must have been failed.')
+        self.assertIn('Your credential is not authorized.', p.exception,
+                      'The exception message must contain \' Your credential is not authorized. \'')
