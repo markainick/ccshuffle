@@ -23,7 +23,7 @@ class DeserializableException(Exception):
     pass
 
 
-class ModelSerializable(object):
+class SerializableModel(object):
     """ This class represents json models that have the function 'serializable' that returns a serializable object.  """
 
     @abstractmethod
@@ -60,14 +60,28 @@ class JSONModelEncoder(DjangoJSONEncoder):
             return {key: self.default(o[key]) for key in o}
         elif isinstance(o, (list, tuple)):
             return [self.default(entry) for entry in o]
-        elif isinstance(o, ModelSerializable):
+        elif isinstance(o, SerializableModel):
             # Serialize if the object is serializable.
             return self.default(o.serialize())
         else:
             return super(type(self), self).default(o)
 
 
-class Artist(models.Model, ModelSerializable):
+class SearchableModel(object):
+    @classmethod
+    @abstractmethod
+    def search(cls, phrase: str, tags: [str]) -> [models.Model]:
+        """
+        Searches for the model objects, which fulfill all or some search criteria.
+
+        :param phrase: the phrase to search for.
+        :param tags: the tags, which describes the model object.
+        :return: the model objects, which fulfill all or some search criteria.
+        """
+        raise NotImplementedError('The function search of %s' % cls.__class__.__name__)
+
+
+class Artist(models.Model, SerializableModel):
     """ This class represents the model for artists. """
     name = models.CharField(max_length=250, blank=False)
     abstract = models.CharField(max_length=250, blank=True, default=None, null=True)
@@ -126,7 +140,7 @@ class Artist(models.Model, ModelSerializable):
         return self.name
 
 
-class Album(models.Model, ModelSerializable):
+class Album(models.Model, SerializableModel):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -189,7 +203,7 @@ class Album(models.Model, ModelSerializable):
         return self.name + (' (Artist: %s) ' % self.artist if self.artist else '')
 
 
-class Tag(models.Model, ModelSerializable):
+class Tag(models.Model, SerializableModel):
     """ This class represents a tag, which is used to describe the music (f.e. genres). """
     name = models.CharField(max_length=250, blank=False, unique=True)
 
@@ -229,7 +243,7 @@ class Tag(models.Model, ModelSerializable):
         return self.name
 
 
-class License(models.Model, ModelSerializable):
+class License(models.Model, SerializableModel):
     """ This class represents a license. """
     CC_BY = 'CC-BY'
     CC_BY_SA = 'CC-BY-SA'
@@ -318,7 +332,7 @@ class License(models.Model, ModelSerializable):
         return '%s (Link: %s)' % (self.name, self.web_link)
 
 
-class Song(models.Model, ModelSerializable):
+class Song(models.Model, SerializableModel, SearchableModel):
     """ This class represents the model for songs. Songs can be associated with an album or not (f.e. a single). """
     name = models.CharField(max_length=250, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -333,14 +347,6 @@ class Song(models.Model, ModelSerializable):
 
     @classmethod
     def search(cls, phrase: str, tags: [str]):
-        """
-        Searches for songs, which fulfill all or some search criteria. The result is sorted by the amount of tags, that
-        the song matches.
-
-        :param phrase: the name of the song
-        :param tags: the tags that describe the music.
-        :return: the songs, which fulfill all or some search criteria.
-        """
         query = Q(name__icontains=phrase)
         if tags:
             tags_query = None
@@ -432,7 +438,7 @@ class Song(models.Model, ModelSerializable):
             ' (Album: %s) ' % self.album if self.album else '')
 
 
-class Source(models.Model, ModelSerializable):
+class Source(models.Model, SerializableModel):
     """ This class represents a source of a song. (f.e. stream or download link) """
 
     TYPE_DOWNLOAD = 'D'
@@ -500,7 +506,7 @@ class Source(models.Model, ModelSerializable):
         return 'Song: %s Type: %s Link: %s (Codec: %s)' % (repr(self.song), self.type, self.link, self.codec)
 
 
-class CrawlingProcess(models.Model, ModelSerializable):
+class CrawlingProcess(models.Model, SerializableModel):
     """ This class represents planned, executed or failed crawling processes. """
 
     Service_Jamendo = 'Jamendo'

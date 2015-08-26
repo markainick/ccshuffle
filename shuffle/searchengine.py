@@ -11,7 +11,7 @@
 #   GNU General Public License for more details.
 #
 
-from .models import Artist, Song, Album, Tag
+from .models import SearchableModel, Song, Artist, Album, Tag
 import logging
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class SearchEngine(object):
     }
 
     @classmethod
-    def all_tags(cls):
+    def all_tags(cls) -> [Tag]:
         """
         Returns all known tags.
 
@@ -40,7 +40,7 @@ class SearchEngine(object):
         return set(Tag.objects.all())
 
     @classmethod
-    def all_tags_names(cls):
+    def all_tags_names(cls) -> [str]:
         """
         Returns all known tags in form of their names.
 
@@ -49,7 +49,7 @@ class SearchEngine(object):
         return [tag_name[0] for tag_name in Tag.objects.values_list('name')]
 
     @classmethod
-    def __encapsulate_tags_of(cls, search_phrase):
+    def __encapsulate_tags_of(cls, search_phrase: str) -> [str]:
         """
         Analysis the given search phrase and returns the tags, which were found in the given search phrase.
 
@@ -60,7 +60,7 @@ class SearchEngine(object):
         return [tag.lower() for tag in search_phrase.split(' ') if tag.lower() in known_tags_names]
 
     @classmethod
-    def __search_for_albums(cls, search_phrase, search_tags):
+    def __search_for_albums(cls, search_phrase: str, search_tags: [str]) -> [Album]:
         """
         Searches for albums, which matches the given search phrase.
 
@@ -71,7 +71,7 @@ class SearchEngine(object):
         raise NotImplementedError('Not implemented yet !')
 
     @classmethod
-    def __search_for_artists(cls, search_phrase, search_tags):
+    def __search_for_artists(cls, search_phrase: str, search_tags: [str]) -> [Artist]:
         """
         Searches for artists, which matches the given search phrase.
 
@@ -82,7 +82,7 @@ class SearchEngine(object):
         raise NotImplementedError('Not implemented yet !')
 
     @classmethod
-    def __search_for_songs(cls, search_phrase, search_tags):
+    def __search_for_songs(cls, search_phrase: str, search_tags: [str]) -> [Song]:
         """
         Searches for songs, which matches the given search phrase.
 
@@ -93,7 +93,7 @@ class SearchEngine(object):
         return Song.search(search_phrase, search_tags)
 
     @classmethod
-    def search(cls, search_phrase: str='', search_for: str=SEARCH_FOR_SONGS) -> ([], [str]):
+    def search(cls, search_phrase: str='', search_for: str=SEARCH_FOR_SONGS) -> ([SearchableModel], [str]):
         """
         Searches for the given search_for type (tags, albums, artists, songs), which fulfills the given search phrase.
 
