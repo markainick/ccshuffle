@@ -16,8 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from shuffle import urls as shuffle_urls
+from django.conf.urls.i18n import i18n_patterns
 
-urlpatterns = [
+urlpatterns = i18n_patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include(shuffle_urls.urlpatterns)),
-]
+)

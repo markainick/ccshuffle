@@ -42,6 +42,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -104,6 +105,13 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.getcwd() + "/static",)
 
+
+# Locale Path
+# https://docs.djangoproject.com/en/1.8/topics/i18n/translation/
+LOCALE_PATHS = (
+    'locale',
+)
+
 # Logging settings
 # https://docs.djangoproject.com/en/1.8/topics/logging/
 
@@ -124,5 +132,4 @@ STATICFILES_DIRS = (os.getcwd() + "/static",)
             'propagate': True,
         },
     },
-}''' 
-
+}'''

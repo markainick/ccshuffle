@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
+
 {% load staticfiles %}
+{% comment %} Localization {% endcomment %}
+{% load i18n %}
 
 {% block headjs %}
     <!-- Search container javascript -->
@@ -21,13 +24,13 @@
                             <li role="tab"
                                     {% if request.GET.search_for == None or request.GET.search_for == 'songs' %}
                                 class="active" {% endif %} >
-                                <a href="#songs" data-toggle="tab">Songs</a>
+                                <a href="#songs" data-toggle="tab">{% trans 'Songs' %}</a>
                             </li>
                             <li role="tab" {% if request.GET.search_for == 'artists' %} class="active" {% endif %}>
-                                <a href="#artists" data-toggle="tab">Artists</a>
+                                <a href="#artists" data-toggle="tab">{% trans 'Artists' %}</a>
                             </li>
                             <li role="tab"{% if request.GET.search_for == 'albums' %} class="active" {% endif %}>
-                                <a href="#albums" data-toggle="tab">Albums</a>
+                                <a href="#albums" data-toggle="tab">{% trans 'Albums' %}</a>
                             </li>
                         </ul>
                     </div>

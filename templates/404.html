@@ -1,12 +1,16 @@
 {% extends 'error-base.html' %}
+{% comment %} Localization {% endcomment %}
+{% load i18n %}
 
 {% block title %} 404 | {{ block.super }} {% endblock title %}
 
 {% block error-title %}
-    <h1><strong>Page not found.</strong></h1>
+    <h1><strong>{% trans 'Page not found' %}.</strong></h1>
 {% endblock error-title %}
 
 {% block error-msg %}
-     <p>For some reason the page can't be found. Try finding it from our
-     <a href="{% url 'home' %}"> homepage </a>.</p>
+    {% url 'home' as home_url %}
+    <p>
+        {% blocktrans %}For some reason the page can't be found. Try finding it from our <a href="{{ home_url }}">homepage </a>{% endblocktrans %}.
+    </p>
 {% endblock error-msg %}

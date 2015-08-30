@@ -1,5 +1,11 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+{% comment %} Localization {% endcomment %}
+{% load i18n %}
+{% trans 'Sign in' as sign_in_txt %}
+{% trans 'Sign out' as sign_out_txt %}
+{% trans 'Register' as register_txt %}
+{% comment %} end global localization {% endcomment %}
 <html lang="en">
 <head>
     <title>{% block title %} Creative Commons Shuffle {% endblock title %}</title>
@@ -43,7 +49,7 @@
                 {% if user.is_authenticated %}
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                             data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                        <span class="sr-only">Toggle navigation</span>
+                        <span class="sr-only">{% trans 'Toggle navigation' %}</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
@@ -53,9 +59,9 @@
                     </a> {% endcomment %}
                 {% else %}
                     <a id="link_register" class="btn btn-primary navbar-btn register-button"
-                       href="{% url 'register' %}">Register</a>
+                       href="{% url 'register' %}">{{ register_txt }}</a>
                     <a class="btn btn-default navbar-btn login-button pull-right visible-xs"
-                       href="{% url 'signin' %}">Sign in</a>
+                       href="{% url 'signin' %}">{{ sign_in_txt }}</a>
                 {% endif %}
             {% endblock %}
         </div>
@@ -64,10 +70,10 @@
                 {% if user.is_authenticated %}
                     <ul id="user-nav" class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                        <li><a href="#">Profile</a></li>
-                        <li><a href="#">Favorites</a></li>
-                        <li><a href="#">Playlists</a></li>
-                        <li><a href="{% url 'signout' %}?next={{ request.path }}">Sign out</a></li>
+                        <li><a href="#">{% trans 'Profile' %}</a></li>
+                        <li><a href="#">{% trans 'Favorites' %}</a></li>
+                        <li><a href="#">{% trans 'Playlists' %}</a></li>
+                        <li><a href="{% url 'signout' %}?next={{ request.path }}">{{ sign_out_txt }}</a></li>
                     </ul>
                 {% else %}
                     <form id="login-form" action="{% url 'signin' %}"
@@ -76,17 +82,17 @@
                         {% csrf_token %}
                         <div class="form-group">
                             <label class="sr-only"
-                                   for="{{ globalLoginForm.username.id_for_label }}">Username</label>
+                                   for="{{ globalLoginForm.username.id_for_label }}">{% trans 'Username' %}</label>
                             {{ globalLoginForm.username }}
                         </div>
                         <div class="form-group">
                             <label class="sr-only"
-                                   for="{{ globalLoginForm.password.id_for_label }}">Password</label>
+                                   for="{{ globalLoginForm.password.id_for_label }}">{% trans 'Password' %}</label>
                             {{ globalLoginForm.password }}
                         </div>
                         <input type="hidden" name="next" value="{{ request.path }}"/>
                         <button id="btn_login" type="submit" class="btn btn-default login-button"
-                                value="Login">Sign in
+                                value="Login">{{ sign_in_txt }}
                         </button>
                     </form>
                 {% endif %}

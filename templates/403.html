@@ -1,11 +1,14 @@
 {% extends 'error-base.html' %}
 
+{% comment %} Localization {% endcomment %}
+{% load i18n %}
+
 {% block title %} 403 | {{ block.super }} {% endblock title %}
 
 {% block error-title %}
-    <h1><strong>Access denied.</strong></h1>
+    <h1><strong>{% trans 'Access denied' %}.</strong></h1>
 {% endblock error-title %}
 
 {% block error-msg %}
-     <p>You have not the permission to enter this area.</p>
+    <p>{% blocktrans %}You have not the permission to enter this area{% endblocktrans %}.</p>
 {% endblock error-msg %}

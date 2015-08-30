@@ -23,9 +23,9 @@ class LoginForm(AuthenticationForm):
         super(LoginForm, self).__init__(*args, **kwargs)
 
         self.fields['username'].widget.attrs.update(
-            {'class': 'form-control', 'placeholder': 'Username', 'required': 'required'})
+            {'class': 'form-control', 'placeholder': _('Username'), 'required': 'required'})
         self.fields['password'].widget.attrs.update(
-            {'class': 'form-control', 'placeholder': 'Password', 'required': 'required'})
+            {'class': 'form-control', 'placeholder': _('Password'), 'required': 'required'})
 
 
 class RegistrationForm(UserCreationForm):
@@ -38,17 +38,17 @@ class RegistrationForm(UserCreationForm):
 
         self.fields['username'].widget.attrs.update({'id': 'id_username_register',
                                                      'class': 'form-control',
-                                                     'placeholder': 'Username',
+                                                     'placeholder': _('Username'),
                                                      'aria-describedby': 'basic-username',
                                                      'required': 'required'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control',
-                                                      'placeholder': 'Password',
+                                                      'placeholder': _('Password'),
                                                       'aria-describedby': 'basic-password',
                                                       'required': 'required'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control',
-                                                      'placeholder': 'Password',
+                                                      'placeholder': _('Password'),
                                                       'aria-describedby': 'basic-password-confirm',
                                                       'required': 'required'})
         self.fields['email'].widget.attrs.update({'class': 'form-control',
-                                                  'placeholder': 'Your email',
+                                                  'placeholder': _('Your email'),
                                                   'aria-describedby': 'basic-email'})
