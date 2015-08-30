@@ -48,32 +48,38 @@
             {% block navigation-header %}
                 {% if user.is_authenticated %}
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                            data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                            data-target="#user-navbar-collapse" aria-expanded="false">
                         <span class="sr-only">{% trans 'Toggle navigation' %}</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    {% comment %}<a class="navbar-brand" href="{% url 'home' %}">
+                    {% comment %}
+                    <a class="navbar-brand" href="{% url 'home' %}">
                         {% include 'ccshuffle-logo.svg' %}
                     </a> {% endcomment %}
                 {% else %}
                     <a id="link_register" class="btn btn-primary navbar-btn register-button"
                        href="{% url 'register' %}">{{ register_txt }}</a>
-                    <a class="btn btn-default navbar-btn login-button pull-right visible-xs"
+                    <a id='btn_login_xs' class="btn btn-default navbar-btn login-button pull-right visible-xs"
                        href="{% url 'signin' %}">{{ sign_in_txt }}</a>
                 {% endif %}
             {% endblock %}
         </div>
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse" id="user-navbar-collapse">
             {% block navigation %}
                 {% if user.is_authenticated %}
+                    <ul id="user-profile-nav" class="nav navbar-nav navbar-left">
+                        <li>
+                            <a id="user-profile-link" href="#"><span class="fa fa-user-md"></span>
+                                {{ user.username }}
+                            </a>
+                        </li>
+                        <li><a id="user-favorites-link" href="#">{% trans 'Favorites' %}</a></li>
+                        <li><a id="user-playlists-link" href="#">{% trans 'Playlists' %}</a></li>
+                    </ul>
                     <ul id="user-nav" class="nav navbar-nav navbar-right">
-                        <li class="dropdown">
-                        <li><a href="#">{% trans 'Profile' %}</a></li>
-                        <li><a href="#">{% trans 'Favorites' %}</a></li>
-                        <li><a href="#">{% trans 'Playlists' %}</a></li>
-                        <li><a href="{% url 'signout' %}?next={{ request.path }}">{{ sign_out_txt }}</a></li>
+                        <li><a href="{% url 'signout' %}?next={{ request.path }}">{{ sign_out_txt }}</a>
                     </ul>
                 {% else %}
                     <form id="login-form" action="{% url 'signin' %}"

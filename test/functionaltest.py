@@ -1,20 +1,30 @@
-__author__ = 'Kevin Haller'
+#   COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
 
 import time
+import copy
 import unittest
 from selenium import webdriver
 
-# COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
-#
-#
-
 django_url = 'http://localhost:8000'
+
+amelie_username = 'amelie@testing'
+amelie_password = 'the_cake_is_a_lie'
+amelie_email = 'amelie@gmail.com'
 
 
 class LoginTest(unittest.TestCase):
-    """
-        This class tests the login behaviour.
-    """
+    """ This class tests the login behaviour. """
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -23,9 +33,7 @@ class LoginTest(unittest.TestCase):
         self.browser.quit()
 
     def test_login_expected_way(self):
-        """
-            This test case tests the login behaviour, when the correct credentials are entered.
-        """
+        """ This test case tests the login behaviour, when the correct credentials are entered. """
         # Amelie visits the homepage of this service and she has already an account. On the upper side (in the header)
         # she sees the login box with the username and the password textfield, because she is working on a laptop.
         self.browser.get(django_url)
@@ -38,23 +46,45 @@ class LoginTest(unittest.TestCase):
         self.assertEqual('Password', password_input.get_attribute('placeholder'),
                          "The placeholder text of the password field must be 'Password' ")
         # She entered here username and password correctly and presses the 'Login' - button besides the text fields.
-        username_input.send_keys('amelie')
-        password_input.send_keys('amelie')
+        username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password)
         login_button.submit()
         # Amelie has logged in successfully and sees her username in the upper left corner.
-        dropdown_user_menu = self.browser.find_element_by_id('dropdownUserMenu')
-        self.assertEqual(dropdown_user_menu.text, 'amelie')
+        user_profile_link = self.browser.find_element_by_id('user-profile-link')
+        self.assertEqual(user_profile_link.text, amelie_username)
 
     def test_login_expected_way_mobil(self):
-        """
-            The test case tests the login behaviour on mobile devices, when the correct credentials are entered.
-        """
-        self.fail("Not implemented")
+        """ The test case tests the login behaviour on mobile devices, when the correct credentials are entered. """
+        browser = copy.copy(self.browser)
+        # Amelie visits the homepage of this service with her mobil phone, because she is on the way to go jogging and
+        # so she has the laptop not with her. She want to listen to a paylist, which she created three days before.
+        browser.set_window_size(500, 750)
+        browser.get(django_url)
+        # She sees the sign in button on the upper right corner and clicks it. She is redirected to the login page.
+        login_link = browser.find_element_by_id('btn_login_xs')
+        login_link.click()
+        self.assertIn('Login', self.browser.title)
+        login_button = browser.find_element_by_id('btn_login')
+        username_input = browser.find_element_by_id("id_username")
+        password_input = browser.find_element_by_id("id_password")
+        self.assertEqual('Username', username_input.get_attribute('placeholder'),
+                         "The placeholder text of the username field must be 'Username' ")
+        self.assertEqual('Password', password_input.get_attribute('placeholder'),
+                         "The placeholder text of the password field must be 'Password' ")
+        # Amelie enter her credentials and clicks the login button.
+        username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password)
+        login_button.submit()
+        # The login attempt succeeds and Amelie is redirected to the homepage, where her username is displayed in the
+        # navigation bar (which is shown, if the user clicks the menu button).
+        navigation_bar_btn = browser.find_element_by_class_name('navbar-toggle')
+        navigation_bar_btn.click()
+        user_profile_link = browser.find_element_by_id('user-profile-link')
+        self.assertIsNotNone(user_profile_link)
+        self.assertEqual(user_profile_link.text, amelie_username)
 
     def test_login_wrong_credentials(self):
-        """
-            The test case tests the login behaviour, when the wrong credentials are entered.
-        """
+        """ The test case tests the login behaviour, when the wrong credentials are entered. """
         # Amelie visits the homepage of this service and she has already an account. On the upper side (in the header)
         # she sees the login box with the username and the password textfield, because she is working on a laptop.
         self.browser.get(django_url)
@@ -67,8 +97,8 @@ class LoginTest(unittest.TestCase):
         self.assertEqual('Password', password_input.get_attribute('placeholder'),
                          "The placeholder text of the password field must be 'Password' ")
         # She entered here username and password not correctly and presses the 'Login' - button besides the text fields.
-        username_input.send_keys('amelie')
-        password_input.send_keys('AMELIE')
+        username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password.upper())  # wrong password
         login_button.submit()
         # Amelie is redirected to the login page, where a error message is displayed. This error message informs Amelie
         # about the unsuccessful login attempt.
@@ -88,8 +118,8 @@ class LoginTest(unittest.TestCase):
         # Amelie thinks and enters her credentials again.
         if len(username_input.get_attribute('value')) == 0:
             print("The browser (%s) has not saved the entered username !" % self.browser.name)
-            username_input.send_keys('amelie')
-        password_input.send_keys('AMELIE')
+            username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password.upper())
         login_button.submit()
         # The credentials are wrong again. An error message informs Amelie about the unsuccessful login attempt.
         # The login page is displayed again.
@@ -109,20 +139,18 @@ class LoginTest(unittest.TestCase):
         # again.
         if len(username_input.get_attribute('value')) == 0:
             print("The browser (%s) has not saved the entered username !" % self.browser.name)
-            username_input.send_keys('amelie')
-        password_input.send_keys('amelie')
+            username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password)
         login_button.submit()
         # The login attempt succeeds and Amelie is redirected to the homepage, where her username is displayed in the
         # upper left corner.
-        dropdown_user_menu = self.browser.find_element_by_id('dropdownUserMenu')
-        self.assertIsNotNone(dropdown_user_menu)
-        self.assertEqual(dropdown_user_menu.text, 'amelie')
+        user_profile_link = self.browser.find_element_by_id('user-profile-link')
+        self.assertIsNotNone(user_profile_link)
+        self.assertEqual(user_profile_link.text, amelie_username)
 
 
 class RegistrationTest(unittest.TestCase):
-    """
-        This class tests the registration behaviour.
-    """
+    """ This class tests the registration behaviour. """
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -134,9 +162,6 @@ class RegistrationTest(unittest.TestCase):
         """
             This test case tests the registration process.
         """
-        username = 'amelie@testing'
-        password = 'the_cake_is_a_lie'
-        email = 'amelie@gmail.com'
         # Amelie visits the homepage of the service and has no account, so she wants to register.
         # So she clicks on the 'register' button.
         self.browser.get(django_url)
@@ -146,7 +171,7 @@ class RegistrationTest(unittest.TestCase):
         # Now Amelie sees the registration page.
         self.assertIn('Register', self.browser.title)
         register_form = self.browser.find_element_by_id('register-form')
-        username_input = register_form.find_element_by_id('id_username')
+        username_input = register_form.find_element_by_id('id_username_register')
         password1_input = register_form.find_element_by_id('id_password1')
         password2_input = register_form.find_element_by_id('id_password2')
         self.assertEqual(username_input.get_attribute('placeholder'), 'Username',
@@ -159,10 +184,10 @@ class RegistrationTest(unittest.TestCase):
         create_account_button = self.browser.find_element_by_id('btn_create_account')
         # She enters the username 'amelie@testing' as well as the desired password. She also enters the email to ensure,
         # that she has the option to reset the password. Amelie is aware of forgetting the password.
-        username_input.send_keys(username)
-        password1_input.send_keys(password)
-        password2_input.send_keys(password)
-        email_input.send_keys(email)
+        username_input.send_keys(amelie_username + '#2')
+        password1_input.send_keys(amelie_password)
+        password2_input.send_keys(amelie_password)
+        email_input.send_keys(amelie_email)
         # Afterwards Amelie clicks on the 'create account'-button.
         create_account_button.click()
         # The registration was successful and Amelie is redirected to the login page, where a message is displayed to
@@ -179,16 +204,16 @@ class RegistrationTest(unittest.TestCase):
         self.assertEqual('Password', password_input.get_attribute('placeholder'),
                          "The placeholder text of the password field must be 'Password' ")
         # She entered here username and password not correctly and presses the 'Login' - button besides the text fields.
-        username_input.send_keys(username)
-        password_input.send_keys(password)
+        username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password)
         login_button.submit()
         # The login attempt succeeds and Amelie is redirected to the homepage, where her username is displayed in the
         # upper left corner.
-        dropdown_user_menu = self.browser.find_element_by_id('dropdownUserMenu')
-        self.assertIsNotNone(dropdown_user_menu)
-        self.assertEqual(dropdown_user_menu.text, username)
+        user_profile_link = self.browser.find_element_by_id('user-profile-link')
+        self.assertIsNotNone(user_profile_link)
+        self.assertEqual(user_profile_link.text, amelie_username + '#2')
         self.fail("Not implemented")
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     unittest.main()
