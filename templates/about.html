@@ -36,12 +36,12 @@
                 <li><a href="#">Profile</a></li>
                 <li><a href="#">Favorites</a></li>
                 <li><a href="#">Playlists</a></li>
-                <li><a href="{% url 'signout' %}?next={{ request.path }}">Sign out</a></li>
+                <li><a href="{% url 'signout' %}?next={{ request.get_full_path }}">Sign out</a></li>
             </ul>
         {% else %}
             <ul id="user-nav" class="nav navbar-nav navbar-left">
                 <li class="dropdown">
-                <li><a href="{% url 'signin' %}">Login</a></li>
+                <li><a href="{% url 'signin' %}?next={{ request.get_full_path }}">Login</a></li>
                 <li><a href="{% url 'register' %}">Register</a></li>
             </ul>
         {% endif %}
