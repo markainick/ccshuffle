@@ -159,7 +159,8 @@ class NotFoundErrorPageView(generic.TemplateView):
 
     def get(self, request, *args, **kwargs):
         logger.info("Get (Not found) %s" % request.session['last_url'])
-        return super(NotFoundErrorPageView, self).get(request, *args, **kwargs)
+        context = self.get_context_data(**kwargs)
+        return self.render_to_response(context, status=404)
 
     def get_context_data(self, **kwargs):
         context = super(type(self), self).get_context_data(**kwargs)
