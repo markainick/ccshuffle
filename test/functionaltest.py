@@ -64,7 +64,7 @@ class LoginTest(unittest.TestCase):
         # She sees the sign in button on the upper right corner and clicks it. She is redirected to the login page.
         login_link = browser.find_element_by_id('btn_login_xs')
         login_link.click()
-        self.assertIn('Login', self.browser.title)
+        self.assertIn('Login', browser.title)
         login_button = browser.find_element_by_id('btn_login')
         username_input = browser.find_element_by_id("id_username")
         password_input = browser.find_element_by_id("id_password")
@@ -174,14 +174,53 @@ class LoginTest(unittest.TestCase):
         username_input.send_keys(amelie_username)
         password_input.send_keys(amelie_password)
         login_button.submit()
-        # The login attempt was successful and Amelie is redirected to the search result.
+        # The login attempt was successful and Amelie is redirected back to the search result.
         redirect_link_parsed = urllib.parse.urlparse(self.browser.current_url)
         redirect_link_params = urllib.parse.parse_qs(redirect_link_parsed.query, strict_parsing=False)
         self.assertIn('search_phrase', redirect_link_params,
                       'The url must contains the search phrase, so that Amelie gets the same search result')
-        self.assertIn('indie', redirect_link_params['search_phrase'])
-        self.assertIn('rock', redirect_link_params['search_phrase'])
-        self.assertIn('alternative', redirect_link_params['search_phrase'])
+        self.assertIn('indie', redirect_link_params['search_phrase'][0])
+        self.assertIn('rock', redirect_link_params['search_phrase'][0])
+        self.assertIn('alternative', redirect_link_params['search_phrase'][0])
+
+    def test_login_mobil_redirect(self):
+        """
+        Tests, if the user is redirected to the page, where she or he has been before, if she or he clicks on the
+        login button and sign in on the separate login page.
+        """
+        browser = copy.copy(self.browser)
+        browser.get(django_url)
+        browser.set_window_size(500, 750)
+        # Amelie feels a little bit bored and she visits this service to maybe explore new music in her favorite genre
+        # and searches for 'alternative indie rock'.
+        search_phrase_textfield = browser.find_element_by_name('search_phrase')
+        search_phrase_textfield.send_keys('indie alternative rock')
+        search_button = browser.find_element_by_id('start-search-button')
+        search_button.click()
+        # Amelie gets the search result for her search terms and now wants to login, because she found a song at the
+        # top of the search result, which she wants to favorite (after listening).
+        login_link = browser.find_element_by_id('btn_login_xs')
+        login_link.click()
+        self.assertIn('Login', browser.title)
+        login_button = browser.find_element_by_id('btn_login')
+        username_input = browser.find_element_by_id("id_username")
+        password_input = browser.find_element_by_id("id_password")
+        self.assertEqual('Username', username_input.get_attribute('placeholder'),
+                         "The placeholder text of the username field must be 'Username' ")
+        self.assertEqual('Password', password_input.get_attribute('placeholder'),
+                         "The placeholder text of the password field must be 'Password' ")
+        # The login attempt was successful and Amelie is redirected back to the search result.
+        username_input.send_keys(amelie_username)
+        password_input.send_keys(amelie_password)
+        login_button.submit()
+        # The login attempt was successful and Amelie is redirected back to the search result.
+        redirect_link_parsed = urllib.parse.urlparse(self.browser.current_url)
+        redirect_link_params = urllib.parse.parse_qs(redirect_link_parsed.query, strict_parsing=False)
+        self.assertIn('search_phrase', redirect_link_params,
+                      'The url must contains the search phrase, so that Amelie gets the same search result')
+        self.assertIn('indie', redirect_link_params['search_phrase'][0])
+        self.assertIn('rock', redirect_link_params['search_phrase'][0])
+        self.assertIn('alternative', redirect_link_params['search_phrase'][0])
 
 
 class RegistrationTest(unittest.TestCase):

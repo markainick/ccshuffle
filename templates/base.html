@@ -62,7 +62,7 @@
                     <a id="link_register" class="btn btn-primary navbar-btn register-button"
                        href="{% url 'register' %}">{{ register_txt }}</a>
                     <a id='btn_login_xs' class="btn btn-default navbar-btn login-button pull-right visible-xs"
-                       href="{% url 'signin' %}">{{ sign_in_txt }}</a>
+                       href="{% url 'signin' %}?next={{ request.get_full_path }}">{{ sign_in_txt }}</a>
                 {% endif %}
             {% endblock %}
         </div>
@@ -96,7 +96,7 @@
                                    for="{{ globalLoginForm.password.id_for_label }}">{% trans 'Password' %}</label>
                             {{ globalLoginForm.password }}
                         </div>
-                        <input type="hidden" name="next" value="{{ request.path }}"/>
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}"/>
                         <button id="btn_login" type="submit" class="btn btn-default login-button"
                                 value="Login">{{ sign_in_txt }}
                         </button>
