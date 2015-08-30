@@ -79,7 +79,7 @@
                         <li><a id="user-playlists-link" href="#">{% trans 'Playlists' %}</a></li>
                     </ul>
                     <ul id="user-nav" class="nav navbar-nav navbar-right">
-                        <li><a href="{% url 'signout' %}?next={{ request.path }}">{{ sign_out_txt }}</a>
+                        <li><a href="{% url 'signout' %}?next={{ request.get_full_path }}">{{ sign_out_txt }}</a>
                     </ul>
                 {% else %}
                     <form id="login-form" action="{% url 'signin' %}"
