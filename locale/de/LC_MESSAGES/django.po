@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-30 02:22+0200\n"
+"POT-Creation-Date: 2015-08-30 02:30+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Kevin Haller <kevin.haller@outofbits.com>\n"
 "Language-Team: None\n"
@@ -23,6 +23,14 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ccshuffle/settings.py:118
+msgid "German"
+msgstr "Deutsch"
+
+#: ccshuffle/settings.py:119
+msgid "English"
+msgstr "Englisch"
 
 #: shuffle/forms.py:26 shuffle/forms.py:41 templates/base.html:91
 #: templates/register.html:24 templates/register.html.py:49

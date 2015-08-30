@@ -112,6 +112,13 @@ LOCALE_PATHS = (
     'locale',
 )
 
+from django.utils.translation import ugettext_lazy as _
+
+LANGUAGES = (
+    ('de', _('German')),
+    ('en', _('English')),
+)
+
 # Logging settings
 # https://docs.djangoproject.com/en/1.8/topics/logging/
 
