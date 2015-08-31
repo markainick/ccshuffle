@@ -132,3 +132,24 @@ LANGUAGES = (
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (BASE_DIR + "/static",)
+
+# Openshift specific settings for PostgreSQL
+# https://developers.openshift.com/en/databases-postgresql.html
+
+if 'OPENSHIFT_REPO_DIR' in os.environ:
+    DB_NAME = os.environ['OPENSHIFT_APP_NAME'] if 'OPENSHIFT_APP_NAME' in os.environ else 'ccshuffle'
+    DB_USER = os.environ['OPENSHIFT_POSTGRESQL_DB_USERNAME'] if 'OPENSHIFT_POSTGRESQL_DB_USERNAME' in os.environ else ''
+    DB_PASSWD = os.environ['OPENSHIFT_POSTGRESQL_DB_PASSWORD'] if 'OPENSHIFT_POSTGRESQL_DB_PASSWORD' in os.environ else ''
+    DB_HOST = os.environ['OPENSHIFT_POSTGRESQL_DB_HOST'] if 'OPENSHIFT_POSTGRESQL_DB_HOST' in os.environ else '127.0.0.1'
+    DB_PORT = os.environ['OPENSHIFT_POSTGRESQL_DB_PORT'] if 'OPENSHIFT_POSTGRESQL_DB_PORT' is os.environ else '5432'
+    # ProstgeSQL database settings.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
+        }
+    }
