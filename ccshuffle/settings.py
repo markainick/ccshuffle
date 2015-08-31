@@ -45,9 +45,10 @@ try:
         # Database
         # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
         DATABASES = conf['DATABASES']
-        # Logging settings
+        # Logging settings, which are optional.
         # https://docs.djangoproject.com/en/1.8/topics/logging/
-        LOGGING = conf['LOGGING']
+        if 'LOGGING' in conf:
+            LOGGING = conf['LOGGING']
 
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
