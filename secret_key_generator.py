@@ -28,13 +28,10 @@ def generate_password(length=8, numeric=True, special_chars=''):
     :param special_chars: the special characters, which shall be used.
     :return: the generated password.
     """
-    if length <= 0:
-        return ''
-    else:
-        char_set = string.ascii_letters + special_chars
-        if numeric:
-            char_set += string.digits
-        return generate_password(length - 1, numeric, special_chars) + random.SystemRandom().choice(char_set)
+    char_set = string.ascii_letters + special_chars
+    if numeric:
+        char_set += string.digits
+    return ''.join([random.SystemRandom().choice(char_set) for _ in range(length)])
 
 
 if __name__ == '__main__':
