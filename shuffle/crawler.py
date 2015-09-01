@@ -332,8 +332,16 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
     def __init__(self, song: Song, tags: [Tag]=None, sources: [Source]=None):
         assert isinstance(song, Song)
         super(JamendoSongEntity, self).__init__(song)
-        self.tags = (tags if tags else song.tags.all())
-        self.sources = (sources if sources else song.sources())
+        # The given tags plus the persisted tags of the song, if the song is already persisted.
+        if tags is not None:
+            self.tags = set(tags + (song.tags.all() if song.id is not None else []))
+        else:
+            self.tags = song.tags.all() if song.id is not None else []
+        # The given sources plus the persisted sources of the song, if the song is already persisted.
+        if sources is not None:
+            self.sources = set(sources + (song.sources() if song.id is not None else []))
+        else:
+            self.sources = song.sources() if song.id is not None else []
 
     @classmethod
     def new_by_json(cls, json: {str: str}):
@@ -363,9 +371,10 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             self.entity.tags.add(*self.tags)
         song = super(type(self), self).persist()
         # Persist the sources of the song.
-        for source in self.sources:
-            source.song = song
-        self.sources = self.__persist_sources(self.sources)
+        if self.sources is not None:
+            for source in self.sources:
+                source.song = song
+            self.sources = self.__persist_sources(self.sources)
         return song
 
     @classmethod
