@@ -45,6 +45,11 @@ try:
         # Database
         # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
         DATABASES = conf['DATABASES']
+        # Jamendo Authentication
+        # https://developer.jamendo.com/v3.0
+        if 'JAMENDO_AUTH' in conf:
+            JAMENDO_AUTH = conf['JAMENDO_AUTH']
+            os.environ['JAMENDO_AUTH'] = JAMENDO_AUTH
         # Logging settings, which are optional.
         # https://docs.djangoproject.com/en/1.8/topics/logging/
         if 'LOGGING' in conf:

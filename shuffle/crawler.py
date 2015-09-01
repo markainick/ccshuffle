@@ -15,6 +15,7 @@ import logging
 import urllib.parse
 import requests
 from abc import abstractmethod
+from shuffle import get_jamendo_api_auth_code
 from .models import Artist, Song, Album, Tag, Source, License, CrawlingProcess
 
 logger = logging.getLogger(__name__)
@@ -140,7 +141,7 @@ class JamendoCallException(Exception):
 class JamendoServiceMixin(object):
     """ The jamendo service mixin provides the utilities to communicate with the jamendo web service (REST Api). """
 
-    client_id = '0a7472b2'
+    client_id = get_jamendo_api_auth_code()
     api_url = 'https://api.jamendo.com/v3.0/'
 
     @classmethod
