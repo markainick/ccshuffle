@@ -298,38 +298,6 @@ section {
 #intouch .container .row .col-sm-6 {
   height: 100%;
 }
-/* Design for the footer */
-footer .credits {
-  background: #32383e;
-  color: #FFFFFF;
-  padding-right: 0px;
-  padding-right: 0rem;
-  padding-left: 0px;
-  padding-left: 0rem;
-  padding-top: 10px;
-  padding-top: 1rem;
-  padding-bottom: 10px;
-  padding-bottom: 1rem;
-}
-footer .credits .copyright {
-  line-height: 1.6;
-  color: #a1aab4;
-  font-size: 14px;
-  font-size: 1.4rem;
-}
-footer .credits a {
-  color: #FFFFFF;
-}
-footer .credits a:hover {
-  text-decoration: underline;
-  color: #FFFFFF;
-}
-footer .credits a:focus {
-  text-decoration: none;
-}
-footer .credits .fa-heart {
-  color: #fb866a;
-}
 /* Greyscale classes for container */
 .full-greyscale-this {
   filter: grayscale(1);

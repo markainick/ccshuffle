@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-30 02:30+0200\n"
+"POT-Creation-Date: 2015-09-02 01:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Kevin Haller <kevin.haller@outofbits.com>\n"
 "Language-Team: None\n"
@@ -24,22 +24,22 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ccshuffle/settings.py:118
+#: ccshuffle/settings.py:129
 msgid "German"
 msgstr "Deutsch"
 
-#: ccshuffle/settings.py:119
+#: ccshuffle/settings.py:130
 msgid "English"
 msgstr "Englisch"
 
-#: shuffle/forms.py:26 shuffle/forms.py:41 templates/base.html:91
+#: shuffle/forms.py:26 shuffle/forms.py:41 templates/base.html:97
 #: templates/register.html:24 templates/register.html.py:49
 #: templates/signin.html:34
 msgid "Username"
 msgstr "Benutzername"
 
 #: shuffle/forms.py:28 shuffle/forms.py:45 shuffle/forms.py:49
-#: templates/base.html:96 templates/register.html:29
+#: templates/base.html:102 templates/register.html:29
 #: templates/register.html.py:63 templates/signin.html:38
 msgid "Password"
 msgstr "Passwort"
@@ -74,6 +74,18 @@ msgstr ""
 "Versuchen Sie es beginnend von der <a href=\"%(home_url)s\">Startseite </a> "
 "erneut"
 
+#: templates/about.html:193
+msgid "Home"
+msgstr "Startseite"
+
+#: templates/about.html:195 templates/base.html:123
+msgid "Source Code"
+msgstr "Quellcode"
+
+#: templates/about.html:198 templates/base.html:126
+msgid "Support"
+msgstr "Unterstützung"
+
 #: templates/base.html:6 templates/register.html:12
 #: templates/register.html.py:34 templates/signin.html:21
 #: templates/signin.html.py:53
@@ -93,17 +105,17 @@ msgstr "Registrieren"
 msgid "Toggle navigation"
 msgstr "Toggle navigation"
 
-#: templates/base.html:79
-msgid "Profile"
-msgstr "Profil"
-
-#: templates/base.html:80
+#: templates/base.html:84
 msgid "Favorites"
 msgstr "Lieblinge"
 
-#: templates/base.html:81
+#: templates/base.html:85
 msgid "Playlists"
 msgstr "Playlisten"
+
+#: templates/base.html:121
+msgid "About"
+msgstr "Infos"
 
 #: templates/index.html:28
 msgid "Songs"
@@ -130,3 +142,6 @@ msgstr "optional"
 msgctxt "registration form"
 msgid "Create Account"
 msgstr "Konto erstellen"
+
+#~ msgid "Profile"
+#~ msgstr "Profil"

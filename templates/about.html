@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% comment %} Localization {% endcomment %}
+{% load i18n %}
 
 {% block title %} About | {{ block.super }} {% endblock title %}
 
@@ -179,17 +181,28 @@
             </div>
         </div>
     </section>
-    <footer>
-        <div class="container-fluid">
-            <div class="row credits">
-                <div class="container text-center">
-                    <small class="copyright">Designed with <i class="fa fa-heart"></i> by <a
-                            href="http://kevin-haller.outofbits.com/" target="_blank">Kevin Haller</a> / <a
-                            href="http://startbootstrap.com"> Startboostrap</a>
-                    </small>
-                </div>
+{% endblock content %}
+
+{% block footer %}
+    <footer class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-4">
+                <ul class="nav nav-pills">
+                    <li class="footer-link-about"><a href="{% url 'home' %}">{% trans 'Home' %}</a></li>
+                    <li class="footer-link-source-code">
+                        <a href="https://github.com/outofbits/ccshuffle" target="_blank">{% trans 'Source Code' %}</a>
+                    </li>
+                    <li class="footer-link-support">
+                        <a href="bitcoin:3EE3aAw6TNgG1fpoFbez2Y7KefCMcjMfmj" target="_blank">{% trans 'Support' %}</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="col-sm-4 text-center copyright">
+                <small>Designed with <i class="fa fa-heart"></i> by <a
+                        href="http://kevin-haller.outofbits.com/" target="_blank">Kevin Haller</a>
+                </small>
             </div>
         </div>
     </footer>
-{% endblock content %}
+{% endblock footer %}
 
