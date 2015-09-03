@@ -73,10 +73,13 @@ class IndexPageView(generic.TemplateView):
         search_for = request.GET.get('search_for', None)
         if search_for:
             search_phrase = request.GET.get('search_phrase', '')
-            search_result = SearchEngine.search(search_phrase, search_for)
-            kwargs['search_result'] = list(search_result[0][:20])
+            search_result, searched_tags = SearchEngine.search(search_phrase, search_for)
+            search_result_offset = int(request.GET.get('start', 0))
+            kwargs['search_result_count'] = len(search_result)
+            kwargs['search_offset'] = search_result_offset
+            kwargs['search_result'] = list(search_result[search_result_offset:search_result_offset + 10])
             if search_for == 'songs':
-                kwargs['searched_tags'] = search_result[1]
+                kwargs['searched_tags'] = searched_tags
         return super(IndexPageView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):

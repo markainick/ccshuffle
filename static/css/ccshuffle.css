@@ -212,6 +212,9 @@ svg #svg-shuffle-text {
   padding-bottom: 15px;
   padding-bottom: 1.5rem;
 }
+#search-results-section .search-pagination {
+  text-align: center;
+}
 /* Style for the song card. */
 .song-card-container .panel-footer {
   background-color: transparent;

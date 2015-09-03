@@ -3,6 +3,8 @@
 {% load staticfiles %}
 {% comment %} Localization {% endcomment %}
 {% load i18n %}
+{% comment %} Extra tags and filters for searching {% endcomment %}
+{% load search_extras %}
 
 {% block headjs %}
     <!-- Search container javascript -->
@@ -145,6 +147,11 @@
                     {% endfor %}
                     </div>
                 <!-- end grid for the search result -->
+                <!-- Pagination for the search result -->
+                <div class="row search-pagination">
+                    {% search_pagination search_offset search_result_count 10 %}
+                </div>
+                <!-- end pagination for the search result -->
             </section>
         {% endif %}
     </section>
