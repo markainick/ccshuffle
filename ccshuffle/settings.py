@@ -72,6 +72,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'shuffle',
+    'crawler',
 )
 
 MIDDLEWARE_CLASSES = (

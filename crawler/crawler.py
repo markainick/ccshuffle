@@ -15,8 +15,9 @@ import logging
 import urllib.parse
 import requests
 from abc import abstractmethod
-from shuffle import get_jamendo_api_auth_code
-from .models import Artist, Song, Album, Tag, Source, License, CrawlingProcess
+from crawler import get_jamendo_api_auth_code
+from crawler.models import CrawlingProcess
+from shuffle.models import Artist, Song, Album, Tag, Source, License
 
 logger = logging.getLogger(__name__)
 

@@ -10,15 +10,3 @@
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
 #
-import os
-
-def get_jamendo_api_auth_code():
-    """
-    Returns the authentication code for using the jamendo api.
-
-    :return: the authentication code for using the jamendo api.
-    """
-    if 'JAMENDO_AUTH' in os.environ:
-        return os.environ['JAMENDO_AUTH']
-    else:
-        raise ValueError('The jamendo authentication code is not set. You can specify it in the CONF_FILE or by setting the environment variable \'JAMENDO_AUTH\'.')
