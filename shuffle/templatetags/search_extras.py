@@ -25,7 +25,7 @@ def get_range(value, offset=0):
 
     :param offset: the integer to start the list with (optional). If not given, 0 will be used as start value.
     :param value: the last value of the list.
-    :return: returns the list of integers from offset to value (step=1).
+    :return: returns the list of integers from offset to value (step size is 1).
     """
     return range(int(offset), int(value))
 
@@ -45,12 +45,15 @@ def multiply(a, b):
 @register.simple_tag(name='search_pagination_url', takes_context=True)
 def search_pagination_link_url(context, start):
     """
-    Computes for search result requests the link with the given start value. If the url already has a start parameter,
-    the current one is replaced by the given one. A ValueError will be thrown, if the given url is no request for a
-    search result.
+    This simple tag analyses the full path of the request (which caused that the template with this
+    search_pagination_url tag was rendered). This tag returns the link of the search request with the given start
+    parameter (the old one will be overridden, if the start parameter already exists). Except of the start parameter the
+    returned link is the same as the search request url.
 
-    :param url: the url of the current request.
-    :param start: the value, which the start parameter shall have.
+    This tag can be used to generate the links of the search pagination.
+
+    :param context: the used context.
+    :param start: the value, which the start parameter of the search request shall have.
     :return: the given url with the new given start parameter.
     """
     scheme, netloc, path, query, fragment = urlsplit(context['request'].get_full_path())
@@ -68,13 +71,14 @@ def search_pagination_link_url(context, start):
 @register.inclusion_tag('searchpagination.html', name='search_pagination', takes_context=True)
 def pagination_navigation(context, current, max_index, number_of_indexes, min_index=0, step=10):
     """
-    A filter for pagination. The filter returns a tuple (lower index, current index, upper index) for the display of
-    elegant pagination navigation.
+    A custom inclusion tag using the search pagination template. The tag shall only be used on the template, where the
+    results of the search request are rendered.
 
-    :param current: the current (activated) index inside of the pagination.
-    :param max_index:  the max index number.
-    :param number_of_indexes: the indexes, which shall be visible.
-    :return: a tuple of (lower index, current index, upper index)
+    :param context: the used context.
+    :param current: the index of the first displayed element inside the search results list.
+    :param max_index:  the index of the last element inside the search results list.
+    :param number_of_indexes: the number of displayed page links of the pagination.
+    :return: the context for the search pagination template.
     """
     step = int(step)
     current = int(current)
