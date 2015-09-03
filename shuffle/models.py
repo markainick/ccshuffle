@@ -14,57 +14,8 @@
 from django.db import models
 from datetime import datetime
 from abc import abstractmethod
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q, Count
-
-
-class DeserializableException(Exception):
-    """ This exception will be thrown, if the serialized representation can't be parsed correctly."""
-    pass
-
-
-class SerializableModel(object):
-    """ This class represents json models that have the function 'serializable' that returns a serializable object.  """
-
-    @abstractmethod
-    def serialize(self):
-        """
-        Serializes this object so that it f.e. can be converted to JSON.
-
-        :return:the serialized object.
-        """
-        raise NotImplementedError('The function serialize of %s' % self.__class__.__name__)
-
-    @classmethod
-    @abstractmethod
-    def from_serialized(cls, obj):
-        """
-        Parses the serialized representation of the object of this class and returns a object of this class. Throws a
-        DeserializableException, if the representation can not be pared.
-
-        :param obj: the serialized representation of the object, which shall be parsed.
-        :return: the object of this class.
-        """
-        raise NotImplementedError('The function from_serialized of %s' % cls.__class__.__name__)
-
-
-class JSONModelEncoder(DjangoJSONEncoder):
-    """  This class represents a json encoder for the models, which are instance of the ModelSerializable class."""
-
-    def default(self, o):
-        if o is None:
-            return ''
-        elif isinstance(o, (str, int, float)):
-            return str(o)
-        elif isinstance(o, (dict, set)):
-            return {key: self.default(o[key]) for key in o}
-        elif isinstance(o, (list, tuple)):
-            return [self.default(entry) for entry in o]
-        elif isinstance(o, SerializableModel):
-            # Serialize if the object is serializable.
-            return self.default(o.serialize())
-        else:
-            return super(type(self), self).default(o)
+from ccshuffle.serialize import SerializableModel, DeserializableException
 
 
 class SearchableModel(object):
@@ -81,7 +32,7 @@ class SearchableModel(object):
         raise NotImplementedError('The function search of %s' % cls.__class__.__name__)
 
 
-class Artist(models.Model, SerializableModel):
+class Artist(models.Model, SerializableModel, SearchableModel):
     """ This class represents the model for artists. """
     name = models.CharField(max_length=250, blank=False)
     abstract = models.CharField(max_length=250, blank=True, default=None, null=True)
@@ -90,6 +41,10 @@ class Artist(models.Model, SerializableModel):
     country_code = models.CharField(max_length=250, blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    @classmethod
+    def search(cls, phrase: str, tags: [str]):
+        raise NotImplementedError('The search of artists is not implemented.')
 
     def is_on_jamendo(self):
         """
@@ -140,7 +95,7 @@ class Artist(models.Model, SerializableModel):
         return self.name
 
 
-class Album(models.Model, SerializableModel):
+class Album(models.Model, SerializableModel, SearchableModel):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -148,6 +103,10 @@ class Album(models.Model, SerializableModel):
     release_date = models.DateField(blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    @classmethod
+    def search(cls, phrase: str, tags: [str]):
+        raise NotImplementedError('The search of albums is not implemented.')
 
     def is_on_jamendo(self):
         """
@@ -505,51 +464,3 @@ class Source(models.Model, SerializableModel):
     def __str__(self):
         return 'Song: %s Type: %s Link: %s (Codec: %s)' % (repr(self.song), self.type, self.link, self.codec)
 
-
-class CrawlingProcess(models.Model, SerializableModel):
-    """ This class represents planned, executed or failed crawling processes. """
-
-    Service_Jamendo = 'Jamendo'
-    Service_Soundcloud = 'Soundcloud'
-    Service_CCMixter = 'CCMixter'
-    Service_General = 'GENERAL'
-
-    Status_Planned = 'Planned'
-    Status_Running = 'Running'
-    Status_Finished = 'Finished'
-    Status_Failed = 'Failed'
-
-    service = models.CharField(max_length=100, blank=False)
-    execution_date = models.DateTimeField(blank=False, default=datetime.now)
-    status = models.CharField(max_length=100, blank=False)
-    exception = models.CharField(max_length=500, blank=True, null=True)
-
-    def serialize(self):
-        return {
-            'service': self.service,
-            'execution_date': self.execution_date,
-            'status': self.status,
-            'exception': self.exception,
-        }
-
-    @classmethod
-    def from_serialized(cls, obj):
-        if isinstance(obj, cls):
-            return obj
-        elif isinstance(obj, (dict, set)):
-            try:
-                execution_date = obj['execution_date']
-                if isinstance(execution_date, str):
-                    execution_date = datetime.strptime(obj['execution_date'], '%Y-%m-%dT%H:%M:%S')
-                elif not isinstance(execution_date, datetime):
-                    raise DeserializableException('The given release date can\'t be parsed.')
-                return cls(service=obj['service'], execution_date=execution_date, status=obj['status'],
-                           exception=obj['exception'])
-            except KeyError as e:
-                raise DeserializableException('The given serialized representation is corrupted.') from e
-        else:
-            raise DeserializableException(
-                'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
-
-    def __str__(self):
-        return '%s (%s - %s)' % (self.execution_date, self.service, self.status)

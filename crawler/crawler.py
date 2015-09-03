@@ -15,8 +15,9 @@ import logging
 import urllib.parse
 import requests
 from abc import abstractmethod
-from shuffle import get_jamendo_api_auth_code
-from .models import Artist, Song, Album, Tag, Source, License, CrawlingProcess
+from crawler import get_jamendo_api_auth_code
+from crawler.models import CrawlingProcess
+from shuffle.models import Artist, Song, Album, Tag, Source, License
 
 logger = logging.getLogger(__name__)
 
@@ -241,7 +242,7 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
                     return response_set.first()
                 else:
                     pass  # TODO: Find the correct artist ?
-        raise ValueError('The song can\'t be created.')
+        raise ValueError('The artist (Jamendo Id: %s, Name: %s) can\'t be created.' % (jamendo_id, name))
 
     @classmethod
     def all_artists(cls) -> [Artist]:
@@ -278,8 +279,11 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         album = Album()
         album.jamendo_id = json['id']
         album.name = json['name']
-        album.artist = JamendoArtistEntity.get_or_create(jamendo_id=json['artist_id'],
-                                                         name=json['artist_name'])
+        try:
+            album.artist = JamendoArtistEntity.get_or_create(jamendo_id=json['artist_id'], name=json['artist_name'])
+        except Exception as e:
+            album.artist = None
+            logging.exception(e)
         album.release_date = json['releasedate']
         album.cover = json['image']
         return cls(album)
@@ -308,7 +312,7 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
                     return response_set.first()
                 else:
                     pass  # TODO: Find the correct album ?
-        raise ValueError('The album can\'t be created.')
+        raise ValueError('The album (Jamendo Id: %s, Name: %s) can\'t be created.' % (jamendo_id, name))
 
     @classmethod
     def all_albums(cls) -> [Album]:
@@ -354,8 +358,16 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         song = Song()
         song.jamendo_id = json['id']
         song.name = json['name']
-        song.album = JamendoAlbumEntity.get_or_create(name=json['album_name'], jamendo_id=json['album_id'])
-        song.artist = JamendoArtistEntity.get_or_create(name=json['artist_name'], jamendo_id=json['artist_id'])
+        try:
+            song.album = JamendoAlbumEntity.get_or_create(name=json['album_name'], jamendo_id=json['album_id'])
+        except Exception as e:
+            song.album = None
+            logging.exception(e)
+        try:
+            song.artist = JamendoArtistEntity.get_or_create(name=json['artist_name'], jamendo_id=json['artist_id'])
+        except Exception as e:
+            song.artist = None
+            logging.exception(e)
         song.duration = int(json['duration'])
         song.release_date = json['releasedate']
         song.cover = json['image']
@@ -401,7 +413,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
                     return response_set.first()
                 else:
                     pass  # TODO: Find the correct song ?
-        raise ValueError('The song can\'t be created.')
+        raise ValueError('The song (Jamendo Id: %s, Name: %s) can\'t be created.' % (jamendo_id, name))
 
     @classmethod
     def all_songs(cls) -> [Song]:

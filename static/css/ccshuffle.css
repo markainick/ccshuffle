@@ -13,12 +13,19 @@
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  */
-html,
-body {
+body,
+html {
+  height: 100%;
   min-width: 350px;
 }
 #content {
-  margin-top: 50px;
+  padding-top: 50px;
+  min-height: calc(100% -  40px);
+}
+@media (max-width: 767px) {
+  #content {
+    min-height: calc(100% -  64px);
+  }
 }
 /* Style for the svg logo */
 svg #svg-shuffle-logo {
@@ -205,6 +212,9 @@ svg #svg-shuffle-text {
   padding-bottom: 15px;
   padding-bottom: 1.5rem;
 }
+#search-results-section .search-pagination {
+  text-align: center;
+}
 /* Style for the song card. */
 .song-card-container .panel-footer {
   background-color: transparent;
@@ -227,4 +237,95 @@ svg #svg-shuffle-text {
 #player-section {
   position: absolute;
   bottom: 0px;
+}
+/* Design for the footer */
+footer {
+  background-color: #32383e;
+  height: 40px;
+  color: #FFFFFF;
+}
+@media (max-width: 767px) {
+  footer {
+    height: 64px;
+  }
+}
+footer .copyright small {
+  line-height: 1.6;
+  color: #a1aab4;
+  font-size: 14px;
+  font-size: 1.4rem;
+}
+@media (min-width: 768px) {
+  footer .copyright {
+    line-height: 40px;
+  }
+}
+footer .nav-pills > li > a {
+  border-radius: 0;
+}
+footer .nav-pills > li > a:focus,
+footer .nav-pills > li > a:hover,
+footer .nav-pills > li > a:active {
+  color: white;
+}
+@media (max-width: 767px) {
+  footer nav > ul {
+    width: intrinsic;
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  footer .footer-link-about > a:focus,
+  footer .footer-link-about > a:hover,
+  footer .footer-link-about > a:active {
+    background-color: transparent;
+    text-decoration: underline;
+    text-decoration-color: #5d9fe9;
+  }
+  footer .footer-link-source-code > a:focus,
+  footer .footer-link-source-code > a:hover,
+  footer .footer-link-source-code > a:active {
+    background-color: transparent;
+    text-decoration: underline;
+    text-decoration-color: #15b19c;
+  }
+  footer .footer-link-support > a:focus,
+  footer .footer-link-support > a:hover,
+  footer .footer-link-support > a:active {
+    background-color: transparent;
+    text-decoration: underline;
+    text-decoration-color: #fc6131;
+  }
+}
+@media (min-width: 768px) {
+  footer .footer-link-about > a:focus,
+  footer .footer-link-about > a:hover,
+  footer .footer-link-about > a:active {
+    background-color: #5d9fe9;
+  }
+  footer .footer-link-source-code > a:focus,
+  footer .footer-link-source-code > a:hover,
+  footer .footer-link-source-code > a:active {
+    background-color: #15b19c;
+  }
+  footer .footer-link-support > a:focus,
+  footer .footer-link-support > a:hover,
+  footer .footer-link-support > a:active {
+    background-color: #fc6131;
+  }
+}
+footer a {
+  color: #FFFFFF;
+}
+footer a:hover {
+  text-decoration: underline;
+  color: #FFFFFF;
+}
+footer a:focus {
+  text-decoration: none;
+}
+footer .fa-heart {
+  color: #fb866a;
 }

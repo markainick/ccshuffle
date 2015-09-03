@@ -10,16 +10,7 @@
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
 #
+from django.contrib import admin
+from .models import CrawlingProcess
 
-from django.conf.urls import include, url
-from .views import (AboutPageView, IndexPageView, RegisterPageView,
-                    NotFoundErrorPageView, SignInPageView, SignOutPageView)
-
-urlpatterns = [
-    url(r'^$', IndexPageView.as_view(), name="home"),
-    url(r'register/$', RegisterPageView.as_view(), name="register"),
-    url(r'login/$', SignInPageView.as_view(), name="signin"),
-    url(r'logout/$', SignOutPageView.as_view(), name="signout"),
-    url(r'about/$', AboutPageView.as_view(), name="about"),
-    url(r'.*$', NotFoundErrorPageView.as_view(), name="404"),
-]
+admin.site.register(CrawlingProcess)

@@ -1,0 +1,28 @@
+{% comment %}
+    This template represents a pagination for the search results. This template is included to other templates with the
+    custom tag search_pagination (The search_extras lib of the app shuffle must be loaded before {% load search_extras %}.
+{% endcomment %}
+{% comment %} Extra tags and filters for searching {% endcomment %}
+{% load search_extras %}
+<!-- Pagination for the search result -->
+<ul class="pagination">
+    {% if pagination_current != pagination_start %}
+        <li>
+            <a href="{% search_pagination_url pagination_start|multiply:pagination_step %}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+    {% endif %}
+    {% for n in pagination_end|get_range:pagination_start %}
+        <li {% if pagination_current == n %} class="active" {% endif %}><a
+                href="{% search_pagination_url n|multiply:pagination_step %}">{{ n|add:1 }}</a></li>
+    {% endfor %}
+    {% if pagination_end > 1 and pagination_current != pagination_end|add:-1 %}
+        <li>
+            <a href="{% search_pagination_url pagination_end|add:-1|multiply:pagination_step %}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    {% endif %}
+</ul>
+<!-- end pagination for the search result -->

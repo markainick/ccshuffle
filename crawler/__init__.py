@@ -10,16 +10,17 @@
 #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #   GNU General Public License for more details.
 #
+import os
 
-from django.conf.urls import include, url
-from .views import (AboutPageView, IndexPageView, RegisterPageView,
-                    NotFoundErrorPageView, SignInPageView, SignOutPageView)
 
-urlpatterns = [
-    url(r'^$', IndexPageView.as_view(), name="home"),
-    url(r'register/$', RegisterPageView.as_view(), name="register"),
-    url(r'login/$', SignInPageView.as_view(), name="signin"),
-    url(r'logout/$', SignOutPageView.as_view(), name="signout"),
-    url(r'about/$', AboutPageView.as_view(), name="about"),
-    url(r'.*$', NotFoundErrorPageView.as_view(), name="404"),
-]
+def get_jamendo_api_auth_code():
+    """
+    Returns the authentication code for using the jamendo api.
+
+    :return: the authentication code for using the jamendo api.
+    """
+    if 'JAMENDO_AUTH' in os.environ:
+        return os.environ['JAMENDO_AUTH']
+    else:
+        raise ValueError(
+            'The jamendo authentication code is not set. You can specify it in the CONF_FILE or by setting the environment variable \'JAMENDO_AUTH\'.')
