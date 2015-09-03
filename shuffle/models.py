@@ -81,7 +81,7 @@ class SearchableModel(object):
         raise NotImplementedError('The function search of %s' % cls.__class__.__name__)
 
 
-class Artist(models.Model, SerializableModel):
+class Artist(models.Model, SerializableModel, SearchableModel):
     """ This class represents the model for artists. """
     name = models.CharField(max_length=250, blank=False)
     abstract = models.CharField(max_length=250, blank=True, default=None, null=True)
@@ -90,6 +90,10 @@ class Artist(models.Model, SerializableModel):
     country_code = models.CharField(max_length=250, blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    @classmethod
+    def search(cls, phrase: str, tags: [str]):
+        raise NotImplementedError('The search of artists is not implemented.')
 
     def is_on_jamendo(self):
         """
@@ -140,7 +144,7 @@ class Artist(models.Model, SerializableModel):
         return self.name
 
 
-class Album(models.Model, SerializableModel):
+class Album(models.Model, SerializableModel, SearchableModel):
     """ This class represents the model for albums. An album contains typically more than one song. """
     name = models.CharField(max_length=512, blank=False)
     artist = models.ForeignKey(Artist, blank=True, null=True)
@@ -148,6 +152,10 @@ class Album(models.Model, SerializableModel):
     release_date = models.DateField(blank=True, default=None, null=True)
 
     jamendo_id = models.IntegerField(blank=True, unique=True, null=True)
+
+    @classmethod
+    def search(cls, phrase: str, tags: [str]):
+        raise NotImplementedError('The search of albums is not implemented.')
 
     def is_on_jamendo(self):
         """
