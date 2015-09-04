@@ -11,7 +11,10 @@
 #   GNU General Public License for more details.
 #
 import json
-from  datetime import datetime
+import sys
+import urllib
+import requests
+from datetime import datetime
 from django.test import TestCase
 from unittest import skip
 from ccshuffle.serialize import JSONModelEncoder
@@ -59,7 +62,20 @@ class ModelTest(TestCase):
 
 class JamendoCrawlerTest(TestCase):
     def __check_connection(self):
-        return True
+        """ Tests if the the jamendo service answers to requests. """
+        properties = {
+            'client_id': JamendoServiceMixin.client_id,
+            'id': 1247375,
+            'format': 'json',
+        }
+        response = requests.get(
+            '%stracks/?%s' % (JamendoServiceMixin.api_url, urllib.parse.urlencode(properties))).json()
+        if 'headers' in response and response['headers']['status'] == 'success':
+            return True
+        else:
+            if 'headers' in response and 'error_message' in response['headers']:
+                print(response['headers']['error_message'], file=sys.stderr)
+            return False
 
     def test_artist_merge_jamendo_songs(self):
         """
@@ -67,6 +83,7 @@ class JamendoCrawlerTest(TestCase):
 
         The test songs are 'Possibilities' from Jasmine Jordan and 'War' of Waterpistols.
         """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
         # Jasmin Jordan - Possibilities
         song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
         db_id = song_jasmine_possibilities.id
@@ -89,6 +106,7 @@ class JamendoCrawlerTest(TestCase):
              'I Don't Know What I'm Doing' from Brad Sucks > License: CC-BY-NC-SA.
              'Celebrate' from Devinjai > License: CC-BY-ND
         """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
         song_melody_for_the_grass = JamendoSongEntity.get_or_create(jamendo_id=30058)
         self.assertEqual(song_melody_for_the_grass.license.type, License.CC_BY_NC_SA,
                          'The license of the song \'Melody for the grass\' must be CC-BY-NC-SA')
@@ -108,6 +126,7 @@ class JamendoCrawlerTest(TestCase):
             Audio stream link: https://storage.jamendo.com/?trackid=1230403&format=mp31
             Download link: https://storage.jamendo.com/download/track/1230403/mp32/
         """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
         song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
         self.assertEqual(len(song_jasmine_possibilities.sources(type=Source.TYPE_STREAM, codec=Source.CODEC_MP3)), 1,
                          'There must be one streaming link persisted for this song (Codec: MP3).')
@@ -127,6 +146,7 @@ class JamendoCrawlerTest(TestCase):
 
         The song 'Possibilities' of Jasmine Jordan is used for testing.
         """
+        self.assertTrue(self.__check_connection(), 'The jamendo webservice must be reachable.')
         song_jasmine_possibilities = JamendoSongEntity.get_or_create(jamendo_id=1230403)
         song_jasmine_pos_tags = [tag.name for tag in song_jasmine_possibilities.tags.all()]
         song_jasmine_pos_tags.sort()
