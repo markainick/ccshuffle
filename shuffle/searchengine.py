@@ -12,6 +12,7 @@
 #
 
 from .models import SearchableModel, Song, Artist, Album, Tag
+from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
 import copy
@@ -48,8 +49,23 @@ class SearchEngine(object):
         def __hash__(self) -> int:
             return hash(self.search_phrase) ^ hash(self.search_for)
 
-        def __repr__(self):
+        def __repr__(self) -> str:
             return '<Search-Request: %s, %s>' % (self.search_phrase, self.search_for)
+
+    class SearchResponse(namedtuple('SearchResponse', ['search_result', 'extracted_tags'])):
+        """
+        This class represents the response to a search request, which consist of the search result and the
+        extracted tags of the search phrase of the search request.
+        """
+
+        def __eq__(self, other) -> bool:
+            if isinstance(other, type(self)):
+                return self.search_result == other.search_result
+            else:
+                return False
+
+        def __hash__(self) -> int:
+            return hash(self.search_result)
 
     class SearchCache(object):
         """ This class represents a possibility to cache search results for a search request temporarily. """
@@ -59,15 +75,15 @@ class SearchEngine(object):
         def __init__(self):
             self.search_cache = dict()
 
-        def push(self, search_request, search_result) -> None:
+        def push(self, search_request, search_response) -> None:
             """
-            Pushes the given search result to this cache. The given search request is used as key to access the search
-            result.
+            Pushes the given search response to this cache. The given search request is used as key to access the search
+            response.
 
             :param search_request: the search request (key), which is used to access the given search result .
-            :param search_result: the result of the given search request (value).
+            :param search_response: the result of the given search request (value).
             """
-            self.search_cache[search_request] = (search_result, search_request.timestamp)
+            self.search_cache[copy.deepcopy(search_request)] = (search_response, search_request.timestamp)
 
         def get(self, search_request):
             """
@@ -107,7 +123,7 @@ class SearchEngine(object):
         return [tag_name[0] for tag_name in Tag.objects.values_list('name')]
 
     @classmethod
-    def __encapsulate_tags_of(cls, search_phrase: str) -> [str]:
+    def __extract_tags_of(cls, search_phrase: str) -> [str]:
         """
         Analysis the given search phrase and returns the tags, which were found in the given search phrase.
 
@@ -120,19 +136,20 @@ class SearchEngine(object):
     @classmethod
     def accept(cls, search_request) -> ([SearchableModel], [str]):
         """
-        Accepts the search request. If the result of this request is stored in the cache, the stored result will
+        Accepts the search request. If the response of this request is stored in the cache, the stored response will
         be returned, otherwise the persistent source (database, ..) is queried.
 
         :param search_request: the search request to search for.
-        :return: the search result and the encapsulated tags in form of a tuple.
+        :return: the search response of the search request.
         """
         if search_request:
-            search_result = cls.search_cache.get(search_request)
-            if search_result is None:
-                search_tags = cls.__encapsulate_tags_of(search_request.search_phrase)
-                search_result = (cls.SEARCH_FOR[search_request.search_for].search(search_request.search_phrase,
-                                                                                  search_tags), search_tags)
-                cls.search_cache.push(search_request, copy.deepcopy(search_result))
-            return search_result
+            search_response = cls.search_cache.get(search_request)
+            if search_response is None:
+                search_tags = cls.__extract_tags_of(search_request.search_phrase)
+                search_result = cls.SEARCH_FOR[search_request.search_for].search(search_request.search_phrase,
+                                                                                 search_tags)
+                search_response = cls.SearchResponse(search_result=search_result, extracted_tags=search_tags)
+                cls.search_cache.push(search_request, search_response)
+            return search_response
         else:
             raise ValueError('The given search request must not be None !' % search_request)
