@@ -33,8 +33,9 @@ class IndexPageView(generic.TemplateView):
         kwargs['tags'] = SearchEngine.all_tags()
         search_for = request.GET.get('search_for', None)
         if search_for:
-            search_phrase = request.GET.get('search_phrase', '')
-            search_result, searched_tags = SearchEngine.search(search_phrase, search_for)
+            search_request = SearchEngine.SearchRequest(search_phrase=request.GET.get('search_phrase', ''),
+                                                        search_for=search_for)
+            search_result, searched_tags = SearchEngine.accept(search_request)
             search_result_offset = int(request.GET.get('start', 0))
             kwargs['search_result_count'] = len(search_result)
             kwargs['search_offset'] = search_result_offset
