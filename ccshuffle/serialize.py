@@ -26,7 +26,7 @@ class SerializableModel(object):
     @abstractmethod
     def serialize(self):
         """
-        Serializes this object so that it f.e. can be converted to JSON.
+        Serializes this object so that it can be converted to JSON for example.
 
         :return:the serialized object.
         """
@@ -50,7 +50,7 @@ class JSONModelEncoder(DjangoJSONEncoder):
 
     def default(self, o):
         if o is None:
-            return ''
+            return None
         elif isinstance(o, (str, int, float)):
             return str(o)
         elif isinstance(o, (dict, set)):
