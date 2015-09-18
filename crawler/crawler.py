@@ -17,7 +17,8 @@ import requests
 from abc import abstractmethod
 from crawler import get_jamendo_api_auth_code
 from crawler.models import CrawlingProcess
-from shuffle.models import Artist, Song, Album, Tag, Source, License
+from shuffle.models import (Artist, JamendoArtistProfile, Song, JamendoSongProfile, Album, JamendoAlbumProfile, Tag,
+                            Source, License)
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +84,8 @@ class ArtistEntity(Entity):
 
     def sync(self) -> None:
         assert isinstance(self.entity, Artist)
-        if self.entity.is_on_jamendo():
-            artist = Artist.objects.filter(jamendo_id=self.entity.jamendo_id)
+        if self.entity.is_on_jamendo:
+            artist = Artist.objects.filter(jamendo_profile__jamendo_id=self.entity.jamendo_id)
             self.entity = self._merge(self.entity, artist.first()) if artist.exists() else self.entity
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
@@ -104,8 +105,8 @@ class AlbumEntity(Entity):
 
     def sync(self) -> None:
         assert isinstance(self.entity, Album)
-        if self.entity.is_on_jamendo():
-            album = Album.objects.filter(jamendo_id=self.entity.jamendo_id)
+        if self.entity.is_on_jamendo:
+            album = Album.objects.filter(jamendo_profile__jamendo_id=self.entity.jamendo_profile.jamendo_id)
             self.entity = self._merge(self.entity, album.first()) if album.exists() else self.entity
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
@@ -121,14 +122,14 @@ class SongEntity(Entity):
 
     @classmethod
     def _merge(cls, new: Song, old: Song) -> Song:
-        if new.is_on_jamendo() and not old.jamendo_id:
-            old.jamendo_id = new.jamendo_id
+        if new.is_on_jamendo and not old.is_on_jamendo:
+            old.jamendo_profile = new.jamendo_profile
         return old
 
     def sync(self) -> None:
         assert isinstance(self.entity, Song)
-        if self.entity.is_on_jamendo():
-            song = Song.objects.filter(jamendo_id=self.entity.jamendo_id)
+        if self.entity.is_on_jamendo:
+            song = Song.objects.filter(jamendo_profile__jamendo_id=self.entity.jamendo_profile.jamendo_id)
             self.entity = self._merge(self.entity, song.first()) if song.exists() else self.entity
         else:
             raise NotImplementedError('Not fully implemented yet for merge of %s' % self.__class__.__name__)
@@ -214,7 +215,9 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         """
         artist = Artist()
         artist.name = json['name']
-        artist.jamendo_id = json['id']
+        artist.jamendo_profile = JamendoArtistProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
+                                                                            image=json['image'],
+                                                                            external_link=json['shareurl'])[0]
         artist.website = json['website']
         return cls(artist)
 
@@ -228,7 +231,7 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         :return: one artist or None.
         """
         if jamendo_id is not None:
-            response_set = Artist.objects.filter(jamendo_id=jamendo_id)
+            response_set = Artist.objects.filter(jamendo_profile__jamendo_id=jamendo_id)
             if response_set.exists():
                 return response_set.first()
             else:
@@ -277,8 +280,10 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         :return: the JamendoAlbumEntity of the given json dictionary.
         """
         album = Album()
-        album.jamendo_id = json['id']
         album.name = json['name']
+        album.jamendo_profile = JamendoAlbumProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
+                                                                          cover=json['image'],
+                                                                          external_link=json['shareurl'])[0]
         try:
             album.artist = JamendoArtistEntity.get_or_create(jamendo_id=json['artist_id'], name=json['artist_name'])
         except Exception as e:
@@ -298,7 +303,7 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         :return: one album or None.
         """
         if jamendo_id is not None:
-            response_set = Album.objects.filter(jamendo_id=jamendo_id)
+            response_set = Album.objects.filter(jamendo_profile__jamendo_id=jamendo_id)
             if response_set.exists():
                 return response_set.first()
             else:
@@ -356,8 +361,10 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         :return: the JamendoSongEntity of the given json dictionary.
         """
         song = Song()
-        song.jamendo_id = json['id']
         song.name = json['name']
+        song.jamendo_profile = JamendoSongProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
+                                                                        cover=json['image'],
+                                                                        external_link=json['shareurl'])[0]
         try:
             song.album = JamendoAlbumEntity.get_or_create(name=json['album_name'], jamendo_id=json['album_id'])
         except Exception as e:
@@ -375,6 +382,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         return cls(song, tags=cls.__get_tags(json), sources=cls.__get_sources(json))
 
     def persist(self):
+        # Persist the entity.
         self.entity.save()
         if self.tags is not None:
             # Persists the tags that does not already exist.
@@ -399,7 +407,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         :return: one song or None.
         """
         if jamendo_id is not None:
-            response_set = Song.objects.filter(jamendo_id=jamendo_id)
+            response_set = Song.objects.filter(jamendo_profile__id=jamendo_id)
             if response_set.exists():
                 return response_set.first()
             else:

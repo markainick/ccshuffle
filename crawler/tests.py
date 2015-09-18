@@ -232,3 +232,4 @@ class JamendoCrawlerTest(TestCase):
         self.assertEqual('Failed', p.status, 'The last crawling must have been failed.')
         self.assertIn('Your credential is not authorized.', p.exception,
                       'The exception message must contain \' Your credential is not authorized. \'')
+
