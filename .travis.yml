@@ -1,0 +1,27 @@
+language: python
+# python environments to test
+python:
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "pypy"
+# django environments to test
+env:
+  - DJANGO=1.8.4
+  - DJANGO=1.8.5
+# command to install dependencies
+install:
+  - pip install -q Django==$DJANGO
+  - pip install -r requirements.txt
+# style checking / pyflakes
+before_script:
+  - "pep8 --exclude=migrations --ignore=E501,E225 shuffle"
+  - "pep8 --exclude=migrations --ignore=E501,E225 crawler"
+  - "pep8 --exclude=migrations --ignore=E501,E225 ccshuffle"
+  - pyflakes shuffle
+  - pyflakes crawler
+  - pyflakes ccshuffle
+# command to run tests
+script:
+  - python manage.py test
