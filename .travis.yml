@@ -16,9 +16,9 @@ install:
   - pip install -r requirements.txt
 # style checking / pyflakes
 before_script:
-  - "pep8 --exclude=migrations --ignore=E501,E225 shuffle"
-  - "pep8 --exclude=migrations --ignore=E501,E225 crawler"
-  - "pep8 --exclude=migrations --ignore=E501,E225 ccshuffle"
+  - pep8 --exclude=migrations --ignore=E501,E225 shuffle
+  - pep8 --exclude=migrations --ignore=E501,E225 crawler
+  - pep8 --exclude=migrations --ignore=E501,E225 ccshuffle
   - pyflakes shuffle
   - pyflakes crawler
   - pyflakes ccshuffle
