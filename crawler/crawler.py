@@ -70,7 +70,6 @@ class Entity(object):
 class ArtistEntity(Entity):
     def persist(self) -> Artist:
         assert isinstance(self.entity, Artist)
-        self.sync()
         self.entity.save()
         return self.entity
 
