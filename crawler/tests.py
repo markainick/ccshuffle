@@ -16,7 +16,7 @@ import urllib
 import requests
 from datetime import datetime
 from django.test import TestCase
-from unittest import skip
+from django.utils.unittest import skip
 from ccshuffle.serialize import JSONModelEncoder
 from shuffle.models import Song, Artist, Album, Source, License
 from .crawler import (JamendoCrawler, JamendoCallException, JamendoServiceMixin, JamendoArtistEntity, JamendoSongEntity,
