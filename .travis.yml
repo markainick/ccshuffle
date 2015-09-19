@@ -14,6 +14,7 @@ env:
 install:
   - pip install -q Django==$DJANGO
   - pip install -r requirements.txt
+  - pip install -r requirements_dev.txt
 # style checking / pyflakes
 before_script:
   - pep8 --exclude=migrations --ignore=E501,E225 shuffle
