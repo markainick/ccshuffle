@@ -34,7 +34,7 @@ class SearchEngine(object):
     class SearchRequest(object):
         """ This class represents a search request, which consists of the search phrase and search for type. """
 
-        def __init__(self, search_phrase:str='', search_for:str='songs'):
+        def __init__(self, search_phrase: str='', search_for: str='songs'):
             assert search_for in SearchEngine.SEARCH_FOR
             self.search_phrase = search_phrase
             self.search_for = search_for

@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import sys, traceback
+import sys
+import traceback
 import json
 from django.utils.translation import ugettext_lazy as _
 
