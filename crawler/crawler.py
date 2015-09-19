@@ -24,8 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 class Entity(object):
-    """ This class represents an entity that is relevant for the search engine. """
-
     def __init__(self, entity):
         assert entity is not None
         self.entity = entity
@@ -70,8 +68,6 @@ class Entity(object):
 
 
 class ArtistEntity(Entity):
-    """ This class represents the entity artist. """
-
     def persist(self) -> Artist:
         assert isinstance(self.entity, Artist)
         self.sync()
@@ -92,8 +88,6 @@ class ArtistEntity(Entity):
 
 
 class AlbumEntity(Entity):
-    """ This class represents the entity album. """
-
     def persist(self) -> Album:
         assert isinstance(self.entity, Album)
         self.entity.save()
@@ -113,8 +107,6 @@ class AlbumEntity(Entity):
 
 
 class SongEntity(Entity):
-    """ This class represents the entity song. """
-
     def persist(self) -> Song:
         assert isinstance(self.entity, Song)
         self.entity.save()
@@ -170,7 +162,7 @@ class JamendoServiceMixin(object):
         return response
 
     @classmethod
-    def all_query(cls, qualifier, properties={}, process=None):
+    def all_query(cls, qualifier, properties={}, offset=0, process=None):
         """
         This method is a template for getting all data sets for a special entity. The function 'call' must be given.
         This function is called unless the response of the function is empty.
@@ -181,7 +173,6 @@ class JamendoServiceMixin(object):
         :param process: an optional function that takes a list of json dictionaries (jamendo entities) as argument
                         and returns a list. This list will be used for the further processing.
         """
-        offset = 0
         result_list = []
         properties['limit'] = 'all'
         while True:
@@ -199,8 +190,6 @@ class JamendoServiceMixin(object):
 
 
 class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
-    """ This class represents the entity artist of the jamendo service. """
-
     def __init__(self, artist: Artist):
         assert isinstance(artist, Artist)
         super(JamendoArtistEntity, self).__init__(artist)
@@ -215,9 +204,12 @@ class JamendoArtistEntity(ArtistEntity, JamendoServiceMixin):
         """
         artist = Artist()
         artist.name = json['name']
-        artist.jamendo_profile = JamendoArtistProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
-                                                                            image=json['image'],
-                                                                            external_link=json['shareurl'])[0]
+        artist.jamendo_profile = JamendoArtistProfile.objects.update_or_create(jamendo_id=json['id'],
+                                                                               defaults={'name': json['name'],
+                                                                                         'image': json['image'],
+                                                                                         'external_link': json[
+                                                                                             'shareurl'],
+                                                                                         })[0]
         artist.website = json['website']
         return cls(artist)
 
@@ -281,12 +273,18 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
         """
         album = Album()
         album.name = json['name']
-        album.jamendo_profile = JamendoAlbumProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
-                                                                          cover=json['image'],
-                                                                          external_link=json['shareurl'])[0]
+
+        # Create a jamendo profile for this album.
+        album.jamendo_profile = JamendoAlbumProfile.objects.update_or_create(jamendo_id=json['id'],
+                                                                             defaults={'name': json['name'],
+                                                                                       'cover': json['image'],
+                                                                                       'external_link': json[
+                                                                                           'shareurl'],
+                                                                                       })[0]
+        # Link to an artist.
         try:
             album.artist = JamendoArtistEntity.get_or_create(jamendo_id=json['artist_id'], name=json['artist_name'])
-        except Exception as e:
+        except ValueError as e:
             album.artist = None
             logging.exception(e)
         album.release_date = json['releasedate']
@@ -318,6 +316,23 @@ class JamendoAlbumEntity(AlbumEntity, JamendoServiceMixin):
                 else:
                     pass  # TODO: Find the correct album ?
         raise ValueError('The album (Jamendo Id: %s, Name: %s) can\'t be created.' % (jamendo_id, name))
+
+    @classmethod
+    def __get_or_create_profile(cls, jamendo_id: str, **kwargs) -> JamendoAlbumProfile:
+        """
+        If the jamendo profile of the album not already exists, a new jamendo profile is created and returned, otherwise
+        the existing one will be updated. The jamendo id must be given.
+
+        :param kwargs: the optional fields of the jamendo profile.
+        :return: the updated or newly created jamendo profile.
+        """
+        profile_querset = JamendoAlbumProfile.objects.filter(jamendo_id=jamendo_id)
+        if profile_querset.exists():
+            profile = profile_querset.first()
+            profile.save(force_update=True, **kwargs)
+            return profile
+        else:
+            return JamendoAlbumProfile.objects.create(jamendo_id=jamendo_id, **kwargs)
 
     @classmethod
     def all_albums(cls) -> [Album]:
@@ -362,19 +377,26 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         """
         song = Song()
         song.name = json['name']
-        song.jamendo_profile = JamendoSongProfile.objects.get_or_create(jamendo_id=json['id'], name=json['name'],
-                                                                        cover=json['image'],
-                                                                        external_link=json['shareurl'])[0]
+        # Creates a jamendo profile for this song.
+        song.jamendo_profile = JamendoSongProfile.objects.update_or_create(jamendo_id=json['id'],
+                                                                           defaults={'name': json['name'],
+                                                                                     'cover': json['image'],
+                                                                                     'external_link': json['shareurl'],
+                                                                                     })[0]
+        # Link to an album.
         try:
             song.album = JamendoAlbumEntity.get_or_create(name=json['album_name'], jamendo_id=json['album_id'])
-        except Exception as e:
+        except ValueError as e:
             song.album = None
             logging.exception(e)
+
+        # Link to an artist.
         try:
             song.artist = JamendoArtistEntity.get_or_create(name=json['artist_name'], jamendo_id=json['artist_id'])
-        except Exception as e:
+        except ValueError as e:
             song.artist = None
             logging.exception(e)
+
         song.duration = int(json['duration'])
         song.release_date = json['releasedate']
         song.cover = json['image']
@@ -424,7 +446,24 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
         raise ValueError('The song (Jamendo Id: %s, Name: %s) can\'t be created.' % (jamendo_id, name))
 
     @classmethod
-    def all_songs(cls) -> [Song]:
+    def __get_or_create_profile(cls, jamendo_id: str, **kwargs) -> JamendoAlbumProfile:
+        """
+        If the jamendo profile of the song not already exists, a new jamendo profile is created and returned, otherwise
+        the existing one will be updated. The jamendo id must be given.
+
+        :param kwargs: the optional fields of the jamendo profile.
+        :return: the updated or newly created jamendo profile.
+        """
+        profile_queryset = JamendoSongProfile.objects.filter(jamendo_id=jamendo_id)
+        if profile_queryset.exists():
+            profile = profile_queryset.first()
+            profile.save(force_update=True, **kwargs)
+            return profile
+        else:
+            return JamendoSongProfile.objects.create(jamendo_id=jamendo_id, **kwargs)
+
+    @classmethod
+    def all_songs(cls, offset=0) -> [Song]:
         """
         This method scans for all songs available on the jamendo service and persists them if the song has not
         been already persisted.
@@ -436,7 +475,7 @@ class JamendoSongEntity(SongEntity, JamendoServiceMixin):
             return [JamendoSongEntity.new_by_json(song_json).sync_and_persist() for song_json in songs_json]
 
         logger.info('SE (Jamendo): Crawling for all songs !')
-        return cls.all_query('tracks', {'include': 'musicinfo stats licenses'}, process=process_result)
+        return cls.all_query('tracks', {'include': 'musicinfo stats licenses'}, offset, process=process_result)
 
     @classmethod
     def __persist_tags(cls, tags: [Tag]) -> [Tag]:
