@@ -11,7 +11,7 @@
 #   GNU General Public License for more details.
 #
 
-from django.conf.urls import include, url
+from django.conf.urls import url
 from .views import (AboutPageView, IndexPageView, RegisterPageView,
                     NotFoundErrorPageView, SignInPageView, SignOutPageView)
 

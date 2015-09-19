@@ -1,4 +1,4 @@
-from django.db import models, migrations
+from django.db import migrations
 from django.contrib.auth.models import User
 from shuffle.models import License
 

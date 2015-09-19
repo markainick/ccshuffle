@@ -13,7 +13,7 @@
 
 from django import template
 import math
-from urllib.parse import urlencode, parse_qs, urlunparse, urlsplit, urlunsplit, SplitResult
+from urllib.parse import urlencode, parse_qs, urlsplit, urlunsplit, SplitResult
 
 register = template.Library()
 
