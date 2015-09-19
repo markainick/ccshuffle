@@ -460,10 +460,6 @@ class ModelTest(TestCase):
         self.assertEqual(int(album_the_wall_json_load['jamendo_profile']['jamendo_id']), album_the_wall.jamendo_id,
                          'The information about the jamendo id of the album shall not be lost.')
 
-    def test_serializable_song_jamendo_profile(self):
-        song_another_brick_jprofile = self.SONG_JPROFILE['Another brick in the wall']
-        song_another_brick_jprofile
-
     def test_serializable_song(self):
         song_another_brick = self.SONG_DB['Another brick in the wall']
         song_another_brick_serialized = song_another_brick.serialize()
