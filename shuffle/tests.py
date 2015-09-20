@@ -594,26 +594,26 @@ class SearchEngineTest(TestCase):
         search_request = SearchEngine.SearchRequest(search_phrase='rock Indie alternative',
                                                     search_for=SearchEngine.SEARCH_FOR_SONGS)
         search_result = SearchEngine.accept(search_request).search_result
-        self.assertIn('punk storm mario', [song.name.lower() for song in search_result],
-                      '\'Punk storm mario\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
-        self.assertIn('land of a beautiful experience', [song.name.lower() for song in search_result],
-                      '\'land of a beautiful experience\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('smell that funk', [song.name.lower() for song in search_result],
+                      '\'smell that funk\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('i\'ve been here before', [song.name.lower() for song in search_result],
+                      '\'i\'ve been here before\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
         # Search phrase: 'Jazz is my love'
         search_request = SearchEngine.SearchRequest(search_phrase='Jazz is my love',
                                                     search_for=SearchEngine.SEARCH_FOR_SONGS)
         search_result = SearchEngine.accept(search_request).search_result
-        self.assertIn('i see beauty', [song.name.lower() for song in search_result],
-                      '\'i see beauty\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
-        self.assertIn('moonlight dance', [song.name.lower() for song in search_result],
-                      '\'moonlight dance\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('dreaming of you', [song.name.lower() for song in search_result],
+                      '\'dreaming of you\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('stepping stones', [song.name.lower() for song in search_result],
+                      '\'stepping stones\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
         # Search phrase: 'Long dreams, short nights'
         search_request = SearchEngine.SearchRequest(search_phrase='Long dreams, short nights',
                                                     search_for=SearchEngine.SEARCH_FOR_SONGS)
         search_result = SearchEngine.accept(search_request).search_result
-        self.assertIn('the night drives the wolf', [song.name.lower() for song in search_result],
-                      '\'the night drives the wolf\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
-        self.assertIn('long dreams, short nights', [song.name.lower() for song in search_result],
-                      '\'long dreams, short nights\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('17 this night ( saxophonic rap mix )', [song.name.lower() for song in search_result],
+                      '\'17 this night ( saxophonic rap mix )\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
+        self.assertIn('the story ', [song.name.lower() for song in search_result],
+                      '\'the story\' must be in the search result (search phrase: %s).' % search_request.search_phrase)
 
     def __search_song(self, search_phrase, search_for):
         """ Wrapper-function for testing the performance of the search."""
