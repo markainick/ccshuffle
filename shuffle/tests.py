@@ -634,9 +634,8 @@ class SearchEngineTest(TestCase):
         search_request = SearchEngine.SearchRequest(search_phrase='indie rock alternative',
                                                     search_for=SearchEngine.SEARCH_FOR_SONGS)
         search_engine = SearchEngine()
-        search_engine.SearchCache._cache_time_s = 8000
         search_response = search_engine.accept(search_request)
-        time.sleep(2)
+        time.sleep(4)
         self.assertEqual(search_response, search_engine.search_cache.get(search_request),
                          'The search response, which has been stored to the cache, must be equal to the search response returned by the cache with the get-method (if the timestamp is not too old).')
 
@@ -648,8 +647,8 @@ class SearchEngineTest(TestCase):
         search_request = SearchEngine.SearchRequest(search_phrase='indie rock alternative',
                                                     search_for=SearchEngine.SEARCH_FOR_SONGS)
         search_engine = SearchEngine()
-        search_engine.SearchCache._cache_time_s = 1000
+        search_engine.SearchCache._cache_time_s = 2
         search_engine.accept(search_request)
-        time.sleep(1.1)
+        time.sleep(2.1)
         self.assertIsNone(search_engine.search_cache.get(search_request),
                           'The cache of the search engine must return None, if the timestamp of the stored search response is too old.')
