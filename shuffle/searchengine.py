@@ -16,6 +16,7 @@ from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
 import copy
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +121,7 @@ class SearchEngine(object):
 
         :return: all known tags in form of their names.
         """
-        return [tag_name[0] for tag_name in Tag.objects.values_list('name')]
+        return set(tag_name[0] for tag_name in Tag.objects.values_list('name'))
 
     @classmethod
     def __extract_tags_of(cls, search_phrase: str) -> [str]:
@@ -130,8 +131,10 @@ class SearchEngine(object):
         :param search_phrase: the search phrase, of which the tags shall be encapsulated.
         :return: the tags of the given search phrase.
         """
-        known_tags_names = cls.all_tags_names()
-        return [tag.lower() for tag in search_phrase.split(' ') if tag.lower() in known_tags_names]
+        search_phrase_split = {tag.lower() for tag in re.split(r'\W+', search_phrase)}
+        search_phrase_split |= {tag1 + tag2 for tag1 in search_phrase_split for tag2 in
+                                search_phrase_split if tag1 != tag2}
+        return search_phrase_split & cls.all_tags_names()
 
     @classmethod
     def accept(cls, search_request) -> ([SearchableModel], [str]):
