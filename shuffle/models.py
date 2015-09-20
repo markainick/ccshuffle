@@ -464,6 +464,8 @@ class JamendoSongProfile(models.Model, SerializableModel):
         elif isinstance(obj, dict):
             # Parses the song id.
             pid = int(obj['id']) if 'id' in obj else None
+            # Parses the name of the profile.
+            name = obj['name'] if 'name' in obj else None
             # Parses the id of the jamendo profile.
             jamendo_id = int(obj['jamendo_id']) if 'jamendo_id' in obj else None
             if jamendo_id is None:
@@ -472,7 +474,8 @@ class JamendoSongProfile(models.Model, SerializableModel):
             external_link = obj['external_link'] if 'external_link' in obj else None
             # Parses the cover link of the profile.
             cover_link = obj['cover'] if 'cover' in obj else None
-            return JamendoSongProfile(id=pid, jamendo_id=jamendo_id, external_link=external_link, cover=cover_link)
+            return JamendoSongProfile(id=pid, jamendo_id=jamendo_id, name=name, external_link=external_link,
+                                      cover=cover_link)
         else:
             raise DeserializableException(
                 'The given object %s can\'t be parsed. It is no dictionary or set (%s).' % (repr(obj), type(obj)))
