@@ -532,7 +532,7 @@ class ModelTest(TestCase):
 
 
 class SearchEngineTest(TestCase):
-    #   fixtures = ['fixtures/se_test_db.json']
+    fixtures = ['fixtures/se_test_db.json']
 
     def __measure(self, func, *args, **kwargs):
         """
