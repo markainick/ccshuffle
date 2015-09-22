@@ -17,6 +17,7 @@ from .views import (AboutPageView, IndexPageView, RegisterPageView,
 
 urlpatterns = [
     url(r'^$', IndexPageView.as_view(), name="home"),
+    url(r'register/username-available$', RegisterPageView.is_username_available),
     url(r'register/$', RegisterPageView.as_view(), name="register"),
     url(r'login/$', SignInPageView.as_view(), name="signin"),
     url(r'logout/$', SignOutPageView.as_view(), name="signout"),

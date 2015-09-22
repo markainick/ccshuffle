@@ -16,9 +16,11 @@ import logging
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-
 from django.views import generic
+from django.shortcuts import redirect
+from django.http import HttpResponse
 
+from ccshuffle.serialize import ResponseObject
 from .forms import LoginForm, RegistrationForm
 from .searchengine import SearchEngine
 
@@ -114,6 +116,21 @@ class RegisterPageView(generic.CreateView):
         context = super(type(self), self).get_context_data(**kwargs)
         context['globalLoginForm'] = LoginForm
         return context
+
+    @classmethod
+    def is_username_available(cls, request):
+        print(request.method)
+        if request.is_ajax() and request.method == 'GET':
+            username = request.GET.get('username', None)
+            if username:
+                return HttpResponse(
+                    ResponseObject('success', 'Fails', not User.objects.filter(username=username).exists()).json(),
+                    content_type="json")
+            else:
+                return HttpResponse(ResponseObject('fail', 'The username to check must be given.', None).json(),
+                                    content_type="json")
+        else:
+            return redirect('404')
 
 
 class NotFoundErrorPageView(generic.TemplateView):

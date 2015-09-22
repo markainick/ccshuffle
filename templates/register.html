@@ -1,7 +1,15 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% comment %} Localization {% endcomment %}
 {% load i18n %}
+
+{% block headjs %}
+    <!-- TypeWatch -->
+    <script type="text/javascript" src="{% static 'plugins/typewatch/jquery.typewatch.js' %}"
+            xmlns="http://www.w3.org/1999/html"></script>
+    <!-- Registration form validation -->
+    <script type="text/javascript" src="{% static 'js/ccshuffle-registration-validation.js' %}"></script>
+{% endblock headjs %}
 
 {% block title %} {% trans 'Register' %} | {{ block.super }} {% endblock title %}
 
@@ -44,27 +52,33 @@
 
             <form action="{% url 'register' %}" id="register-form" method="post">
                 {% csrf_token %}
-                <div class="form-group">
+                <div id="username-register-form-group" class="form-group has-feedback">
                     <label for="{{ form.username.id_for_label }}">{% trans 'Username' %} *</label>
 
                     <div class="input-group">
+                        <span class="input-group-addon" id="basic-username"><span
+                                class="glyphicon glyphicon-user"></span></span>
                         {{ form.username }}
-	                <span class="input-group-addon" id="basic-username"><span
-                            class="glyphicon glyphicon-user"></span></span>
                     </div>
+                    <!--              <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+                                  <span id="username-register-status" class="sr-only">(success)</span>-->
                     {% if form.username.errors %}
                         <div class="error-container">
                             <p class="alert alert-danger" role="alert"> {{ form.username.errors.as_text }} </p>
                         </div>
                     {% endif %}
                 </div>
-                <div class="form-group">
-                    <label for="{{ form.password1.id_for_label }}">{% trans 'Password' %} *</label>
+                <div id="password1-form-group" {% if form.password1.errors or form.password2.errors %}
+                     class="form-group has-error has-feedback" {% else %}
+                     class="form-group has-feedback" {% endif %}>
+                    <label style="width: 100%;" for="{{ form.password1.id_for_label }}">{% trans 'Password' %} *
+                        <span style="margin-right: 15px;"
+                              class="pull-right">({% trans 'min. 6 characters' %})</span></label>
 
                     <div class="input-group">
+                        <span class="input-group-addon" id="basic-password"><span
+                                class="glyphicon glyphicon-lock"></span></span>
                         {{ form.password1 }}
-	                <span class="input-group-addon" id="basic-password"><span
-                            class="glyphicon glyphicon-lock"></span></span>
                     </div>
                     {% if form.password1.errors %}
                         <div class="error-container">
@@ -72,15 +86,17 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="form-group">
+                <div id="password2-form-group" {% if form.password2.errors %}
+                     class="form-group has-error has-feedback" {% else %}
+                     class="form-group has-feedback" {% endif %}>
                     <label for="{{ form.password2.id_for_label }}">
                         {% trans 'Confirm password' context 'registration form' %} *
                     </label>
 
                     <div class="input-group">
+                        <span class="input-group-addon" id="basic-password-confirm"><span
+                                class="glyphicon glyphicon-lock"></span></span>
                         {{ form.password2 }}
-	                <span class="input-group-addon" id="basic-password-confirm"><span
-                            class="glyphicon glyphicon-lock"></span></span>
                     </div>
                     {% if form.password2.errors %}
                         <div class="error-container">
@@ -88,13 +104,15 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="form-group">
+                <div id="email-form-group" {% if form.email.errors %}
+                     class="form-group has-warning has-feedback" {% else %}
+                     class="form-group has-feedback" {% endif %}>
                     <label for="{{ form.email.id_for_label }}">{% trans 'Email' %} ({% trans 'optional' %}) </label>
 
-                    <div class="input-group">
+                    <div id="email-input-group" class="input-group">
+                        <span class="input-group-addon" id="basic-email"><span
+                                class="glyphicon glyphicon-envelope"></span></span>
                         {{ form.email }}
-	                        <span class="input-group-addon" id="basic-email"><span
-                                    class="glyphicon glyphicon-envelope"></span></span>
                     </div>
                     {% if form.email.errors %}
                         <div class="error-container">
