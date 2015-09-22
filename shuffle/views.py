@@ -13,9 +13,11 @@
 
 import logging
 
+from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.views import generic
 from django.shortcuts import redirect
 from django.http import HttpResponse
@@ -111,6 +113,16 @@ class RegisterPageView(generic.CreateView):
     model = User
     template_name = 'register.html'
     success_url = reverse_lazy('signin')
+
+    def post(self, request, *args, **kwargs):
+        response = super(type(self), self).post(request, *args, **kwargs)
+        form = self.get_form()
+        # Success message for the registration, displayed on the 'sign in' page, where the user is redirected to.
+        if form.is_valid():
+            messages.add_message(request, messages.SUCCESS,
+                                 _('Welcome %(username)s ! Your account has been created, now you can login.' % {
+                                     'username': form.cleaned_data.get('username')}))
+        return response
 
     def get_context_data(self, **kwargs):
         context = super(type(self), self).get_context_data(**kwargs)

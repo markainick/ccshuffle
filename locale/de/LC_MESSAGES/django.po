@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-22 01:32+0200\n"
+"POT-Creation-Date: 2015-09-22 22:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Kevin Haller <kevin.haller@outofbits.com>\n"
 "Language-Team: None\n"
@@ -32,29 +32,37 @@ msgstr "Deutsch"
 msgid "English"
 msgstr "Englisch"
 
-#: shuffle/forms.py:28 shuffle/forms.py:51 templates/base.html:99
+#: shuffle/forms.py:28 shuffle/forms.py:52 templates/base.html:99
 #: templates/register.html:32 templates/register.html.py:57
-#: templates/signin.html:34
+#: templates/signin.html:36
 msgid "Username"
 msgstr "Benutzername"
 
-#: shuffle/forms.py:30 shuffle/forms.py:55 shuffle/forms.py:60
+#: shuffle/forms.py:30 shuffle/forms.py:57 shuffle/forms.py:62
 #: templates/base.html:104 templates/register.html:37
-#: templates/register.html.py:75 templates/signin.html:38
+#: templates/register.html.py:75 templates/signin.html:40
 msgid "Password"
 msgstr "Passwort"
 
-#: shuffle/forms.py:39 templates/register.html:111
+#: shuffle/forms.py:37 templates/register.html:111
 msgid "Email"
 msgstr "E-Mail"
 
-#: shuffle/forms.py:43
+#: shuffle/forms.py:44
 msgid "The password must be at least 6 characters long."
 msgstr "Das Passwort muss mindestens 6 Zeichen lang sein."
 
-#: shuffle/forms.py:65
+#: shuffle/forms.py:67
 msgid "Your email"
 msgstr "Deine E-Mail"
+
+#: shuffle/views.py:124
+#, python-format
+msgid ""
+"Welcome %(username)s ! Your account has been created, now you can login."
+msgstr ""
+"Wilkommen %(username)s !. Ihr Benutzerkonto ist erstellt worden, Sie können "
+"sich jetzt anmelden."
 
 #: templates/403.html:10
 msgid "Access denied"
@@ -92,7 +100,7 @@ msgstr "Unterstützung"
 
 #: templates/base.html:6 templates/register.html:20
 #: templates/register.html.py:42 templates/signin.html:21
-#: templates/signin.html.py:53
+#: templates/signin.html.py:55
 msgid "Sign in"
 msgstr "Anmelden"
 
