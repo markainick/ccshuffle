@@ -236,7 +236,7 @@ $(document).ready(function () {
                     registrationController.indicateWarningFormInput("#email-form-group");
                 }
             } else {
-                registrationController.removeFormInputIndication("#email-form-group")
+                registrationController.removeFormInputIndication("#email-form-group");
             }
         },
         wait: 750,
