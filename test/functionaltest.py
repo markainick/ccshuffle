@@ -232,10 +232,7 @@ class RegistrationTest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
 
-    def test_registration(self):
-        """
-            This test case tests the registration process.
-        """
+    def test_registration_valid(self):
         # Amelie visits the homepage of the service and has no account, so she wants to register.
         # So she clicks on the 'register' button.
         self.browser.get(django_url)
@@ -258,7 +255,7 @@ class RegistrationTest(unittest.TestCase):
         create_account_button = self.browser.find_element_by_id('btn_create_account')
         # She enters the username 'amelie@testing' as well as the desired password. She also enters the email to ensure,
         # that she has the option to reset the password. Amelie is aware of forgetting the password.
-        username_input.send_keys(amelie_username + '#2')
+        username_input.send_keys(amelie_username + '+2')
         password1_input.send_keys(amelie_password)
         password2_input.send_keys(amelie_password)
         email_input.send_keys(amelie_email)
@@ -268,7 +265,7 @@ class RegistrationTest(unittest.TestCase):
         # inform Amelie about the successful registration and that now the login is possible.
         self.assertIn('Login', self.browser.title, 'The user must be redirected to the login page')
         registration_success_message = self.browser.find_element_by_class_name('alert')
-        self.assertIn(registration_success_message, "The registration was successful.")
+        self.assertIn("Your account has been created, now you can login.", registration_success_message.text)
         # Amelie enters her credentials.
         login_button = self.browser.find_element_by_id('btn_login')
         username_input = self.browser.find_element_by_id("id_username")
@@ -278,15 +275,14 @@ class RegistrationTest(unittest.TestCase):
         self.assertEqual('Password', password_input.get_attribute('placeholder'),
                          "The placeholder text of the password field must be 'Password' ")
         # She entered here username and password not correctly and presses the 'Login' - button besides the text fields.
-        username_input.send_keys(amelie_username)
+        username_input.send_keys(amelie_username + '+2')
         password_input.send_keys(amelie_password)
         login_button.submit()
         # The login attempt succeeds and Amelie is redirected to the homepage, where her username is displayed in the
         # upper left corner.
         user_profile_link = self.browser.find_element_by_id('user-profile-link')
         self.assertIsNotNone(user_profile_link)
-        self.assertEqual(user_profile_link.text, amelie_username + '#2')
-        self.fail("Not implemented")
+        self.assertEqual(user_profile_link.text, amelie_username + '+2')
 
 
 if __name__ == "__main__":
