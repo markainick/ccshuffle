@@ -550,7 +550,7 @@ class Song(models.Model, SerializableModel, SearchableModel):
 
         :return: the name of the tags as list.
         """
-        return [tag.name for tag in self.tags]
+        return [tag.name for tag in self.all_tags]
 
     def sources(self, **source_fields):
         """
