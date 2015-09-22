@@ -134,7 +134,7 @@ $(document).ready(function () {
             validity &= Boolean(value);
         }
         if (!Modernizr.input.pattern || !Modernizr.formvalidation) {
-            validity &= value.match(new RegExp($("#id_password1").attr("pattern")));
+            validity &= (value.match(new RegExp($("#id_password1").attr("pattern"))) !== null);
         }
         if (Modernizr.formvalidation) {
             validity &= $("#id_password1")[0].checkValidity();
@@ -156,15 +156,19 @@ $(document).ready(function () {
     };
 
     /**
-     * Checks, if the entered email address is valid.
+     * Checks, if the entered email address is valid. If the email input type or the html5 form validation is not
+     * supported by the current browser, a own email regex will be used. The email regex can be found here
+     * http://emailregex.com/.
      *
      * @param value the email of the email input field.
      * @return {boolean} true, if the entered email is valid, otherwise false.
      */
     var emailValidCheck = function (value) {
         var validity = true;
-        if (Modernizr.formvalidation && Modernizr.inputtypes.email) {
-            validity &= $(this)[0].checkValidity();
+        if (!Modernizr.inputtypes.email || !Modernizr.formvalidation) {
+            validity &= (null !== value.match(new RegExp("^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$")));
+        } else {
+            validity &= $("#id_email")[0].checkValidity();
         }
         return validity;
     };
