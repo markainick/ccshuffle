@@ -114,14 +114,26 @@ class RegisterPageView(generic.CreateView):
     template_name = 'register.html'
     success_url = reverse_lazy('signin')
 
+    def __init__(self):
+        super(type(self), self).__init__()
+        self.registration_form = None
+
+    def get_form(self, form_class=None):
+        if self.registration_form is None:
+            self.registration_form = super(type(self), self).get_form(form_class)
+        return self.registration_form
+
+    def clear_form(self):
+        del self.registration_form
+
     def post(self, request, *args, **kwargs):
         response = super(type(self), self).post(request, *args, **kwargs)
-        form = self.get_form()
         # Success message for the registration, displayed on the 'sign in' page, where the user is redirected to.
-        if form.is_valid():
+        if self.registration_form.is_valid():
             messages.add_message(request, messages.SUCCESS,
                                  _('Welcome %(username)s ! Your account has been created, now you can login.' % {
-                                     'username': form.cleaned_data.get('username')}))
+                                     'username': self.registration_form.cleaned_data.get('username')}))
+        self.clear_form()
         return response
 
     def get_context_data(self, **kwargs):

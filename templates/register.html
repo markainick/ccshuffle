@@ -125,6 +125,18 @@
                         <p class="alert alert-danger" role="alert"> {{ form.non_field_errors.as_text }} </p>
                     {% endif %}
                 </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            {{ form.captcha }}
+                            {% if form.captcha.errors %}
+                                <div class="error-container">
+                                    <p class="alert alert-danger" role="alert"> {{ form.captcha.errors.as_text }} </p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
                 <button id="btn_create_account" type="submit" class="btn btn-primary">
                     {% trans 'Create Account' context 'registration form' %}
                 </button>

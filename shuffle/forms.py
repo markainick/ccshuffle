@@ -12,6 +12,7 @@
 #
 
 from django import forms
+from captcha.fields import ReCaptchaField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import (AuthenticationForm, UserCreationForm)
 
@@ -19,11 +20,8 @@ import re
 
 
 class LoginForm(AuthenticationForm):
-    """ This form represents the login form. """
-
     def __init__(self, *args, **kwargs):
         super(LoginForm, self).__init__(*args, **kwargs)
-
         self.fields['username'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': _('Username'), 'required': 'required'})
         self.fields['password'].widget.attrs.update(
@@ -34,6 +32,7 @@ class RegistrationForm(UserCreationForm):
     password_pattern_str = r'.{6,}'
     username_pattern_str = r'^[\w.@+-]+$'
 
+    captcha = ReCaptchaField()
     email = forms.EmailField(label=_("Email"), max_length=2048, required=False, widget=forms.EmailInput)
 
     def __init__(self, *args, **kwargs):

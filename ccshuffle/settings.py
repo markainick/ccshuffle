@@ -46,6 +46,12 @@ try:
         # Database
         # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
         DATABASES = conf['DATABASES']
+        # Settings for the reCaptcha
+        # https://github.com/praekelt/django-recaptcha
+        RECAPTCHA_PUBLIC_KEY = conf['RECAPTCHA_PUBLIC_KEY']
+        RECAPTCHA_PRIVATE_KEY = conf['RECAPTCHA_PRIVATE_KEY']
+        NOCAPTCHA = True
+        RECAPTCHA_USE_SSL = True
         # Jamendo Authentication
         # https://developer.jamendo.com/v3.0
         if 'JAMENDO_AUTH' in conf:
@@ -55,7 +61,6 @@ try:
         # https://docs.djangoproject.com/en/1.8/topics/logging/
         if 'LOGGING' in conf:
             LOGGING = conf['LOGGING']
-
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     traceback.print_exception(exc_type, exc_value, exc_traceback, limit=10, file=sys.stdout)
@@ -72,6 +77,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'captcha',
     'shuffle',
     'crawler',
 )
