@@ -12,6 +12,7 @@
 #
 
 import os
+import time
 import copy
 import urllib
 import unittest
@@ -84,6 +85,8 @@ class LoginTest(unittest.TestCase):
         # navigation bar (which is shown, if the user clicks the menu button).
         navigation_bar_btn = browser.find_element_by_class_name('navbar-toggle')
         navigation_bar_btn.click()
+        # Wait until the menu appears.
+        time.sleep(0.5)
         user_profile_link = browser.find_element_by_id('user-profile-link')
         self.assertIsNotNone(user_profile_link)
         self.assertEqual(user_profile_link.text, amelie['username'])
