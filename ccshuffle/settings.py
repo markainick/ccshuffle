@@ -61,6 +61,11 @@ try:
         # https://docs.djangoproject.com/en/1.8/topics/logging/
         if 'LOGGING' in conf:
             LOGGING = conf['LOGGING']
+        # Functional testing mode.
+        # !! Only use this setting for testing purposes and not in production !!
+        if 'FUNCTIONAL_TESTING' in conf:
+            FUNCTIONAL_TESTING = conf['FUNCTIONAL_TESTING']
+            os.environ['FUNCTIONAL_TESTING'] = str(FUNCTIONAL_TESTING)
 except Exception as e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     traceback.print_exception(exc_type, exc_value, exc_traceback, limit=10, file=sys.stdout)

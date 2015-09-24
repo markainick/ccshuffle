@@ -11,12 +11,12 @@
 #   GNU General Public License for more details.
 #
 
+import re
 from django import forms
 from captcha.fields import ReCaptchaField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import (AuthenticationForm, UserCreationForm)
-
-import re
+from ccshuffle import in_functional_testing_mode
 
 
 class LoginForm(AuthenticationForm):
@@ -32,11 +32,14 @@ class RegistrationForm(UserCreationForm):
     password_pattern_str = r'.{6,}'
     username_pattern_str = r'^[\w.@+-]+$'
 
-    captcha = ReCaptchaField()
     email = forms.EmailField(label=_("Email"), max_length=2048, required=False, widget=forms.EmailInput)
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
+        # If in functional testing mode, remove reCaptcha from the fields of the registration form.
+        if in_functional_testing_mode():
+            del self.fields['captcha']
         # Compile the pattern.
         self.password_pattern = re.compile(self.password_pattern_str)
         # Adds additional error messages.
