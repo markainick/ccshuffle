@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import sys
-import traceback
 import json
 from django.utils.translation import ugettext_lazy as _
 
@@ -30,8 +28,6 @@ CONF_FILE = os.environ['CCSHUFFLE_CONF'] if 'CCSHUFFLE_CONF' in os.environ else 
 try:
     with open(CONF_FILE, 'r', encoding='utf-8') as fp:
         conf = json.load(fp)
-        # The secret key must be a large random value and it must be kept secret.
-        SECRET_KEY = conf['SECRET_KEY']
         # True for development, False for production (the ALLOWED_HOSTs must be set then).
         DEBUG = conf['DEBUG'] if 'DEBUG' in conf else False
         if not DEBUG:
@@ -43,12 +39,30 @@ try:
             # The session cookie enforces to be transported over https.
             # https://docs.djangoproject.com/en/1.8/ref/settings/#std:setting-SESSION_COOKIE_SECURE
             SESSION_COOKIE_SECURE = conf['SESSION_COOKIE_SECURE'] if 'SESSION_COOKIE_SECURE' in conf else True
+        # The secret key must be a large random value and it must be kept secret.
+        if 'SECRET_KEY' not in conf and not conf['SECRET_KEY']:
+            raise ValueError('The secret key must be set in the configuration file.')
+        elif conf['SECRET_KEY'] == "&*lu()8=bw%embg-@&n9h=q5w&s=&1=9fn@1xgejo3m1-d+x76":
+            print('For production set your own secret key in the configuration file. It must be kept secret !')
+            if not DEBUG:
+                raise ValueError('The secret key must be set in the configuration file. It must be kept secret !')
+        SECRET_KEY = conf['SECRET_KEY']
         # Database
         # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
+        if 'DATABASES' not in conf and not conf['DATABASES']:
+            raise ValueError('The database configuration must be set in the configuration file.')
         DATABASES = conf['DATABASES']
         # Settings for the reCaptcha
         # https://github.com/praekelt/django-recaptcha
+        if 'RECAPTCHA_PUBLIC_KEY' not in conf and not conf['RECAPTCHA_PUBLIC_KEY']:
+            raise ValueError('The public key for the reCaptcha validation must be set in the configuration file.')
         RECAPTCHA_PUBLIC_KEY = conf['RECAPTCHA_PUBLIC_KEY']
+        if 'RECAPTCHA_PRIVATE_KEY' not in conf and not conf['RECAPTCHA_PRIVATE_KEY']:
+            raise ValueError('The private key for the reCaptcha validation must be set in the configuration file.')
+        elif conf['RECAPTCHA_PRIVATE_KEY'] == "6LdKag0TAAAAALDTyLLkQGx1mw__1T89de_uIWac":
+            print('For production register your own reCaptcha account and keep the private key secret.')
+            if not DEBUG:
+                raise ValueError('Register your own reCaptcha account and keep the private key secret.')
         RECAPTCHA_PRIVATE_KEY = conf['RECAPTCHA_PRIVATE_KEY']
         NOCAPTCHA = True
         RECAPTCHA_USE_SSL = True
@@ -64,13 +78,12 @@ try:
         # Functional testing mode.
         # !! Only use this setting for testing purposes and not in production !!
         if 'FUNCTIONAL_TESTING' in conf:
+            if not DEBUG:
+                raise ValueError('The functional testing mode must not be used for production.')
             FUNCTIONAL_TESTING = conf['FUNCTIONAL_TESTING']
             os.environ['FUNCTIONAL_TESTING'] = str(FUNCTIONAL_TESTING)
 except Exception as e:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    traceback.print_exception(exc_type, exc_value, exc_traceback, limit=10, file=sys.stdout)
-    print('The configuration file (%s) can\'t be loaded.' % CONF_FILE, file=sys.stderr)
-    exit(1)
+    raise SystemError('The configuration file (%s) can\'t be loaded.' % CONF_FILE) from e
 
 
 # Application definition
