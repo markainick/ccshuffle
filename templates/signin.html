@@ -22,10 +22,13 @@
             <form id="login-form" method="post">
                 {% csrf_token %}
                 <div class="notification-container">
-                    {% if login_notification %}
-                        {% comment %} TODO Issue #3 <https://github.com/outofbits/ccshuffle/issues/3>
-                        <p id="login-notification" class="alert alert-info" role="alert"> {{ login_notification }} </p>
-                        {% endcomment %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                                <p id="login-notification" class="alert alert-info"
+                                   role="alert"> {{ message }} </p>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
                 </div>
                 <div class="form-group">

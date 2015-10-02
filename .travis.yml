@@ -1,0 +1,31 @@
+language: python
+# python environments to test
+python:
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+# django environments to test
+env:
+  - DJANGO=1.8.3
+  - DJANGO=1.8.4
+# command to start the gui for selenium (firefox) testing.
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x16"
+# command to install dependencies
+install:
+  - pip install -q Django==$DJANGO
+  - pip install -r requirements.txt
+  - pip install -r requirements_dev.txt
+# style checking / pyflakes
+before_script:
+  - pep8 --exclude=migrations --ignore=E501,E225 shuffle
+  - pep8 --exclude=migrations --ignore=E501,E225 crawler
+  - pep8 --exclude=migrations --ignore=E501,E225 ccshuffle
+  - pyflakes shuffle
+  - pyflakes crawler
+  - pyflakes ccshuffle
+# command to run tests
+script:
+  - python manage.py test
+  - python test/functionaltest.py

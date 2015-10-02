@@ -38,6 +38,8 @@
     <script type="text/javascript" src="{% static 'plugins/bootstrap/dist/js/bootstrap.min.js' %}"></script>
     <!-- Django Ajax javascript -->
     <script type="text/javascript" src="{% static 'js/ccshuffle-django-ajax.js' %}"></script>
+    <!-- Modernizr HTML5 support checker-->
+    <script type="text/javascript" src="{% static 'plugins/modernizr/modernizr-custom.js' %}"></script>
     {% comment %} Container for further javascripts {% endcomment %}
     {% block headjs %} {% endblock headjs %}
 </head>
@@ -107,5 +109,27 @@
     </div>
 </nav>
 {% block content %} {% endblock content %}
+{% block footer %}
+    <footer class="container-fluid">
+        <div class="row">
+            <nav class="col-sm-4">
+                <ul class="nav nav-pills">
+                    <li class="footer-link-about"><a href="{% url 'about' %}">{% trans 'About' %}</a></li>
+                    <li class="footer-link-source-code">
+                        <a href="https://github.com/outofbits/ccshuffle" target="_blank">{% trans 'Source Code' %}</a>
+                    </li>
+                    <li class="footer-link-support">
+                        <a href="bitcoin:3EE3aAw6TNgG1fpoFbez2Y7KefCMcjMfmj" target="_blank">{% trans 'Support' %}</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="col-sm-4 text-center copyright">
+                <small>Designed with <i class="fa fa-heart"></i> by <a
+                        href="http://kevin-haller.outofbits.com/" target="_blank">Kevin Haller</a>
+                </small>
+            </div>
+        </div>
+    </footer>
+{% endblock footer %}
 </body>
 </html>

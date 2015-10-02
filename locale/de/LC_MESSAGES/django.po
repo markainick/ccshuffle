@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-30 02:30+0200\n"
+"POT-Creation-Date: 2015-09-22 22:50+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Kevin Haller <kevin.haller@outofbits.com>\n"
 "Language-Team: None\n"
@@ -24,33 +24,45 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ccshuffle/settings.py:118
+#: ccshuffle/settings.py:131
 msgid "German"
 msgstr "Deutsch"
 
-#: ccshuffle/settings.py:119
+#: ccshuffle/settings.py:132
 msgid "English"
 msgstr "Englisch"
 
-#: shuffle/forms.py:26 shuffle/forms.py:41 templates/base.html:91
-#: templates/register.html:24 templates/register.html.py:49
-#: templates/signin.html:34
+#: shuffle/forms.py:28 shuffle/forms.py:52 templates/base.html:99
+#: templates/register.html:32 templates/register.html.py:57
+#: templates/signin.html:36
 msgid "Username"
 msgstr "Benutzername"
 
-#: shuffle/forms.py:28 shuffle/forms.py:45 shuffle/forms.py:49
-#: templates/base.html:96 templates/register.html:29
-#: templates/register.html.py:63 templates/signin.html:38
+#: shuffle/forms.py:30 shuffle/forms.py:57 shuffle/forms.py:62
+#: templates/base.html:104 templates/register.html:37
+#: templates/register.html.py:75 templates/signin.html:40
 msgid "Password"
 msgstr "Passwort"
 
-#: shuffle/forms.py:37 templates/register.html:93
+#: shuffle/forms.py:37 templates/register.html:111
 msgid "Email"
 msgstr "E-Mail"
 
-#: shuffle/forms.py:53
+#: shuffle/forms.py:44
+msgid "The password must be at least 6 characters long."
+msgstr "Das Passwort muss mindestens 6 Zeichen lang sein."
+
+#: shuffle/forms.py:67
 msgid "Your email"
 msgstr "Deine E-Mail"
+
+#: shuffle/views.py:124
+#, python-format
+msgid ""
+"Welcome %(username)s ! Your account has been created, now you can login."
+msgstr ""
+"Wilkommen %(username)s !. Ihr Benutzerkonto ist erstellt worden, Sie können "
+"sich jetzt anmelden."
 
 #: templates/403.html:10
 msgid "Access denied"
@@ -74,9 +86,21 @@ msgstr ""
 "Versuchen Sie es beginnend von der <a href=\"%(home_url)s\">Startseite </a> "
 "erneut"
 
-#: templates/base.html:6 templates/register.html:12
-#: templates/register.html.py:34 templates/signin.html:21
-#: templates/signin.html.py:53
+#: templates/about.html:193
+msgid "Home"
+msgstr "Startseite"
+
+#: templates/about.html:195 templates/base.html:125
+msgid "Source Code"
+msgstr "Quellcode"
+
+#: templates/about.html:198 templates/base.html:128
+msgid "Support"
+msgstr "Unterstützung"
+
+#: templates/base.html:6 templates/register.html:20
+#: templates/register.html.py:42 templates/signin.html:21
+#: templates/signin.html.py:55
 msgid "Sign in"
 msgstr "Anmelden"
 
@@ -84,49 +108,56 @@ msgstr "Anmelden"
 msgid "Sign out"
 msgstr "Abmelden"
 
-#: templates/base.html:8 templates/register.html:7
-#: templates/register.html.py:44 templates/signin.html:12
+#: templates/base.html:8 templates/register.html:15
+#: templates/register.html.py:52 templates/signin.html:12
 msgid "Register"
 msgstr "Registrieren"
 
-#: templates/base.html:57
+#: templates/base.html:59
 msgid "Toggle navigation"
 msgstr "Toggle navigation"
 
-#: templates/base.html:79
-msgid "Profile"
-msgstr "Profil"
-
-#: templates/base.html:80
+#: templates/base.html:86
 msgid "Favorites"
 msgstr "Lieblinge"
 
-#: templates/base.html:81
+#: templates/base.html:87
 msgid "Playlists"
 msgstr "Playlisten"
 
-#: templates/index.html:28
+#: templates/base.html:123
+msgid "About"
+msgstr "Infos"
+
+#: templates/index.html:31
 msgid "Songs"
 msgstr "Songs"
 
-#: templates/index.html:31
+#: templates/index.html:34
 msgid "Artists"
 msgstr "Künstler"
 
-#: templates/index.html:34
+#: templates/index.html:37
 msgid "Albums"
 msgstr "Alben"
 
-#: templates/register.html:78
+#: templates/register.html:77
+msgid "min. 6 characters"
+msgstr "min. 6 Zeichen"
+
+#: templates/register.html:94
 msgctxt "registration form"
 msgid "Confirm password"
 msgstr "Bestätigung des Passworts"
 
-#: templates/register.html:93
+#: templates/register.html:111
 msgid "optional"
 msgstr "optional"
 
-#: templates/register.html:112
+#: templates/register.html:130
 msgctxt "registration form"
 msgid "Create Account"
 msgstr "Konto erstellen"
+
+#~ msgid "Profile"
+#~ msgstr "Profil"

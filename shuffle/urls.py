@@ -11,16 +11,16 @@
 #   GNU General Public License for more details.
 #
 
-from django.conf.urls import include, url
+from django.conf.urls import url
 from .views import (AboutPageView, IndexPageView, RegisterPageView,
-                    NotFoundErrorPageView, SignInPageView, SignOutPageView, CrawlerPageView)
+                    NotFoundErrorPageView, SignInPageView, SignOutPageView)
 
 urlpatterns = [
     url(r'^$', IndexPageView.as_view(), name="home"),
+    url(r'register/username-available$', RegisterPageView.is_username_available),
     url(r'register/$', RegisterPageView.as_view(), name="register"),
     url(r'login/$', SignInPageView.as_view(), name="signin"),
     url(r'logout/$', SignOutPageView.as_view(), name="signout"),
     url(r'about/$', AboutPageView.as_view(), name="about"),
-    url(r'crawler/$', CrawlerPageView.as_view(), name="crawler"),
     url(r'.*$', NotFoundErrorPageView.as_view(), name="404"),
 ]

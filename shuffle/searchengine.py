@@ -12,14 +12,16 @@
 #
 
 from .models import SearchableModel, Song, Artist, Album, Tag
+from collections import namedtuple
+from datetime import datetime, timedelta
 import logging
+import copy
+import re
 
 logger = logging.getLogger(__name__)
 
 
 class SearchEngine(object):
-    """ The class represents the search engine """
-
     SEARCH_FOR_SONGS = 'songs'
     SEARCH_FOR_ALBUMS = 'albums'
     SEARCH_FOR_ARTISTS = 'artists'
@@ -29,6 +31,79 @@ class SearchEngine(object):
         SEARCH_FOR_ALBUMS: Album,
         SEARCH_FOR_ARTISTS: Artist,
     }
+
+    class SearchRequest(object):
+        """ This class represents a search request, which consists of the search phrase and search for type. """
+
+        def __init__(self, search_phrase: str='', search_for: str='songs'):
+            assert search_for in SearchEngine.SEARCH_FOR
+            self.search_phrase = search_phrase
+            self.search_for = search_for
+            self.timestamp = datetime.now()
+
+        def __eq__(self, other) -> bool:
+            if isinstance(other, type(self)):
+                return self.search_phrase == other.search_phrase and self.search_for == other.search_for
+            else:
+                return False
+
+        def __hash__(self) -> int:
+            return hash(self.search_phrase) ^ hash(self.search_for)
+
+        def __repr__(self) -> str:
+            return '<Search-Request: %s, %s>' % (self.search_phrase, self.search_for)
+
+    class SearchResponse(namedtuple('SearchResponse', ['search_result', 'extracted_tags'])):
+        """
+        This class represents the response to a search request, which consist of the search result and the
+        extracted tags of the search phrase of the search request.
+        """
+
+        def __eq__(self, other) -> bool:
+            if isinstance(other, type(self)):
+                return self.search_result == other.search_result
+            else:
+                return False
+
+        def __hash__(self) -> int:
+            return hash(self.search_result)
+
+    class SearchCache(object):
+        """ This class represents a possibility to cache search results for a search request temporarily. """
+
+        _cache_time_s = 3600
+
+        def __init__(self):
+            self.search_cache = dict()
+
+        def push(self, search_request, search_response) -> None:
+            """
+            Pushes the given search response to this cache. The given search request is used as key to access the search
+            response.
+
+            :param search_request: the search request (key), which is used to access the given search result .
+            :param search_response: the result of the given search request (value).
+            """
+            self.search_cache[copy.deepcopy(search_request)] = (search_response, search_request.timestamp)
+
+        def get(self, search_request):
+            """
+            The stored search result of the given request will be returned, if it has been cached and is valid.
+            Otherwise None will be returned.
+
+            :param search_request: the search request, of which the search result shall be returned.
+            :return: the stored search result of the given request will be returned, if it was cached and is valid -
+            otherwise None.
+            """
+            if search_request in self.search_cache:
+                search_result, timestamp = self.search_cache[search_request]
+                if datetime.now() - timedelta(seconds=self._cache_time_s) < timestamp:
+                    return search_result
+                else:
+                    del self.search_cache[search_request]
+            return None
+
+    search_cache = SearchCache()
 
     @classmethod
     def all_tags(cls) -> [Tag]:
@@ -46,69 +121,38 @@ class SearchEngine(object):
 
         :return: all known tags in form of their names.
         """
-        return [tag_name[0] for tag_name in Tag.objects.values_list('name')]
+        return set(tag_name[0] for tag_name in Tag.objects.values_list('name'))
 
     @classmethod
-    def __encapsulate_tags_of(cls, search_phrase: str) -> [str]:
+    def __extract_tags_of(cls, search_phrase: str) -> [str]:
         """
         Analysis the given search phrase and returns the tags, which were found in the given search phrase.
 
         :param search_phrase: the search phrase, of which the tags shall be encapsulated.
         :return: the tags of the given search phrase.
         """
-        known_tags_names = cls.all_tags_names()
-        return [tag.lower() for tag in search_phrase.split(' ') if tag.lower() in known_tags_names]
+        search_phrase_split = {tag.lower() for tag in re.split(r'\W+', search_phrase)}
+        search_phrase_split |= {tag1 + tag2 for tag1 in search_phrase_split for tag2 in
+                                search_phrase_split if tag1 != tag2}
+        return search_phrase_split & cls.all_tags_names()
 
     @classmethod
-    def __search_for_albums(cls, search_phrase: str, search_tags: [str]) -> [Album]:
+    def accept(cls, search_request) -> ([SearchableModel], [str]):
         """
-        Searches for albums, which matches the given search phrase.
+        Accepts the search request. If the response of this request is stored in the cache, the stored response will
+        be returned, otherwise the persistent source (database, ..) is queried.
 
-        :param search_phrase: the search phrase, which the albums shall match.
-        :param search_tags: the tags, which the albums shall match.
-        :return: albums, which match the given search phrase.
+        :param search_request: the search request to search for.
+        :return: the search response of the search request.
         """
-        raise NotImplementedError('Not implemented yet !')
-
-    @classmethod
-    def __search_for_artists(cls, search_phrase: str, search_tags: [str]) -> [Artist]:
-        """
-        Searches for artists, which matches the given search phrase.
-
-        :param search_phrase: the search phrase, which the artists shall match.
-        :param search_tags: the tags, which the artists shall match.
-        :return: artists, which match the given search phrase.
-        """
-        raise NotImplementedError('Not implemented yet !')
-
-    @classmethod
-    def __search_for_songs(cls, search_phrase: str, search_tags: [str]) -> [Song]:
-        """
-        Searches for songs, which matches the given search phrase.
-
-        :param search_phrase: the search phrase, which shall match.
-        :param search_tags: the tags, which the songs shall match.
-        :return: songs, which match the given search phrase.
-        """
-        return Song.search(search_phrase, search_tags)
-
-    @classmethod
-    def search(cls, search_phrase: str='', search_for: str=SEARCH_FOR_SONGS) -> ([SearchableModel], [str]):
-        """
-        Searches for the given search_for type (tags, albums, artists, songs), which fulfills the given search phrase.
-
-        :param search_phrase: the search phrase.
-        :param search_for: the search type (tags, albums, artists, songs).
-        :return: the search result and the encapsulated tags in form of a tuple.
-        """
-        if search_for == cls.SEARCH_FOR_SONGS:
-            search_tags = cls.__encapsulate_tags_of(search_phrase)
-            return cls.__search_for_songs(search_phrase, search_tags), search_tags
-        elif search_for == cls.SEARCH_FOR_ALBUMS:
-            search_tags = cls.__encapsulate_tags_of(search_phrase)
-            return cls.__search_for_albums(search_phrase, search_tags), search_tags
-        elif search_for == cls.SEARCH_FOR_ARTISTS:
-            search_tags = cls.__encapsulate_tags_of(search_phrase)
-            return cls.__search_for_artists(search_phrase, search_tags), search_tags
+        if search_request:
+            search_response = cls.search_cache.get(search_request)
+            if search_response is None:
+                search_tags = cls.__extract_tags_of(search_request.search_phrase)
+                search_result = cls.SEARCH_FOR[search_request.search_for].search(search_request.search_phrase,
+                                                                                 search_tags)
+                search_response = cls.SearchResponse(search_result=search_result, extracted_tags=search_tags)
+                cls.search_cache.push(search_request, search_response)
+            return search_response
         else:
-            raise ValueError('The given search type (%s) is unknown !' % search_for)
+            raise ValueError('The given search request must not be None !' % search_request)

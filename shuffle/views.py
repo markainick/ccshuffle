@@ -11,57 +11,22 @@
 #   GNU General Public License for more details.
 #
 
+import logging
+
+from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect, render_to_response
-from django.http import HttpResponse
-from django.template import RequestContext
+from django.contrib import messages
 from django.views import generic
-from .forms import LoginForm, RegistrationForm
-from .crawler import JamendoCrawler
-from .searchengine import SearchEngine
-from .models import JSONModelEncoder, CrawlingProcess, Song
+from django.shortcuts import redirect
+from django.http import HttpResponse
 
-import logging
-import json
+from ccshuffle.serialize import ResponseObject
+from .forms import LoginForm, RegistrationForm
+from .searchengine import SearchEngine
 
 logger = logging.getLogger(__name__)
-
-
-class ResponseObject(object):
-    """ Response object for the ajax requests of the dashboard """
-
-    def __init__(self, status='success', error_msg='', result_obj=None):
-        """
-        Initializes the response object.
-
-        :param status: success or fail.
-        :param error_msg: the error message if the status is 'fail'.
-        :param result_obj: the result object, which is json serializable.
-        """
-        self.response_dic = {
-            'header': {'status': status, 'error_message': error_msg},
-            'result': result_obj,
-        }
-
-    def result_object(self):
-        """
-        Returns the the same object passed through the constructor as result object.
-
-        :return: the same object passed through the constructor.
-        """
-        return self.response_dic['result']
-
-    def json(self, cls=None):
-        """
-        Returns the json dump of the result object.
-
-        :param cls: optional the class for serializing the result object, otherwise the default serializer
-                    JSONEncoder.
-        :return: the json dump of the result object.
-        """
-        return json.dumps(self.response_dic, cls=cls)
 
 
 class IndexPageView(generic.TemplateView):
@@ -72,11 +37,16 @@ class IndexPageView(generic.TemplateView):
         kwargs['tags'] = SearchEngine.all_tags()
         search_for = request.GET.get('search_for', None)
         if search_for:
-            search_phrase = request.GET.get('search_phrase', '')
-            search_result = SearchEngine.search(search_phrase, search_for)
-            kwargs['search_result'] = list(search_result[0][:20])
+            search_request = SearchEngine.SearchRequest(search_phrase=request.GET.get('search_phrase', ''),
+                                                        search_for=search_for)
+            search_response = SearchEngine.accept(search_request)
+            search_result_offset = int(request.GET.get('start', 0))
+            kwargs['search_result_count'] = len(search_response.search_result)
+            kwargs['search_offset'] = search_result_offset
+            kwargs['search_result'] = list(
+                search_response.search_result[search_result_offset:search_result_offset + 10])
             if search_for == 'songs':
-                kwargs['searched_tags'] = search_result[1]
+                kwargs['searched_tags'] = search_response.extracted_tags
         return super(IndexPageView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -144,10 +114,47 @@ class RegisterPageView(generic.CreateView):
     template_name = 'register.html'
     success_url = reverse_lazy('signin')
 
+    def __init__(self):
+        super(type(self), self).__init__()
+        self.registration_form = None
+
+    def get_form(self, form_class=None):
+        if self.registration_form is None:
+            self.registration_form = super(type(self), self).get_form(form_class)
+        return self.registration_form
+
+    def clear_form(self):
+        del self.registration_form
+
+    def post(self, request, *args, **kwargs):
+        response = super(type(self), self).post(request, *args, **kwargs)
+        # Success message for the registration, displayed on the 'sign in' page, where the user is redirected to.
+        if self.registration_form.is_valid():
+            messages.add_message(request, messages.SUCCESS,
+                                 _('Welcome %(username)s ! Your account has been created, now you can login.' % {
+                                     'username': self.registration_form.cleaned_data.get('username')}))
+        self.clear_form()
+        return response
+
     def get_context_data(self, **kwargs):
         context = super(type(self), self).get_context_data(**kwargs)
         context['globalLoginForm'] = LoginForm
         return context
+
+    @classmethod
+    def is_username_available(cls, request):
+        print(request.method)
+        if request.is_ajax() and request.method == 'GET':
+            username = request.GET.get('username', None)
+            if username:
+                return HttpResponse(
+                    ResponseObject('success', 'Fails', not User.objects.filter(username=username).exists()).json(),
+                    content_type="json")
+            else:
+                return HttpResponse(ResponseObject('fail', 'The username to check must be given.', None).json(),
+                                    content_type="json")
+        else:
+            return redirect('404')
 
 
 class NotFoundErrorPageView(generic.TemplateView):
@@ -166,53 +173,3 @@ class NotFoundErrorPageView(generic.TemplateView):
         context = super(type(self), self).get_context_data(**kwargs)
         context['globalLoginForm'] = LoginForm
         return context
-
-
-class CrawlerPageView(generic.TemplateView):
-    """ This class represents the page view for starting the crawling process as well as showing the process. """
-    template_name = 'crawler.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(type(self), self).get_context_data(**kwargs)
-        context['jamendo_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_Jamendo)
-        context['soundcloud_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_Soundcloud)
-        context['ccmixter_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_CCMixter)
-        context['general_cp_list'] = CrawlingProcess.objects.filter(service=CrawlingProcess.Service_General)
-        return context
-
-    def get(self, request, *args, **kwargs):
-        if request.user is None or not request.user.is_authenticated():
-            return redirect('%s?next=%s' % (reverse_lazy('signin'), request.path))
-        else:
-            if request.user.is_superuser:
-                if request.is_ajax():
-                    return self.handle_ajax_request(request)
-                else:
-                    return super(CrawlerPageView, self).get(request, *args, **kwargs)
-            else:
-                return render_to_response('403.html', context_instance=RequestContext(request))
-
-    def handle_ajax_request(self, request):
-        """
-        Handle ajax requests.
-
-        :param request: the request object.
-        :return: the http response to the ajax requests.
-        """
-        logger.debug('%s: Ajax request' % self.__class__.__name__)
-        logger.debug('%s' % request.GET)
-        ajax_data = request.GET
-        if 'command' in ajax_data:
-            if ajax_data['command'] == 'start-jamendo-crawl':
-                try:
-                    response_object = ResponseObject(result_obj=JamendoCrawler.crawl())
-                    return HttpResponse(response_object.json(cls=JSONModelEncoder))
-                except BaseException as e:
-                    response_object = ResponseObject(status='fail', error_msg=str(e))
-                    return HttpResponse(response_object.json(), status=500)
-            else:
-                response_object = ResponseObject(status='fail', error_msg='The given command is unknown !')
-                return HttpResponse(response_object.json(), status=400)
-        else:
-            response_object = ResponseObject(status='fail', error_msg='No command is given !')
-            return HttpResponse(response_object.json(), status=400)

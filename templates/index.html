@@ -3,6 +3,8 @@
 {% load staticfiles %}
 {% comment %} Localization {% endcomment %}
 {% load i18n %}
+{% comment %} Extra tags and filters for searching {% endcomment %}
+{% load search_extras %}
 
 {% block headjs %}
     <!-- Search container javascript -->
@@ -10,7 +12,7 @@
 {% endblock headjs %}
 
 {% block content %}
-    <div id="content">
+    <section id="content">
         <section id="search-section">
             <div class="container search-container">
                 {% if not search_result %}
@@ -40,7 +42,8 @@
                         <form id="search-form" class="{% url 'home' %}">
                             <div class="input-group">
                                 <input name="search_phrase" type="text" class="form-control"
-                                       placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"/>
+                                       placeholder="Alternative Rock" value="{{ request.GET.search_phrase }}"
+                                       required="required"/>
                                 <input type="hidden" name="search_for"
                                        value="{{ request.GET.search_for|default:'songs' }}"/>
                             <span class="input-group-btn">
@@ -70,7 +73,7 @@
                                     <div class="row">
                                         <div class="col-xs-8">
                                             <h3 class="panel-title"><a
-                                                    href="#link-to-artist-profile">{{ result.artist }}</a>
+                                                    href="#link-to-artist-profile">{{ result.artist.name }}</a>
                                                 - {{ result.name }}</h3>
                                         </div>
                                         <div class="col-xs-2">
@@ -131,7 +134,6 @@
                                                             <span class="label label-default">
                                                                 <s>{{ tag }}</s></span>
                                                         {% endif %}
-                                                        <span></span>
                                                     {% endfor %}
                                                 {% endif %}
                                             </div>
@@ -145,7 +147,12 @@
                     {% endfor %}
                     </div>
                 <!-- end grid for the search result -->
+                <!-- Pagination for the search result -->
+                <div class="row search-pagination">
+                    {% search_pagination search_offset search_result_count 10 %}
+                </div>
+                <!-- end pagination for the search result -->
             </section>
         {% endif %}
-    </div>
+    </section>
 {% endblock content %}
