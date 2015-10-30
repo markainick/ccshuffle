@@ -1,0 +1,162 @@
+#   COPYRIGHT (c) 2015 Kevin Haller <kevin.haller@outofbits.com>
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-09-22 22:50+0200\n"
+"PO-Revision-Date: 2015-10-30 13:43+0100\n"
+"Last-Translator: Kevin Haller <kevin.haller@outofbits.com>\n"
+"Language-Team: None\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.6\n"
+
+#: ccshuffle/settings.py:131
+msgid "German"
+msgstr "Tedesco"
+
+#: ccshuffle/settings.py:132
+msgid "English"
+msgstr "Inglese"
+
+#: shuffle/forms.py:28 shuffle/forms.py:52 templates/base.html:99
+#: templates/register.html:32 templates/register.html.py:57
+#: templates/signin.html:36
+msgid "Username"
+msgstr "Nome utente"
+
+#: shuffle/forms.py:30 shuffle/forms.py:57 shuffle/forms.py:62
+#: templates/base.html:104 templates/register.html:37
+#: templates/register.html.py:75 templates/signin.html:40
+msgid "Password"
+msgstr "Password"
+
+#: shuffle/forms.py:37 templates/register.html:111
+msgid "Email"
+msgstr "E-Mail"
+
+#: shuffle/forms.py:44
+msgid "The password must be at least 6 characters long."
+msgstr "La password deve essere lunga almeno 6 caratteri."
+
+#: shuffle/forms.py:67
+msgid "Your email"
+msgstr "La tua email"
+
+#: shuffle/views.py:124
+#, python-format
+msgid ""
+"Welcome %(username)s ! Your account has been created, now you can login."
+msgstr ""
+"Benvenuto %(username)s ! Il tuo account è stato creato, ora puoi loggarti."
+
+#: templates/403.html:10
+msgid "Access denied"
+msgstr "Accesso negato"
+
+#: templates/403.html:14
+msgid "You have not the permission to enter this area"
+msgstr "Non hai il permesso per accedere a quest'area"
+
+#: templates/404.html:9
+msgid "Page not found"
+msgstr "Pagina non trovata"
+
+#: templates/404.html:15
+#, python-format
+msgid ""
+"For some reason the page can't be found. Try finding it from our <a href="
+"\"%(home_url)s\">homepage </a>"
+msgstr ""
+"Per qualche ragione la pagina non è stata trovata. Prova a cercarla dalla "
+"nostra <a href=\"%(home_url)s\">homepage </a>"
+
+#: templates/about.html:193
+msgid "Home"
+msgstr "Home"
+
+#: templates/about.html:195 templates/base.html:125
+msgid "Source Code"
+msgstr "Codice Sorgente"
+
+#: templates/about.html:198 templates/base.html:128
+msgid "Support"
+msgstr "Supporto"
+
+#: templates/base.html:6 templates/register.html:20
+#: templates/register.html.py:42 templates/signin.html:21
+#: templates/signin.html.py:55
+msgid "Sign in"
+msgstr "Accedi"
+
+#: templates/base.html:7
+msgid "Sign out"
+msgstr "Esci"
+
+#: templates/base.html:8 templates/register.html:15
+#: templates/register.html.py:52 templates/signin.html:12
+msgid "Register"
+msgstr "Registrati"
+
+#: templates/base.html:59
+msgid "Toggle navigation"
+msgstr "Toggle navigazione"
+
+#: templates/base.html:86
+msgid "Favorites"
+msgstr "Favoriti"
+
+#: templates/base.html:87
+msgid "Playlists"
+msgstr "Playlist"
+
+#: templates/base.html:123
+msgid "About"
+msgstr "Informazioni"
+
+#: templates/index.html:31
+msgid "Songs"
+msgstr "Canzoni"
+
+#: templates/index.html:34
+msgid "Artists"
+msgstr "Artisti"
+
+#: templates/index.html:37
+msgid "Albums"
+msgstr "Album"
+
+#: templates/register.html:77
+msgid "min. 6 characters"
+msgstr "min. 6 caratteri"
+
+#: templates/register.html:94
+msgctxt "registration form"
+msgid "Confirm password"
+msgstr "Conferma password"
+
+#: templates/register.html:111
+msgid "optional"
+msgstr "opzionale"
+
+#: templates/register.html:130
+msgctxt "registration form"
+msgid "Create Account"
+msgstr "Crea Account"
+
+#~ msgid "Profile"
+#~ msgstr "Profil"
